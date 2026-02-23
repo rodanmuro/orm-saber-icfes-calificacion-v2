@@ -1,7 +1,9 @@
 import { StatusBar } from 'expo-status-bar';
 import { useMemo, useState } from 'react';
+import * as ImagePicker from 'expo-image-picker';
 import {
   ActivityIndicator,
+  Image,
   Pressable,
   SafeAreaView,
   ScrollView,
@@ -11,14 +13,25 @@ import {
   View,
 } from 'react-native';
 
-import { buildHealthUrl, getApiBaseUrl } from './src/config/api';
+import {
+  buildHealthUrl,
+  buildOcrReadUrl,
+  getApiBaseUrl,
+  getDefaultMetadataPath,
+} from './src/config/api';
 import { checkHealth } from './src/services/health';
+import { sendPhotoToOcr } from './src/services/omrRead';
 
 export default function App() {
   const [apiBaseUrl, setApiBaseUrl] = useState(getApiBaseUrl());
+  const [metadataPath, setMetadataPath] = useState(getDefaultMetadataPath());
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
+  const [photoUri, setPhotoUri] = useState('');
+  const [omrLoading, setOmrLoading] = useState(false);
+  const [omrResult, setOmrResult] = useState(null);
   const healthUrl = useMemo(() => buildHealthUrl(apiBaseUrl), [apiBaseUrl]);
+  const omrReadUrl = useMemo(() => buildOcrReadUrl(apiBaseUrl), [apiBaseUrl]);
 
   async function handleHealthCheck() {
     if (!healthUrl) {
@@ -58,6 +71,83 @@ export default function App() {
       });
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleTakePhoto() {
+    const permission = await ImagePicker.requestCameraPermissionsAsync();
+    if (permission.status !== 'granted') {
+      setOmrResult({
+        type: 'error',
+        title: 'Permiso de cámara denegado',
+        detail: 'Debes permitir cámara para tomar la foto.',
+      });
+      return;
+    }
+
+    const capture = await ImagePicker.launchCameraAsync({
+      cameraType: ImagePicker.CameraType.back,
+      quality: 0.85,
+      allowsEditing: false,
+    });
+
+    if (capture.canceled || !capture.assets?.length) {
+      return;
+    }
+
+    setPhotoUri(capture.assets[0].uri);
+    setOmrResult(null);
+  }
+
+  async function handleSendPhoto() {
+    if (!omrReadUrl) {
+      setOmrResult({
+        type: 'error',
+        title: 'URL inválida',
+        detail: 'Configura URL base del backend antes de enviar.',
+      });
+      return;
+    }
+    if (!photoUri) {
+      setOmrResult({
+        type: 'error',
+        title: 'Falta foto',
+        detail: 'Toma una foto antes de enviar al backend.',
+      });
+      return;
+    }
+
+    setOmrLoading(true);
+    setOmrResult(null);
+    try {
+      const response = await sendPhotoToOcr({
+        endpointUrl: omrReadUrl,
+        photoUri,
+        metadataPath,
+      });
+      if (response.ok) {
+        setOmrResult({
+          type: 'success',
+          title: 'Lectura OMR completada',
+          detail: `Backend respondió ${response.statusCode}`,
+          payload: response.payload,
+        });
+      } else {
+        setOmrResult({
+          type: 'error',
+          title: 'Error en lectura OMR',
+          detail: `HTTP ${response.statusCode}`,
+          payload: response.payload,
+        });
+      }
+    } catch (error) {
+      setOmrResult({
+        type: 'error',
+        title: 'No se pudo enviar la foto',
+        detail: String(error?.message || error),
+      });
+    } finally {
+      setOmrLoading(false);
     }
   }
 
@@ -106,6 +196,63 @@ export default function App() {
             {result.payload ? (
               <Text style={styles.resultPayload}>
                 {JSON.stringify(result.payload, null, 2)}
+              </Text>
+            ) : null}
+          </View>
+        ) : null}
+
+        <View style={styles.card}>
+          <Text style={styles.label}>Captura y envío OMR</Text>
+          <Text style={styles.urlHint}>Endpoint: {omrReadUrl || '-'}</Text>
+          <TextInput
+            style={styles.input}
+            value={metadataPath}
+            onChangeText={setMetadataPath}
+            autoCapitalize="none"
+            autoCorrect={false}
+            placeholder="data/output/template_basica_omr_v1.json"
+          />
+
+          <Pressable onPress={handleTakePhoto} style={styles.secondaryButton}>
+            <Text style={styles.secondaryButtonText}>Tomar foto</Text>
+          </Pressable>
+
+          {photoUri ? (
+            <Image source={{ uri: photoUri }} style={styles.previewImage} />
+          ) : (
+            <Text style={styles.urlHint}>Aún no has tomado foto.</Text>
+          )}
+
+          <Pressable
+            onPress={handleSendPhoto}
+            disabled={omrLoading}
+            style={[styles.button, omrLoading && styles.buttonDisabled]}
+          >
+            {omrLoading ? (
+              <ActivityIndicator color="#ffffff" />
+            ) : (
+              <Text style={styles.buttonText}>Enviar foto a backend</Text>
+            )}
+          </Pressable>
+        </View>
+
+        {omrResult ? (
+          <View
+            style={[
+              styles.resultCard,
+              omrResult.type === 'success' ? styles.successCard : styles.errorCard,
+            ]}
+          >
+            <Text style={styles.resultTitle}>{omrResult.title}</Text>
+            <Text style={styles.resultDetail}>{omrResult.detail}</Text>
+            {omrResult.payload?.quality_summary ? (
+              <Text style={styles.resultDetail}>
+                Resumen: {JSON.stringify(omrResult.payload.quality_summary)}
+              </Text>
+            ) : null}
+            {omrResult.payload ? (
+              <Text style={styles.resultPayload}>
+                {JSON.stringify(omrResult.payload, null, 2)}
               </Text>
             ) : null}
           </View>
@@ -177,6 +324,28 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '600',
   },
+  secondaryButton: {
+    marginTop: 4,
+    backgroundColor: '#1d4ed8',
+    paddingVertical: 10,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  secondaryButtonText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  previewImage: {
+    marginTop: 4,
+    width: '100%',
+    height: 210,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    backgroundColor: '#e5e7eb',
+  },
   resultCard: {
     borderRadius: 12,
     padding: 12,
@@ -204,5 +373,6 @@ const styles = StyleSheet.create({
     fontFamily: 'monospace',
     fontSize: 12,
     color: '#1f2937',
+    maxHeight: 240,
   },
 });

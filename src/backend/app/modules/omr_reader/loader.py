@@ -36,8 +36,7 @@ def load_local_read_input(*, image_path: str | Path, metadata_path: str | Path) 
             "Use a valid JPG/PNG image path."
         )
 
-    metadata = _load_metadata(metadata_file)
-    _validate_read_metadata(metadata)
+    metadata = load_read_metadata(metadata_file)
 
     return OMRReadImageContext(
         image_path=image_file,
@@ -63,6 +62,14 @@ def _load_metadata(path: Path) -> dict[str, Any]:
     if not isinstance(payload, dict):
         raise InvalidMetadataError("metadata root must be a JSON object")
 
+    return payload
+
+
+def load_read_metadata(metadata_path: str | Path) -> dict[str, Any]:
+    metadata_file = Path(metadata_path)
+    _validate_file_exists(metadata_file, "metadata")
+    payload = _load_metadata(metadata_file)
+    _validate_read_metadata(payload)
     return payload
 
 

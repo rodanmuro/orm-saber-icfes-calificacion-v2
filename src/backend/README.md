@@ -117,3 +117,17 @@ python -m app.modules.omr_reader.scripts.classify_bubbles \
   --metadata src/backend/data/output/template_basica_omr_v1.json \
   --output-json src/backend/data/output/foto_bubbles.json
 ```
+
+## Endpoint API para leer foto subida (ACT_0014)
+Recibe una foto por `multipart/form-data` y retorna JSON OMR por pregunta.
+
+```bash
+curl -X POST "http://127.0.0.1:8000/api/v1/omr/read-photo" \
+  -F "photo=@src/backend/data/input/diligenciadas/foto_001.jpeg" \
+  -F "metadata_path=data/output/template_basica_omr_v1.json"
+```
+
+Parametros opcionales en form-data:
+- `px_per_mm` (default `10.0`)
+- `marked_threshold` (default `0.33`)
+- `unmarked_threshold` (default `0.18`)
