@@ -101,6 +101,7 @@ class TemplateLayout(BaseModel):
     template_id: str
     version: str
     page: PageConfig
+    printable_area: BlockGeometry
     block: BlockGeometry
     aruco_markers: list[MarkerPlacement]
     bubbles: list[BubblePlacement]

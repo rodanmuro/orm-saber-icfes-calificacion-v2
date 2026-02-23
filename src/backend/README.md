@@ -20,7 +20,8 @@ uvicorn app.main:app --reload --app-dir src/backend
 
 ## Arquitectura del generador de plantillas
 Modulos base (`src/backend/app/modules/template_generator`):
-- `config_loader`: lectura y validacion de configuracion externa JSON.
+- `config_loader`: lectura y validacion de configuracion externa (JSON/YAML).
+- `geometry`: funciones puras para area imprimible y validaciones geometricas.
 - `layout_engine`: orquestacion geometrica y validaciones de limites.
 - `aruco_renderer`: calculo de posicionamiento de marcadores ArUco.
 - `bubble_layout`: calculo de grillas OMR e IDs deterministas.
@@ -30,7 +31,8 @@ Modulos base (`src/backend/app/modules/template_generator`):
 
 Dependencias (direccion unica):
 - `config_loader` -> `contracts`
-- `layout_engine` -> `contracts`, `aruco_renderer`, `bubble_layout`
+- `geometry` -> `contracts`
+- `layout_engine` -> `contracts`, `geometry`, `aruco_renderer`, `bubble_layout`
 - `pipeline` -> `config_loader`, `layout_engine`, `template_renderer`, `metadata_exporter`
 
 ## Contratos parametrizables

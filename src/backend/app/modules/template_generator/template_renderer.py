@@ -2,10 +2,13 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from reportlab.lib.colors import Color
 from reportlab.lib.units import mm
 from reportlab.pdfgen import canvas
 
 from app.modules.template_generator.contracts import TemplateLayout
+
+PRINTABLE_AREA_COLOR = Color(0.78, 0.78, 0.78)
 
 
 def render_template_pdf(layout: TemplateLayout, output_path: str | Path) -> Path:
@@ -18,6 +21,7 @@ def render_template_pdf(layout: TemplateLayout, output_path: str | Path) -> Path
     pdf = canvas.Canvas(str(out_path), pagesize=(page_width_pt, page_height_pt))
     pdf.setTitle(f"Template {layout.template_id} v{layout.version}")
 
+    _draw_printable_area(pdf, layout)
     _draw_block(pdf, layout)
     _draw_markers(pdf, layout)
     _draw_bubbles(pdf, layout)
@@ -25,6 +29,22 @@ def render_template_pdf(layout: TemplateLayout, output_path: str | Path) -> Path
     pdf.showPage()
     pdf.save()
     return out_path
+
+
+def _draw_printable_area(pdf: canvas.Canvas, layout: TemplateLayout) -> None:
+    pdf.setStrokeColor(PRINTABLE_AREA_COLOR)
+    pdf.setLineWidth(0.6)
+    pdf.rect(
+        layout.printable_area.x_mm * mm,
+        _invert_y(
+            layout.page.height_mm,
+            layout.printable_area.y_mm + layout.printable_area.height_mm,
+        )
+        * mm,
+        layout.printable_area.width_mm * mm,
+        layout.printable_area.height_mm * mm,
+    )
+    pdf.setStrokeColorRGB(0, 0, 0)
 
 
 def _draw_block(pdf: canvas.Canvas, layout: TemplateLayout) -> None:
