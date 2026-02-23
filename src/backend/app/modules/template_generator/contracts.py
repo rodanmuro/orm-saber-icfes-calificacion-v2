@@ -203,6 +203,7 @@ class BlockGeometry(BaseModel):
 class TemplateLayout(BaseModel):
     template_id: str
     version: str
+    aruco_dictionary_name: str
     page: PageConfig
     printable_area: BlockGeometry
     main_block_bbox: BlockGeometry

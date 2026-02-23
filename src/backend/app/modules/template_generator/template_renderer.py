@@ -6,6 +6,7 @@ from reportlab.lib.colors import Color
 from reportlab.lib.units import mm
 from reportlab.pdfgen import canvas
 
+from app.modules.template_generator.aruco_assets import build_aruco_image_reader
 from app.modules.template_generator.contracts import TemplateLayout
 
 PRINTABLE_AREA_COLOR = Color(0.78, 0.78, 0.78)
@@ -59,15 +60,32 @@ def _draw_block(pdf: canvas.Canvas, layout: TemplateLayout) -> None:
 
 
 def _draw_markers(pdf: canvas.Canvas, layout: TemplateLayout) -> None:
-    pdf.setLineWidth(1)
     for marker in layout.aruco_markers:
         x = marker.center_x_mm - (marker.size_mm / 2)
         y = marker.center_y_mm - (marker.size_mm / 2)
+        marker_px = max(64, int(marker.size_mm * 12))
+        marker_img = build_aruco_image_reader(
+            dictionary_name=layout.aruco_dictionary_name,
+            marker_id=marker.marker_id,
+            marker_pixels=marker_px,
+        )
+        pdf.drawImage(
+            marker_img,
+            x * mm,
+            _invert_y(layout.page.height_mm, y + marker.size_mm) * mm,
+            width=marker.size_mm * mm,
+            height=marker.size_mm * mm,
+            preserveAspectRatio=True,
+            mask="auto",
+        )
+        pdf.setLineWidth(0.4)
         pdf.rect(
             x * mm,
             _invert_y(layout.page.height_mm, y + marker.size_mm) * mm,
             marker.size_mm * mm,
             marker.size_mm * mm,
+            stroke=1,
+            fill=0,
         )
         pdf.setFont("Helvetica", 7)
         pdf.drawString(

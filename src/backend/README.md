@@ -47,6 +47,7 @@ Notas de `aruco_config`:
 - `dictionary_name` validado contra diccionarios ArUco soportados.
 - `ids` validados por rango segun diccionario.
 - `corner_inset_mm` y `corner_offsets_mm` para mover cada marcador por esquina.
+- Render PDF con marcadores ArUco reales (OpenCV ArUco), no solo placeholders.
 
 Notas de `bubble_config`:
 - `group_id` debe ser unico por grupo.
@@ -58,6 +59,7 @@ Notas de `bubble_config`:
 - Numeracion de preguntas por fila configurable con `question_number_style`.
 - Separacion numero -> primera burbuja por centros en `question_number_style.center_gap_mm`.
 - Salida estructurada `question_items` (unidad logica de pregunta con numero + opciones).
+- Metadata incluye `aruco_dictionary_name` para trazabilidad de deteccion.
 
 Base de ejemplo:
 - `src/backend/config/template.base.json`

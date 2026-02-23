@@ -35,6 +35,7 @@ def build_template_layout(config: TemplateConfig) -> TemplateLayout:
     return TemplateLayout(
         template_id=config.output_config.template_id,
         version=config.output_config.version,
+        aruco_dictionary_name=config.aruco_config.dictionary_name,
         page=config.page_config,
         printable_area=printable_area,
         main_block_bbox=block,
