@@ -1,0 +1,48 @@
+# OS / Editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Secrets / env files
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+
+# Python / FastAPI (backend)
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Virtual environments
+venv/
+.venv/
+env/
+.envrc
+src/backend/venv/
+src/backend/.venv/
+
+# JS / React / Vite (frontend)
+node_modules/
+dist/
+.vite/
+.cache/
+.eslintcache
+coverage/
+*.tsbuildinfo
+
+# Optional project-specific locations
+src/frontend/node_modules/
+src/frontend/dist/
+src/frontend/.vite/
