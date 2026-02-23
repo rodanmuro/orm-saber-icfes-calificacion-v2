@@ -28,6 +28,7 @@ def classify_bubbles(
     marked_threshold: float = 0.33,
     unmarked_threshold: float = 0.18,
     inner_radius_factor: float = 0.58,
+    robust_mode: bool = False,
 ) -> list[BubbleReadResult]:
     if px_per_mm <= 0:
         raise BubbleReadError("px_per_mm must be > 0")
@@ -40,9 +41,7 @@ def classify_bubbles(
     if not isinstance(bubbles, list) or len(bubbles) == 0:
         raise InvalidMetadataError("metadata 'bubbles' must be a non-empty list")
 
-    gray = cv2.cvtColor(aligned_image, cv2.COLOR_BGR2GRAY)
-    blur = cv2.GaussianBlur(gray, (5, 5), 0)
-    _, binary_inv = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+    binary_inv = _build_binary_map(aligned_image=aligned_image, robust_mode=robust_mode)
 
     results: list[BubbleReadResult] = []
     for bubble in bubbles:
@@ -83,6 +82,36 @@ def _validate_bubble_metadata(bubble: dict[str, Any]) -> None:
     missing = REQUIRED_BUBBLE_KEYS - set(bubble.keys())
     if missing:
         raise InvalidMetadataError(f"bubble metadata missing keys: {sorted(missing)}")
+
+
+def _build_binary_map(*, aligned_image: np.ndarray, robust_mode: bool) -> np.ndarray:
+    gray = cv2.cvtColor(aligned_image, cv2.COLOR_BGR2GRAY)
+
+    if not robust_mode:
+        blur = cv2.GaussianBlur(gray, (5, 5), 0)
+        _, binary_inv = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+        return binary_inv
+
+    # Robust pipeline for uneven lighting / glare:
+    # 1) Background normalization
+    # 2) Local contrast enhancement (CLAHE)
+    # 3) Adaptive local threshold
+    background = cv2.GaussianBlur(gray, (0, 0), sigmaX=35, sigmaY=35)
+    normalized = cv2.divide(gray, background, scale=255)
+
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+    enhanced = clahe.apply(normalized)
+    denoised = cv2.GaussianBlur(enhanced, (3, 3), 0)
+
+    binary_inv = cv2.adaptiveThreshold(
+        denoised,
+        255,
+        cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+        cv2.THRESH_BINARY_INV,
+        35,
+        6,
+    )
+    return binary_inv
 
 
 def _compute_fill_ratio(binary_inv: np.ndarray, cx: int, cy: int, radius: int) -> float:

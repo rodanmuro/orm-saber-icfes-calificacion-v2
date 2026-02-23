@@ -47,6 +47,7 @@ Abrir la app Expo Go en el celular y escanear QR.
 - Pulsar `Tomar foto`, capturar hoja y confirmar.
 - Tocar la miniatura para abrir vista completa y revisar sombras/reflejos.
 - Pulsar `Enviar foto a backend`.
+- La app normaliza orientacion EXIF antes de subir (evita desajustes por rotacion de dispositivo).
 - Éxito esperado:
   - Mensaje `Lectura OMR completada`.
   - `quality_summary` con preguntas/opciones detectadas.

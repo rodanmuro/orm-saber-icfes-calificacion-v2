@@ -4,8 +4,8 @@ import cv2
 import numpy as np
 import pytest
 
-from app.modules.omr_reader.alignment import align_image_to_template
-from app.modules.omr_reader.errors import ArucoDetectionError, InvalidMetadataError
+from app.modules.omr_reader.alignment import align_image_to_template, _validate_capture_quality
+from app.modules.omr_reader.errors import ArucoDetectionError, CaptureQualityError, InvalidMetadataError
 
 
 def _synthetic_metadata() -> dict:
@@ -88,3 +88,12 @@ def test_align_image_to_template_fails_with_invalid_metadata() -> None:
 
     with pytest.raises(InvalidMetadataError, match="missing required keys"):
         align_image_to_template(image=image, metadata=metadata, px_per_mm=10.0)
+
+
+def test_validate_capture_quality_rejects_tiny_quad() -> None:
+    src_points = np.array(
+        [[10.0, 10.0], [30.0, 10.0], [30.0, 30.0], [10.0, 30.0]],
+        dtype=np.float32,
+    )
+    with pytest.raises(CaptureQualityError, match="area too small"):
+        _validate_capture_quality(src_points, image_w=2000, image_h=2000)

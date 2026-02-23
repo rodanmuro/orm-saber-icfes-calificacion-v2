@@ -26,6 +26,7 @@ def run_omr_read_from_image_bytes(
     px_per_mm: float = 10.0,
     marked_threshold: float = 0.33,
     unmarked_threshold: float = 0.18,
+    robust_mode: bool = False,
 ) -> dict[str, Any]:
     metadata_file = resolve_backend_relative_path(metadata_path)
     metadata = load_read_metadata(metadata_file)
@@ -42,6 +43,7 @@ def run_omr_read_from_image_bytes(
         px_per_mm=px_per_mm,
         marked_threshold=marked_threshold,
         unmarked_threshold=unmarked_threshold,
+        robust_mode=robust_mode,
     )
     result = build_omr_read_result(metadata=metadata, bubble_results=bubbles)
     result["thresholds"] = {
@@ -51,6 +53,7 @@ def run_omr_read_from_image_bytes(
     result["diagnostics"] = {
         "metadata_path": str(metadata_file),
         "detected_marker_ids": aligned.detected_marker_ids,
+        "robust_mode": robust_mode,
     }
     return result
 

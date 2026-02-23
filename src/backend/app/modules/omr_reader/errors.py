@@ -25,5 +25,9 @@ class HomographyError(OMRReadInputError):
     """Raised when image alignment via homography fails."""
 
 
+class CaptureQualityError(OMRReadInputError):
+    """Raised when capture geometry quality is too poor for reliable OMR."""
+
+
 class BubbleReadError(OMRReadInputError):
     """Raised when bubble classification cannot be completed."""

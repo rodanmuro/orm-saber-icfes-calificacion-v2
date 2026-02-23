@@ -1,6 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
 import { useMemo, useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
+import * as ImageManipulator from 'expo-image-manipulator';
 import {
   ActivityIndicator,
   Image,
@@ -89,16 +90,42 @@ export default function App() {
 
     const capture = await ImagePicker.launchCameraAsync({
       cameraType: ImagePicker.CameraType.back,
-      quality: 1.0,
+      quality: 0.85,
       allowsEditing: false,
+      exif: true,
     });
 
     if (capture.canceled || !capture.assets?.length) {
       return;
     }
 
-    setPhotoUri(capture.assets[0].uri);
+    const asset = capture.assets[0];
+    const normalizedUri = await normalizePhotoOrientation(asset);
+    setPhotoUri(normalizedUri);
     setOmrResult(null);
+  }
+
+  async function normalizePhotoOrientation(asset) {
+    const orientation = Number(asset?.exif?.Orientation || 1);
+    const rotate =
+      orientation === 3
+        ? 180
+        : orientation === 6
+          ? 90
+          : orientation === 8
+            ? 270
+            : 0;
+
+    if (!rotate) {
+      return asset.uri;
+    }
+
+    const normalized = await ImageManipulator.manipulateAsync(
+      asset.uri,
+      [{ rotate }],
+      { compress: 0.95, format: ImageManipulator.SaveFormat.JPEG }
+    );
+    return normalized.uri;
   }
 
   async function handleSendPhoto() {

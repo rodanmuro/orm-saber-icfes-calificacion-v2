@@ -70,6 +70,6 @@ def test_run_omr_read_from_image_bytes_orchestrates_pipeline(monkeypatch) -> Non
     assert payload["template_id"] == "template_test"
     assert payload["version"] == "v1"
     assert payload["diagnostics"]["detected_marker_ids"] == [0, 1, 2, 3]
+    assert payload["diagnostics"]["robust_mode"] is False
     assert payload["thresholds"]["marked"] == 0.33
     assert payload["thresholds"]["unmarked"] == 0.18
-

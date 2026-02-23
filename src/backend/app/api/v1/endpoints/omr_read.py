@@ -22,8 +22,9 @@ async def read_photo_omr(
     photo: UploadFile = File(...),
     metadata_path: str = Form(DEFAULT_METADATA_PATH),
     px_per_mm: float = Form(10.0),
-    marked_threshold: float = Form(0.26),
-    unmarked_threshold: float = Form(0.10),
+    marked_threshold: float = Form(0.22),
+    unmarked_threshold: float = Form(0.08),
+    robust_mode: bool = Form(False),
 ) -> dict:
     try:
         image_bytes = await photo.read()
@@ -37,6 +38,7 @@ async def read_photo_omr(
             px_per_mm=px_per_mm,
             marked_threshold=marked_threshold,
             unmarked_threshold=unmarked_threshold,
+            robust_mode=robust_mode,
         )
         trace_json_path = persist_omr_trace_json(
             uploaded_image_path=uploaded_path,

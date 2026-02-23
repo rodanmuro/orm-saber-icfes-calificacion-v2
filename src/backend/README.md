@@ -129,5 +129,8 @@ curl -X POST "http://127.0.0.1:8000/api/v1/omr/read-photo" \
 
 Parametros opcionales en form-data:
 - `px_per_mm` (default `10.0`)
-- `marked_threshold` (default `0.26`)
-- `unmarked_threshold` (default `0.10`)
+- `marked_threshold` (default `0.22`)
+- `unmarked_threshold` (default `0.08`)
+
+Notas:
+- El backend valida calidad geometrica minima de captura; si la perspectiva es extrema o la hoja ocupa muy poco, devuelve error controlado (HTTP 400).

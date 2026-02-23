@@ -6,7 +6,12 @@ import cv2
 import numpy as np
 
 from app.modules.omr_reader.contracts import OMRAlignmentResult
-from app.modules.omr_reader.errors import ArucoDetectionError, HomographyError, InvalidMetadataError
+from app.modules.omr_reader.errors import (
+    ArucoDetectionError,
+    CaptureQualityError,
+    HomographyError,
+    InvalidMetadataError,
+)
 
 REQUIRED_ALIGNMENT_KEYS = {"aruco_dictionary_name", "page", "aruco_markers"}
 CORNER_ORDER = ["top_left", "top_right", "bottom_right", "bottom_left"]
@@ -29,6 +34,7 @@ def align_image_to_template(
     detected_centers_by_id = _detect_marker_centers(image, dictionary_name)
 
     src_points = _build_src_points(aruco_markers, detected_centers_by_id)
+    _validate_capture_quality(src_points, image.shape[1], image.shape[0])
     dst_points = _build_dst_points(aruco_markers, px_per_mm)
 
     homography = cv2.getPerspectiveTransform(src_points, dst_points)
@@ -131,3 +137,35 @@ def _build_dst_points(metadata_markers: list[dict[str, Any]], px_per_mm: float) 
         )
 
     return np.array(dst_points, dtype=np.float32)
+
+
+def _validate_capture_quality(src_points: np.ndarray, image_w: int, image_h: int) -> None:
+    if image_w <= 0 or image_h <= 0:
+        raise CaptureQualityError("invalid source image size")
+
+    quad = src_points.reshape(4, 2).astype(np.float32)
+    area = float(cv2.contourArea(quad))
+    image_area = float(image_w * image_h)
+    area_ratio = area / image_area if image_area > 0 else 0.0
+
+    if area_ratio < 0.08:
+        raise CaptureQualityError(
+            f"capture area too small for reliable OMR (marker quad ratio={area_ratio:.4f})"
+        )
+
+    sides = []
+    for i in range(4):
+        p1 = quad[i]
+        p2 = quad[(i + 1) % 4]
+        sides.append(float(np.linalg.norm(p2 - p1)))
+
+    min_side = min(sides)
+    max_side = max(sides)
+    if min_side <= 0:
+        raise CaptureQualityError("invalid marker geometry (zero side length)")
+
+    side_ratio = max_side / min_side
+    if side_ratio > 3.0:
+        raise CaptureQualityError(
+            f"capture perspective too extreme (side ratio={side_ratio:.3f})"
+        )
