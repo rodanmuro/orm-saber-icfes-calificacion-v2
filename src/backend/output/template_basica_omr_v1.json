@@ -15,6 +15,12 @@
     "width_mm": 195.9,
     "height_mm": 259.4
   },
+  "main_block_bbox": {
+    "x_mm": 30.0,
+    "y_mm": 45.0,
+    "width_mm": 155.0,
+    "height_mm": 190.0
+  },
   "block": {
     "x_mm": 30.0,
     "y_mm": 45.0,

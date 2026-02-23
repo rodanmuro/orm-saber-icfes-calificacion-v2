@@ -18,4 +18,5 @@ def test_pipeline_generates_pdf_and_json(base_config_json: Path, tmp_path: Path)
     payload = json.loads(json_path.read_text(encoding="utf-8"))
     assert payload["template_id"] == "template_test"
     assert payload["version"] == "v1"
+    assert "main_block_bbox" in payload
     assert len(payload["bubbles"]) == 40

@@ -37,6 +37,7 @@ def build_template_layout(config: TemplateConfig) -> TemplateLayout:
         version=config.output_config.version,
         page=config.page_config,
         printable_area=printable_area,
+        main_block_bbox=block,
         block=block,
         aruco_markers=aruco_markers,
         bubbles=bubbles,

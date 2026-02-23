@@ -14,6 +14,7 @@ def test_layout_engine_returns_expected_counts(base_config_dict: dict) -> None:
     assert len(layout.aruco_markers) == 4
     assert len(layout.bubbles) == 40
     assert layout.printable_area.width_mm > 0
+    assert layout.main_block_bbox == layout.block
 
 
 def test_layout_engine_rejects_block_outside_printable_area(base_config_dict: dict) -> None:
