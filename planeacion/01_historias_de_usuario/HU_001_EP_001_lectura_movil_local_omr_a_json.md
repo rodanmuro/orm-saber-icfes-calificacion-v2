@@ -104,3 +104,52 @@
 - Esta HU_001 limita alcance a backend/local con fotos estaticas; no incluye app movil.
 - No incluye scoring de examen ni integracion API externa en esta fase.
 - Actividades `ACT_XXXX` se crean para sprint actual priorizando primero HU_01/HU_02/HU_03.
+
+---
+
+## HU_07 - Validar conectividad LAN entre app movil y backend local
+**Como** desarrollador en fase MVP
+**Quiero** probar desde el celular que la app puede conectarse al backend por IP local
+**Para** confirmar viabilidad de pruebas reales antes de integrar lectura de foto completa.
+
+### Criterios de aceptacion
+1. La app movil puede consultar un endpoint de salud (`health`) del backend usando IP local.
+2. Se documenta resultado de prueba en la misma red LAN (exito o fallo con causa).
+3. Se define checklist minimo de red local para repetir la prueba.
+
+### Evidencia esperada
+- Pantalla/componente de prueba de conectividad en app movil.
+- Registro de prueba LAN ejecutada contra backend local.
+
+---
+
+## HU_08 - Recibir foto desde app movil y procesar lectura en backend
+**Como** backend OMR
+**Quiero** recibir una foto enviada desde la app movil y ejecutar el pipeline de lectura
+**Para** devolver JSON de respuestas sin depender de carga manual en disco.
+
+### Criterios de aceptacion
+1. Existe endpoint que recibe imagen y metadata/template de referencia.
+2. El endpoint responde JSON estructurado por pregunta con estados de opciones.
+3. Errores de entrada (imagen invalida, marcadores faltantes) se retornan de forma legible.
+
+### Evidencia esperada
+- Endpoint FastAPI documentado para carga de imagen.
+- Prueba local de envio y respuesta JSON valida.
+
+---
+
+## HU_09 - Capturar foto en app Expo y mostrar resultado JSON
+**Como** usuario de prueba MVP
+**Quiero** tomar una foto de la hoja desde el celular y enviarla al backend
+**Para** ver de inmediato las opciones detectadas por pregunta.
+
+### Criterios de aceptacion
+1. La app Expo activa camara y captura una foto.
+2. La foto se envia al backend local y recibe respuesta JSON.
+3. La app muestra resultado legible (al menos resumen + JSON crudo).
+
+### Evidencia esperada
+- Pantalla Expo con captura y envio.
+- Resultado mostrado en dispositivo tras procesar una foto real.
+
