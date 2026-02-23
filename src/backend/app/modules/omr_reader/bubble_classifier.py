@@ -29,6 +29,9 @@ def classify_bubbles(
     unmarked_threshold: float = 0.18,
     inner_radius_factor: float = 0.58,
     robust_mode: bool = False,
+    robust_contrast_alpha: float = 1.25,
+    robust_contrast_beta: float = -8.0,
+    debug_artifacts: dict[str, np.ndarray] | None = None,
 ) -> list[BubbleReadResult]:
     if px_per_mm <= 0:
         raise BubbleReadError("px_per_mm must be > 0")
@@ -36,12 +39,21 @@ def classify_bubbles(
         raise BubbleReadError("thresholds must satisfy 0 <= unmarked <= marked <= 1")
     if not (0.2 <= inner_radius_factor <= 1.0):
         raise BubbleReadError("inner_radius_factor must be between 0.2 and 1.0")
+    if robust_contrast_alpha <= 0:
+        raise BubbleReadError("robust_contrast_alpha must be > 0")
 
     bubbles = metadata.get("bubbles")
     if not isinstance(bubbles, list) or len(bubbles) == 0:
         raise InvalidMetadataError("metadata 'bubbles' must be a non-empty list")
 
-    binary_inv = _build_binary_map(aligned_image=aligned_image, robust_mode=robust_mode)
+    binary_inv = _build_binary_map(
+        aligned_image=aligned_image,
+        robust_mode=robust_mode,
+        robust_contrast_alpha=robust_contrast_alpha,
+        robust_contrast_beta=robust_contrast_beta,
+    )
+    if debug_artifacts is not None:
+        debug_artifacts["binary_inv"] = binary_inv.copy()
 
     results: list[BubbleReadResult] = []
     for bubble in bubbles:
@@ -84,7 +96,13 @@ def _validate_bubble_metadata(bubble: dict[str, Any]) -> None:
         raise InvalidMetadataError(f"bubble metadata missing keys: {sorted(missing)}")
 
 
-def _build_binary_map(*, aligned_image: np.ndarray, robust_mode: bool) -> np.ndarray:
+def _build_binary_map(
+    *,
+    aligned_image: np.ndarray,
+    robust_mode: bool,
+    robust_contrast_alpha: float,
+    robust_contrast_beta: float,
+) -> np.ndarray:
     gray = cv2.cvtColor(aligned_image, cv2.COLOR_BGR2GRAY)
 
     if not robust_mode:
@@ -99,9 +117,14 @@ def _build_binary_map(*, aligned_image: np.ndarray, robust_mode: bool) -> np.nda
     background = cv2.GaussianBlur(gray, (0, 0), sigmaX=35, sigmaY=35)
     normalized = cv2.divide(gray, background, scale=255)
 
-    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+    clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
     enhanced = clahe.apply(normalized)
-    denoised = cv2.GaussianBlur(enhanced, (3, 3), 0)
+    contrasted = cv2.convertScaleAbs(
+        enhanced,
+        alpha=robust_contrast_alpha,
+        beta=robust_contrast_beta,
+    )
+    denoised = cv2.GaussianBlur(contrasted, (3, 3), 0)
 
     binary_inv = cv2.adaptiveThreshold(
         denoised,

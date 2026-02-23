@@ -2,10 +2,11 @@ export async function sendPhotoToOcr({
   endpointUrl,
   photoUri,
   metadataPath,
-  markedThreshold = 0.22,
+  markedThreshold = 0.12,
   unmarkedThreshold = 0.08,
   pxPerMm = 10.0,
   robustMode = true,
+  saveDebugArtifacts = true,
 }) {
   const formData = new FormData();
   formData.append('photo', {
@@ -18,6 +19,7 @@ export async function sendPhotoToOcr({
   formData.append('unmarked_threshold', String(unmarkedThreshold));
   formData.append('px_per_mm', String(pxPerMm));
   formData.append('robust_mode', String(robustMode));
+  formData.append('save_debug_artifacts', String(saveDebugArtifacts));
 
   const response = await fetch(endpointUrl, {
     method: 'POST',

@@ -23,7 +23,7 @@ def build_omr_read_result(
             raise BubbleReadError(f"duplicate bubble result detected: {item.bubble_id}")
         bubble_by_id[item.bubble_id] = item
 
-    questions_payload: list[dict[str, Any]] = []
+        questions_payload: list[dict[str, Any]] = []
     expected_option_count = 0
     referenced_bubble_ids: set[str] = set()
 
@@ -65,6 +65,17 @@ def build_omr_read_result(
             elif bubble_result.state == "ambigua":
                 ambiguous_options.append(option_payload["label"])
 
+        if len(marked_options) > 1:
+            marked_option_payloads = [item for item in question_options if item["state"] == "marcada"]
+            winner = max(marked_option_payloads, key=lambda item: float(item["fill_ratio"]))
+            winner_label = winner["label"]
+            for item in marked_option_payloads:
+                if item["label"] != winner_label:
+                    item["state"] = "ambigua"
+                    if item["label"] not in ambiguous_options:
+                        ambiguous_options.append(item["label"])
+            marked_options = [winner_label]
+
         questions_payload.append(
             {
                 "question_number": int(question.get("question_number", -1)),
@@ -90,9 +101,15 @@ def build_omr_read_result(
             f"expected={expected_option_count}, reported={reported_option_count}"
         )
 
-    marked_count = sum(1 for item in bubble_results if item.state == "marcada")
-    unmarked_count = sum(1 for item in bubble_results if item.state == "no_marcada")
-    ambiguous_count = sum(1 for item in bubble_results if item.state == "ambigua")
+    marked_count = sum(
+        1 for q in questions_payload for option in q["options"] if option["state"] == "marcada"
+    )
+    unmarked_count = sum(
+        1 for q in questions_payload for option in q["options"] if option["state"] == "no_marcada"
+    )
+    ambiguous_count = sum(
+        1 for q in questions_payload for option in q["options"] if option["state"] == "ambigua"
+    )
     ambiguous_questions = sum(1 for q in questions_payload if len(q["ambiguous_options"]) > 0)
 
     if not timestamp_iso:

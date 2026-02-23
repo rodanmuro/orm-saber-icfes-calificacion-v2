@@ -121,3 +121,54 @@ def test_build_omr_read_result_fails_with_extra_result() -> None:
     ]
     with pytest.raises(BubbleReadError, match="not present in metadata question_items"):
         build_omr_read_result(metadata=_metadata_question_items(), bubble_results=results)
+
+
+def test_build_omr_read_result_resolves_multiple_marked_by_highest_ratio() -> None:
+    results = [
+        BubbleReadResult(
+            bubble_id="G01_00_00",
+            group_id="G01",
+            row=0,
+            col=0,
+            label="A",
+            fill_ratio=0.31,
+            state="marcada",
+        ),
+        BubbleReadResult(
+            bubble_id="G01_00_01",
+            group_id="G01",
+            row=0,
+            col=1,
+            label="B",
+            fill_ratio=0.42,
+            state="marcada",
+        ),
+        BubbleReadResult(
+            bubble_id="G01_01_00",
+            group_id="G01",
+            row=1,
+            col=0,
+            label="A",
+            fill_ratio=0.0,
+            state="no_marcada",
+        ),
+        BubbleReadResult(
+            bubble_id="G01_01_01",
+            group_id="G01",
+            row=1,
+            col=1,
+            label="B",
+            fill_ratio=0.0,
+            state="no_marcada",
+        ),
+    ]
+
+    payload = build_omr_read_result(metadata=_metadata_question_items(), bubble_results=results)
+    q1 = payload["questions"][0]
+
+    assert q1["marked_options"] == ["B"]
+    assert "A" in q1["ambiguous_options"]
+
+    by_label = {item["label"]: item for item in q1["options"]}
+    assert by_label["B"]["state"] == "marcada"
+    assert by_label["A"]["state"] == "ambigua"

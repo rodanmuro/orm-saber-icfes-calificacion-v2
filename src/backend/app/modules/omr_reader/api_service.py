@@ -17,6 +17,7 @@ from app.modules.omr_reader.result_builder import build_omr_read_result
 
 DEFAULT_METADATA_PATH = "data/output/template_basica_omr_v1.json"
 DEFAULT_UPLOADS_DIR = "data/input/mobile_uploads"
+DEFAULT_DEBUG_OUTPUT_DIR = "data/output/debug_preprocess"
 
 
 def run_omr_read_from_image_bytes(
@@ -24,9 +25,12 @@ def run_omr_read_from_image_bytes(
     image_bytes: bytes,
     metadata_path: str = DEFAULT_METADATA_PATH,
     px_per_mm: float = 10.0,
-    marked_threshold: float = 0.33,
+    marked_threshold: float = 0.12,
     unmarked_threshold: float = 0.18,
     robust_mode: bool = False,
+    save_debug_artifacts: bool = False,
+    debug_base_name: str | None = None,
+    debug_output_dir: str = DEFAULT_DEBUG_OUTPUT_DIR,
 ) -> dict[str, Any]:
     metadata_file = resolve_backend_relative_path(metadata_path)
     metadata = load_read_metadata(metadata_file)
@@ -37,6 +41,7 @@ def run_omr_read_from_image_bytes(
         metadata=metadata,
         px_per_mm=px_per_mm,
     )
+    debug_artifacts: dict[str, np.ndarray] | None = {} if save_debug_artifacts else None
     bubbles = classify_bubbles(
         aligned_image=aligned.aligned_image,
         metadata=metadata,
@@ -44,6 +49,7 @@ def run_omr_read_from_image_bytes(
         marked_threshold=marked_threshold,
         unmarked_threshold=unmarked_threshold,
         robust_mode=robust_mode,
+        debug_artifacts=debug_artifacts,
     )
     result = build_omr_read_result(metadata=metadata, bubble_results=bubbles)
     result["thresholds"] = {
@@ -55,6 +61,14 @@ def run_omr_read_from_image_bytes(
         "detected_marker_ids": aligned.detected_marker_ids,
         "robust_mode": robust_mode,
     }
+    if save_debug_artifacts:
+        debug_paths = persist_debug_artifacts(
+            aligned_image=aligned.aligned_image,
+            binary_inv=debug_artifacts["binary_inv"] if debug_artifacts else None,
+            debug_base_name=debug_base_name,
+            output_dir=debug_output_dir,
+        )
+        result["diagnostics"]["debug_artifacts"] = {k: str(v) for k, v in debug_paths.items()}
     return result
 
 
@@ -130,6 +144,30 @@ def persist_omr_trace_json(
         encoding="utf-8",
     )
     return trace_path
+
+
+def persist_debug_artifacts(
+    *,
+    aligned_image: np.ndarray,
+    binary_inv: np.ndarray | None,
+    debug_base_name: str | None,
+    output_dir: str = DEFAULT_DEBUG_OUTPUT_DIR,
+) -> dict[str, Path]:
+    out_dir = resolve_backend_relative_path(output_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    prefix = debug_base_name or f"omr_{stamp}_{uuid4().hex[:8]}"
+
+    aligned_path = out_dir / f"{prefix}.aligned.jpg"
+    cv2.imwrite(str(aligned_path), aligned_image)
+
+    output: dict[str, Path] = {"aligned": aligned_path}
+    if binary_inv is not None:
+        binary_path = out_dir / f"{prefix}.binary_inv.png"
+        cv2.imwrite(str(binary_path), binary_inv)
+        output["binary_inv"] = binary_path
+    return output
 
 
 def resolve_backend_relative_path(path_value: str) -> Path:

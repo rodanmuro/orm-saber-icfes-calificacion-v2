@@ -49,11 +49,25 @@ src/frontend/.vite/
 
 # Generated template artifacts
 src/backend/data/output/*.pdf
+src/backend/data/output/debug_preprocess/*.jpg
+src/backend/data/output/debug_preprocess/*.jpeg
+src/backend/data/output/debug_preprocess/*.png
+src/backend/data/output/debug_preprocess/*.csv
+
+# Generated image artifacts in backend data/output
+src/backend/data/output/**/*.jpg
+src/backend/data/output/**/*.jpeg
+src/backend/data/output/**/*.png
+src/backend/data/output/**/*.webp
 
 # Local test photos for OMR read stage
 src/backend/data/input/*.jpg
 src/backend/data/input/*.jpeg
 src/backend/data/input/*.png
+src/backend/data/input/**/*.jpg
+src/backend/data/input/**/*.jpeg
+src/backend/data/input/**/*.png
+src/backend/data/input/**/*.webp
 src/backend/data/input/cien_pruebas/
 src/backend/data/input/diligenciadas/**/*.jpg
 src/backend/data/input/diligenciadas/**/*.jpeg
