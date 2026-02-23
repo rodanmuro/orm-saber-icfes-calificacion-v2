@@ -58,6 +58,8 @@ src/backend/data/input/cien_pruebas/
 src/backend/data/input/diligenciadas/**/*.jpg
 src/backend/data/input/diligenciadas/**/*.jpeg
 src/backend/data/input/diligenciadas/**/*.png
+src/backend/data/input/mobile_uploads/*
+!src/backend/data/input/mobile_uploads/.gitkeep
 
 # Benchmark artifacts (keep only consolidated reports)
 src/backend/data/input/diligenciadas/cien_pruebas/variantes/

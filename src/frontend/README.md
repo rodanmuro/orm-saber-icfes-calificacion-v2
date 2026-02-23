@@ -45,10 +45,19 @@ Abrir la app Expo Go en el celular y escanear QR.
 
 - En la sección `Captura y envío OMR`, verificar el `metadata_path`.
 - Pulsar `Tomar foto`, capturar hoja y confirmar.
+- Tocar la miniatura para abrir vista completa y revisar sombras/reflejos.
 - Pulsar `Enviar foto a backend`.
 - Éxito esperado:
   - Mensaje `Lectura OMR completada`.
   - `quality_summary` con preguntas/opciones detectadas.
+
+## 6) Evidencia de foto capturada en backend
+
+Cada foto enviada se guarda en:
+
+`src/backend/data/input/mobile_uploads/`
+
+Esto permite inspeccionar imágenes reales de pruebas móviles.
 
 ## Checklist LAN
 

@@ -7,6 +7,8 @@ from fastapi import APIRouter, File, Form, HTTPException, UploadFile, status
 
 from app.modules.omr_reader.api_service import (
     DEFAULT_METADATA_PATH,
+    persist_omr_trace_json,
+    persist_uploaded_image_bytes,
     run_omr_read_from_image_bytes,
 )
 from app.modules.omr_reader.errors import OMRReadInputError
@@ -20,11 +22,15 @@ async def read_photo_omr(
     photo: UploadFile = File(...),
     metadata_path: str = Form(DEFAULT_METADATA_PATH),
     px_per_mm: float = Form(10.0),
-    marked_threshold: float = Form(0.33),
-    unmarked_threshold: float = Form(0.18),
+    marked_threshold: float = Form(0.26),
+    unmarked_threshold: float = Form(0.10),
 ) -> dict:
     try:
         image_bytes = await photo.read()
+        uploaded_path = persist_uploaded_image_bytes(
+            image_bytes=image_bytes,
+            original_filename=photo.filename,
+        )
         result = run_omr_read_from_image_bytes(
             image_bytes=image_bytes,
             metadata_path=metadata_path,
@@ -32,12 +38,21 @@ async def read_photo_omr(
             marked_threshold=marked_threshold,
             unmarked_threshold=unmarked_threshold,
         )
+        trace_json_path = persist_omr_trace_json(
+            uploaded_image_path=uploaded_path,
+            result_payload=result,
+        )
+        result.setdefault("diagnostics", {})
+        result["diagnostics"]["uploaded_image_path"] = str(uploaded_path)
+        result["diagnostics"]["trace_json_path"] = str(trace_json_path)
         logger.info(
             "OMR read completed | template=%s version=%s summary=%s",
             result.get("template_id"),
             result.get("version"),
             json.dumps(result.get("quality_summary", {}), ensure_ascii=False),
         )
+        logger.info("OMR image saved at: %s", uploaded_path)
+        logger.info("OMR trace json saved at: %s", trace_json_path)
         lines: list[str] = []
         for item in result.get("questions", []):
             question_number = item.get("question_number")

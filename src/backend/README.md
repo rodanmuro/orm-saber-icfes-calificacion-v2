@@ -129,5 +129,5 @@ curl -X POST "http://127.0.0.1:8000/api/v1/omr/read-photo" \
 
 Parametros opcionales en form-data:
 - `px_per_mm` (default `10.0`)
-- `marked_threshold` (default `0.33`)
-- `unmarked_threshold` (default `0.18`)
+- `marked_threshold` (default `0.26`)
+- `unmarked_threshold` (default `0.10`)

@@ -2,8 +2,8 @@ export async function sendPhotoToOcr({
   endpointUrl,
   photoUri,
   metadataPath,
-  markedThreshold = 0.33,
-  unmarkedThreshold = 0.18,
+  markedThreshold = 0.26,
+  unmarkedThreshold = 0.10,
   pxPerMm = 10.0,
 }) {
   const formData = new FormData();
@@ -39,4 +39,3 @@ export async function sendPhotoToOcr({
     payload,
   };
 }
-

@@ -4,6 +4,7 @@ import * as ImagePicker from 'expo-image-picker';
 import {
   ActivityIndicator,
   Image,
+  Modal,
   Pressable,
   SafeAreaView,
   ScrollView,
@@ -28,6 +29,7 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [photoUri, setPhotoUri] = useState('');
+  const [photoPreviewVisible, setPhotoPreviewVisible] = useState(false);
   const [omrLoading, setOmrLoading] = useState(false);
   const [omrResult, setOmrResult] = useState(null);
   const healthUrl = useMemo(() => buildHealthUrl(apiBaseUrl), [apiBaseUrl]);
@@ -87,7 +89,7 @@ export default function App() {
 
     const capture = await ImagePicker.launchCameraAsync({
       cameraType: ImagePicker.CameraType.back,
-      quality: 0.85,
+      quality: 1.0,
       allowsEditing: false,
     });
 
@@ -218,7 +220,16 @@ export default function App() {
           </Pressable>
 
           {photoUri ? (
-            <Image source={{ uri: photoUri }} style={styles.previewImage} />
+            <>
+              <Pressable onPress={() => setPhotoPreviewVisible(true)}>
+                <Image
+                  source={{ uri: photoUri }}
+                  style={styles.previewImage}
+                  resizeMode="contain"
+                />
+              </Pressable>
+              <Text style={styles.urlHint}>Toca la imagen para verla completa.</Text>
+            </>
           ) : (
             <Text style={styles.urlHint}>Aún no has tomado foto.</Text>
           )}
@@ -258,6 +269,28 @@ export default function App() {
           </View>
         ) : null}
       </ScrollView>
+      <Modal
+        animationType="fade"
+        transparent={false}
+        visible={photoPreviewVisible}
+        onRequestClose={() => setPhotoPreviewVisible(false)}
+      >
+        <SafeAreaView style={styles.modalContainer}>
+          <Pressable
+            style={styles.modalCloseButton}
+            onPress={() => setPhotoPreviewVisible(false)}
+          >
+            <Text style={styles.modalCloseText}>Cerrar</Text>
+          </Pressable>
+          {photoUri ? (
+            <Image
+              source={{ uri: photoUri }}
+              style={styles.modalImage}
+              resizeMode="contain"
+            />
+          ) : null}
+        </SafeAreaView>
+      </Modal>
       <StatusBar style="auto" />
     </SafeAreaView>
   );
@@ -340,11 +373,35 @@ const styles = StyleSheet.create({
   previewImage: {
     marginTop: 4,
     width: '100%',
-    height: 210,
+    height: 260,
     borderRadius: 10,
     borderWidth: 1,
     borderColor: '#d1d5db',
     backgroundColor: '#e5e7eb',
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: '#000000',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 12,
+  },
+  modalCloseButton: {
+    alignSelf: 'flex-end',
+    marginBottom: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    backgroundColor: '#1f2937',
+  },
+  modalCloseText: {
+    color: '#ffffff',
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  modalImage: {
+    width: '100%',
+    height: '90%',
   },
   resultCard: {
     borderRadius: 12,
