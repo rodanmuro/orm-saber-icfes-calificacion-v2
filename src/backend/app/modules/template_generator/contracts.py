@@ -5,6 +5,26 @@ from typing import Literal
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 
+ARUCO_DICTIONARY_CAPACITY: dict[str, int] = {
+    "DICT_4X4_50": 50,
+    "DICT_4X4_100": 100,
+    "DICT_4X4_250": 250,
+    "DICT_4X4_1000": 1000,
+    "DICT_5X5_50": 50,
+    "DICT_5X5_100": 100,
+    "DICT_5X5_250": 250,
+    "DICT_5X5_1000": 1000,
+    "DICT_6X6_50": 50,
+    "DICT_6X6_100": 100,
+    "DICT_6X6_250": 250,
+    "DICT_6X6_1000": 1000,
+    "DICT_7X7_50": 50,
+    "DICT_7X7_100": 100,
+    "DICT_7X7_250": 250,
+    "DICT_7X7_1000": 1000,
+}
+
+
 class PageConfig(BaseModel):
     width_mm: float = Field(gt=0)
     height_mm: float = Field(gt=0)
@@ -14,11 +34,24 @@ class PageConfig(BaseModel):
     margin_left_mm: float = Field(ge=0)
 
 
+class ArucoCornerOffset(BaseModel):
+    x_mm: float = Field(default=0.0, ge=0)
+    y_mm: float = Field(default=0.0, ge=0)
+
+
+class ArucoCornerOffsets(BaseModel):
+    top_left: ArucoCornerOffset = Field(default_factory=ArucoCornerOffset)
+    top_right: ArucoCornerOffset = Field(default_factory=ArucoCornerOffset)
+    bottom_left: ArucoCornerOffset = Field(default_factory=ArucoCornerOffset)
+    bottom_right: ArucoCornerOffset = Field(default_factory=ArucoCornerOffset)
+
+
 class ArucoConfig(BaseModel):
     dictionary_name: str
     marker_size_mm: float = Field(gt=0)
     corner_inset_mm: float = Field(ge=0)
     ids: list[int] = Field(min_length=4, max_length=4)
+    corner_offsets_mm: ArucoCornerOffsets = Field(default_factory=ArucoCornerOffsets)
 
     @field_validator("ids")
     @classmethod
@@ -26,6 +59,19 @@ class ArucoConfig(BaseModel):
         if len(set(value)) != len(value):
             raise ValueError("aruco ids must be unique")
         return value
+
+    @model_validator(mode="after")
+    def validate_dictionary_and_ids(self) -> "ArucoConfig":
+        if self.dictionary_name not in ARUCO_DICTIONARY_CAPACITY:
+            raise ValueError(f"unsupported aruco dictionary '{self.dictionary_name}'")
+
+        capacity = ARUCO_DICTIONARY_CAPACITY[self.dictionary_name]
+        for marker_id in self.ids:
+            if marker_id < 0 or marker_id >= capacity:
+                raise ValueError(
+                    f"aruco id '{marker_id}' is out of range for {self.dictionary_name}"
+                )
+        return self
 
 
 class BlockConfig(BaseModel):

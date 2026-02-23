@@ -25,29 +25,29 @@
     {
       "marker_id": 0,
       "corner": "top_left",
-      "center_x_mm": 16.0,
-      "center_y_mm": 16.0,
+      "center_x_mm": 26.0,
+      "center_y_mm": 26.0,
       "size_mm": 12.0
     },
     {
       "marker_id": 1,
       "corner": "top_right",
-      "center_x_mm": 199.9,
-      "center_y_mm": 16.0,
+      "center_x_mm": 189.9,
+      "center_y_mm": 26.0,
       "size_mm": 12.0
     },
     {
       "marker_id": 2,
       "corner": "bottom_left",
-      "center_x_mm": 16.0,
-      "center_y_mm": 263.4,
+      "center_x_mm": 26.0,
+      "center_y_mm": 253.39999999999998,
       "size_mm": 12.0
     },
     {
       "marker_id": 3,
       "corner": "bottom_right",
-      "center_x_mm": 199.9,
-      "center_y_mm": 263.4,
+      "center_x_mm": 189.9,
+      "center_y_mm": 253.39999999999998,
       "size_mm": 12.0
     }
   ],

@@ -43,6 +43,11 @@ El archivo de configuracion define:
 - `bubble_config`
 - `output_config`
 
+Notas de `aruco_config`:
+- `dictionary_name` validado contra diccionarios ArUco soportados.
+- `ids` validados por rango segun diccionario.
+- `corner_inset_mm` y `corner_offsets_mm` para mover cada marcador por esquina.
+
 Base de ejemplo:
 - `src/backend/config/template.base.json`
 

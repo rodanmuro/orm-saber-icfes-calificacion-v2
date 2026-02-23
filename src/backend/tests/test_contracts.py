@@ -23,3 +23,22 @@ def test_template_config_rejects_invalid_margins(base_config_dict: dict) -> None
 
     with pytest.raises(ValidationError):
         TemplateConfig.model_validate(payload)
+
+
+def test_template_config_rejects_unsupported_aruco_dictionary(base_config_dict: dict) -> None:
+    payload = dict(base_config_dict)
+    payload["aruco_config"] = dict(payload["aruco_config"])
+    payload["aruco_config"]["dictionary_name"] = "DICT_UNKNOWN"
+
+    with pytest.raises(ValidationError):
+        TemplateConfig.model_validate(payload)
+
+
+def test_template_config_rejects_aruco_id_out_of_range(base_config_dict: dict) -> None:
+    payload = dict(base_config_dict)
+    payload["aruco_config"] = dict(payload["aruco_config"])
+    payload["aruco_config"]["dictionary_name"] = "DICT_4X4_50"
+    payload["aruco_config"]["ids"] = [0, 1, 2, 50]
+
+    with pytest.raises(ValidationError):
+        TemplateConfig.model_validate(payload)
