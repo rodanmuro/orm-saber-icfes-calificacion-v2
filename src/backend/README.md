@@ -68,7 +68,7 @@ Base de ejemplo:
 ```bash
 python -m app.modules.template_generator.scripts.generate_template \
   --config src/backend/config/template.base.json \
-  --output-dir src/backend/output
+  --output-dir src/backend/data/output
 ```
 
 ## Generacion reproducible multi-configuracion
@@ -80,8 +80,27 @@ python -m app.modules.template_generator.scripts.generate_templates_batch \
     src/backend/config/template.base.json \
     src/backend/config/template.single_column_20.json \
     src/backend/config/template.two_columns_24.json \
-  --output-dir src/backend/output
+  --output-dir src/backend/data/output
 ```
 
 Opcional:
 - `--fail-fast` para detenerse en la primera configuracion invalida.
+
+## Validar entrada local de lectura OMR
+Valida imagen + metadata antes de correr deteccion/lectura:
+
+```bash
+python -m app.modules.omr_reader.scripts.validate_read_input \
+  --image /ruta/foto_diligenciada.jpg \
+  --metadata src/backend/data/output/template_basica_omr_v1.json
+```
+
+## Alinear foto usando ArUco + homografia
+Genera una imagen corregida al plano de la plantilla:
+
+```bash
+python -m app.modules.omr_reader.scripts.align_photo \
+  --image src/backend/data/input/foto.jpg \
+  --metadata src/backend/data/output/template_basica_omr_v1.json \
+  --output-image src/backend/data/output/foto_alineada.png
+```

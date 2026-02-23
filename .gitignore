@@ -48,4 +48,10 @@ src/frontend/dist/
 src/frontend/.vite/
 
 # Generated template artifacts
-src/backend/output/*.pdf
+src/backend/data/output/*.pdf
+
+# Local test photos for OMR read stage
+src/backend/data/input/*.jpg
+src/backend/data/input/*.jpeg
+src/backend/data/input/*.png
+src/backend/data/input/cien_pruebas/
