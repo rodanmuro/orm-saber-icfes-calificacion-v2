@@ -104,3 +104,16 @@ python -m app.modules.omr_reader.scripts.align_photo \
   --metadata src/backend/data/output/template_basica_omr_v1.json \
   --output-image src/backend/data/output/foto_alineada.png
 ```
+
+## Clasificar burbujas y generar JSON por pregunta
+Corre alineacion + lectura de ROI y exporta:
+- `questions`: resultado por pregunta y opcion (`marcada`/`no_marcada`/`ambigua`)
+- `quality_summary`: conteos globales basicos
+- `bubbles`: detalle por burbuja (debug)
+
+```bash
+python -m app.modules.omr_reader.scripts.classify_bubbles \
+  --image src/backend/data/input/foto.jpg \
+  --metadata src/backend/data/output/template_basica_omr_v1.json \
+  --output-json src/backend/data/output/foto_bubbles.json
+```

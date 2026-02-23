@@ -32,3 +32,13 @@ class OMRAlignmentResult(BaseModel):
 
     class Config:
         arbitrary_types_allowed = True
+
+
+class BubbleReadResult(BaseModel):
+    bubble_id: str
+    group_id: str
+    row: int
+    col: int
+    label: str
+    fill_ratio: float
+    state: str  # marcada | no_marcada | ambigua

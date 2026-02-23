@@ -55,3 +55,12 @@ src/backend/data/input/*.jpg
 src/backend/data/input/*.jpeg
 src/backend/data/input/*.png
 src/backend/data/input/cien_pruebas/
+src/backend/data/input/diligenciadas/**/*.jpg
+src/backend/data/input/diligenciadas/**/*.jpeg
+src/backend/data/input/diligenciadas/**/*.png
+
+# Benchmark artifacts (keep only consolidated reports)
+src/backend/data/input/diligenciadas/cien_pruebas/variantes/
+src/backend/data/input/diligenciadas/cien_pruebas/resultados/lecturas_json/
+!src/backend/data/input/diligenciadas/cien_pruebas/resultados/reporte_cien_pruebas.json
+!src/backend/data/input/diligenciadas/cien_pruebas/resultados/reporte_cien_pruebas.html

@@ -23,3 +23,7 @@ class ArucoDetectionError(OMRReadInputError):
 
 class HomographyError(OMRReadInputError):
     """Raised when image alignment via homography fails."""
+
+
+class BubbleReadError(OMRReadInputError):
+    """Raised when bubble classification cannot be completed."""

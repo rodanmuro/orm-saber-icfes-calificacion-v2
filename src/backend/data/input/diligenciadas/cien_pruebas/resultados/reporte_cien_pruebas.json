@@ -1,0 +1,2875 @@
+{
+  "generated_at": "2026-02-23T16:38:27.370728+00:00",
+  "base_image": "data/input/diligenciadas/foto_001.jpeg",
+  "metadata": "data/output/template_basica_omr_v1.json",
+  "key_json": "data/output/diligenciadas/foto_001_resultado.json",
+  "num_variants": 100,
+  "seed": 23022026,
+  "summary": {
+    "total_images": 100,
+    "exact_matches": 76,
+    "mismatch_images": 16,
+    "pipeline_errors": 8,
+    "avg_accuracy": 0.8656666666666666,
+    "min_accuracy": 0.0
+  },
+  "results": [
+    {
+      "index": 1,
+      "file_name": "foto_var_001.jpg",
+      "augmentation": {
+        "angle_deg": -0.1743,
+        "blur_kernel": 3,
+        "noise_sigma": 1.7428,
+        "alpha": 0.8505,
+        "beta": 5.8627,
+        "jpeg_quality": 70
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 2,
+      "file_name": "foto_var_002.jpg",
+      "augmentation": {
+        "angle_deg": -11.8156,
+        "blur_kernel": 1,
+        "noise_sigma": 4.6425,
+        "alpha": 0.9742,
+        "beta": 10.7984,
+        "jpeg_quality": 88
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 3,
+      "file_name": "foto_var_003.jpg",
+      "augmentation": {
+        "angle_deg": 10.2338,
+        "blur_kernel": 1,
+        "noise_sigma": 4.8437,
+        "alpha": 1.0625,
+        "beta": -0.6094,
+        "jpeg_quality": 74
+      },
+      "status": "mismatch",
+      "accuracy": 0.9,
+      "exact_match": false,
+      "wrong_questions": [
+        {
+          "question_number": 23,
+          "expected": [
+            "A"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 25,
+          "expected": [
+            "C"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 26,
+          "expected": [
+            "D"
+          ],
+          "predicted": []
+        }
+      ],
+      "error_reason": "3 preguntas difieren de la clave"
+    },
+    {
+      "index": 4,
+      "file_name": "foto_var_004.jpg",
+      "augmentation": {
+        "angle_deg": -0.6835,
+        "blur_kernel": 3,
+        "noise_sigma": 12.7542,
+        "alpha": 1.0539,
+        "beta": -9.8458,
+        "jpeg_quality": 57
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 5,
+      "file_name": "foto_var_005.jpg",
+      "augmentation": {
+        "angle_deg": -5.0753,
+        "blur_kernel": 7,
+        "noise_sigma": 4.3574,
+        "alpha": 0.9833,
+        "beta": -14.6585,
+        "jpeg_quality": 89
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 6,
+      "file_name": "foto_var_006.jpg",
+      "augmentation": {
+        "angle_deg": 14.0455,
+        "blur_kernel": 5,
+        "noise_sigma": 12.6994,
+        "alpha": 0.8463,
+        "beta": -28.5909,
+        "jpeg_quality": 93
+      },
+      "status": "pipeline_error",
+      "accuracy": 0.0,
+      "exact_match": false,
+      "wrong_questions": [],
+      "error_reason": "required marker id '3' for corner 'bottom_right' was not detected"
+    },
+    {
+      "index": 7,
+      "file_name": "foto_var_007.jpg",
+      "augmentation": {
+        "angle_deg": -14.1723,
+        "blur_kernel": 7,
+        "noise_sigma": 17.8867,
+        "alpha": 0.9231,
+        "beta": 15.1381,
+        "jpeg_quality": 91
+      },
+      "status": "mismatch",
+      "accuracy": 0.533333,
+      "exact_match": false,
+      "wrong_questions": [
+        {
+          "question_number": 6,
+          "expected": [
+            "D"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 7,
+          "expected": [
+            "C"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 16,
+          "expected": [
+            "A"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 17,
+          "expected": [
+            "A"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 18,
+          "expected": [
+            "B"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 19,
+          "expected": [
+            "C"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 20,
+          "expected": [
+            "C"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 21,
+          "expected": [
+            "D"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 23,
+          "expected": [
+            "A"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 24,
+          "expected": [
+            "B"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 25,
+          "expected": [
+            "C"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 26,
+          "expected": [
+            "D"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 27,
+          "expected": [
+            "D"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 28,
+          "expected": [
+            "D"
+          ],
+          "predicted": []
+        }
+      ],
+      "error_reason": "14 preguntas difieren de la clave"
+    },
+    {
+      "index": 8,
+      "file_name": "foto_var_008.jpg",
+      "augmentation": {
+        "angle_deg": 9.2949,
+        "blur_kernel": 7,
+        "noise_sigma": 8.584,
+        "alpha": 1.0938,
+        "beta": -22.5326,
+        "jpeg_quality": 92
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 9,
+      "file_name": "foto_var_009.jpg",
+      "augmentation": {
+        "angle_deg": -14.6539,
+        "blur_kernel": 3,
+        "noise_sigma": 8.8672,
+        "alpha": 0.8201,
+        "beta": -10.3484,
+        "jpeg_quality": 84
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 10,
+      "file_name": "foto_var_010.jpg",
+      "augmentation": {
+        "angle_deg": 5.6413,
+        "blur_kernel": 7,
+        "noise_sigma": 10.1288,
+        "alpha": 1.1166,
+        "beta": 9.7325,
+        "jpeg_quality": 96
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 11,
+      "file_name": "foto_var_011.jpg",
+      "augmentation": {
+        "angle_deg": 1.7422,
+        "blur_kernel": 3,
+        "noise_sigma": 19.3759,
+        "alpha": 0.8684,
+        "beta": -18.6112,
+        "jpeg_quality": 71
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 12,
+      "file_name": "foto_var_012.jpg",
+      "augmentation": {
+        "angle_deg": -9.8725,
+        "blur_kernel": 5,
+        "noise_sigma": 6.9029,
+        "alpha": 1.0945,
+        "beta": -1.1798,
+        "jpeg_quality": 70
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 13,
+      "file_name": "foto_var_013.jpg",
+      "augmentation": {
+        "angle_deg": -10.7731,
+        "blur_kernel": 7,
+        "noise_sigma": 11.7824,
+        "alpha": 0.8233,
+        "beta": -18.9285,
+        "jpeg_quality": 71
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 14,
+      "file_name": "foto_var_014.jpg",
+      "augmentation": {
+        "angle_deg": 5.197,
+        "blur_kernel": 3,
+        "noise_sigma": 11.2119,
+        "alpha": 1.0612,
+        "beta": -19.8307,
+        "jpeg_quality": 78
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 15,
+      "file_name": "foto_var_015.jpg",
+      "augmentation": {
+        "angle_deg": -5.7511,
+        "blur_kernel": 3,
+        "noise_sigma": 8.1683,
+        "alpha": 0.8865,
+        "beta": 20.4374,
+        "jpeg_quality": 80
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 16,
+      "file_name": "foto_var_016.jpg",
+      "augmentation": {
+        "angle_deg": -10.7312,
+        "blur_kernel": 3,
+        "noise_sigma": 6.5771,
+        "alpha": 1.1645,
+        "beta": 6.3604,
+        "jpeg_quality": 60
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 17,
+      "file_name": "foto_var_017.jpg",
+      "augmentation": {
+        "angle_deg": 4.4386,
+        "blur_kernel": 7,
+        "noise_sigma": 13.8138,
+        "alpha": 0.8501,
+        "beta": -8.167,
+        "jpeg_quality": 96
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 18,
+      "file_name": "foto_var_018.jpg",
+      "augmentation": {
+        "angle_deg": -4.8763,
+        "blur_kernel": 5,
+        "noise_sigma": 15.4871,
+        "alpha": 1.1493,
+        "beta": 19.9439,
+        "jpeg_quality": 59
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 19,
+      "file_name": "foto_var_019.jpg",
+      "augmentation": {
+        "angle_deg": 2.5987,
+        "blur_kernel": 1,
+        "noise_sigma": 11.4226,
+        "alpha": 1.0683,
+        "beta": 15.4872,
+        "jpeg_quality": 63
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 20,
+      "file_name": "foto_var_020.jpg",
+      "augmentation": {
+        "angle_deg": 2.1912,
+        "blur_kernel": 7,
+        "noise_sigma": 9.3048,
+        "alpha": 0.8648,
+        "beta": -11.1167,
+        "jpeg_quality": 83
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 21,
+      "file_name": "foto_var_021.jpg",
+      "augmentation": {
+        "angle_deg": -6.5702,
+        "blur_kernel": 3,
+        "noise_sigma": 1.1542,
+        "alpha": 0.9434,
+        "beta": -28.7007,
+        "jpeg_quality": 82
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 22,
+      "file_name": "foto_var_022.jpg",
+      "augmentation": {
+        "angle_deg": 8.814,
+        "blur_kernel": 5,
+        "noise_sigma": 16.2488,
+        "alpha": 1.1066,
+        "beta": 1.5463,
+        "jpeg_quality": 77
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 23,
+      "file_name": "foto_var_023.jpg",
+      "augmentation": {
+        "angle_deg": 1.3483,
+        "blur_kernel": 7,
+        "noise_sigma": 16.6531,
+        "alpha": 0.9353,
+        "beta": 15.0101,
+        "jpeg_quality": 60
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 24,
+      "file_name": "foto_var_024.jpg",
+      "augmentation": {
+        "angle_deg": 8.1106,
+        "blur_kernel": 7,
+        "noise_sigma": 4.6096,
+        "alpha": 1.0227,
+        "beta": -17.0667,
+        "jpeg_quality": 87
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 25,
+      "file_name": "foto_var_025.jpg",
+      "augmentation": {
+        "angle_deg": -11.4865,
+        "blur_kernel": 7,
+        "noise_sigma": 18.7636,
+        "alpha": 0.8708,
+        "beta": 13.4319,
+        "jpeg_quality": 74
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 26,
+      "file_name": "foto_var_026.jpg",
+      "augmentation": {
+        "angle_deg": 4.4364,
+        "blur_kernel": 1,
+        "noise_sigma": 7.1908,
+        "alpha": 0.8519,
+        "beta": 22.9552,
+        "jpeg_quality": 80
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 27,
+      "file_name": "foto_var_027.jpg",
+      "augmentation": {
+        "angle_deg": -14.9576,
+        "blur_kernel": 3,
+        "noise_sigma": 4.3182,
+        "alpha": 1.1522,
+        "beta": 25.2474,
+        "jpeg_quality": 82
+      },
+      "status": "mismatch",
+      "accuracy": 0.366667,
+      "exact_match": false,
+      "wrong_questions": [
+        {
+          "question_number": 4,
+          "expected": [
+            "C"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 6,
+          "expected": [
+            "D"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 7,
+          "expected": [
+            "C"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 8,
+          "expected": [
+            "B"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 12,
+          "expected": [
+            "C"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 16,
+          "expected": [
+            "A"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 17,
+          "expected": [
+            "A"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 18,
+          "expected": [
+            "B"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 19,
+          "expected": [
+            "C"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 20,
+          "expected": [
+            "C"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 21,
+          "expected": [
+            "D"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 22,
+          "expected": [
+            "A"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 23,
+          "expected": [
+            "A"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 24,
+          "expected": [
+            "B"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 25,
+          "expected": [
+            "C"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 26,
+          "expected": [
+            "D"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 27,
+          "expected": [
+            "D"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 28,
+          "expected": [
+            "D"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 29,
+          "expected": [
+            "C"
+          ],
+          "predicted": []
+        }
+      ],
+      "error_reason": "19 preguntas difieren de la clave"
+    },
+    {
+      "index": 28,
+      "file_name": "foto_var_028.jpg",
+      "augmentation": {
+        "angle_deg": -11.0755,
+        "blur_kernel": 3,
+        "noise_sigma": 1.8997,
+        "alpha": 0.9665,
+        "beta": -21.0872,
+        "jpeg_quality": 66
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 29,
+      "file_name": "foto_var_029.jpg",
+      "augmentation": {
+        "angle_deg": 6.6206,
+        "blur_kernel": 1,
+        "noise_sigma": 5.5457,
+        "alpha": 0.9577,
+        "beta": -14.1449,
+        "jpeg_quality": 81
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 30,
+      "file_name": "foto_var_030.jpg",
+      "augmentation": {
+        "angle_deg": 9.4402,
+        "blur_kernel": 5,
+        "noise_sigma": 0.5838,
+        "alpha": 1.0327,
+        "beta": -13.9237,
+        "jpeg_quality": 94
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 31,
+      "file_name": "foto_var_031.jpg",
+      "augmentation": {
+        "angle_deg": 5.4986,
+        "blur_kernel": 5,
+        "noise_sigma": 18.0233,
+        "alpha": 0.8765,
+        "beta": 17.2002,
+        "jpeg_quality": 86
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 32,
+      "file_name": "foto_var_032.jpg",
+      "augmentation": {
+        "angle_deg": -9.6564,
+        "blur_kernel": 5,
+        "noise_sigma": 1.8623,
+        "alpha": 1.1605,
+        "beta": -6.906,
+        "jpeg_quality": 69
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 33,
+      "file_name": "foto_var_033.jpg",
+      "augmentation": {
+        "angle_deg": 13.0875,
+        "blur_kernel": 7,
+        "noise_sigma": 11.0909,
+        "alpha": 1.082,
+        "beta": 19.3039,
+        "jpeg_quality": 59
+      },
+      "status": "pipeline_error",
+      "accuracy": 0.0,
+      "exact_match": false,
+      "wrong_questions": [],
+      "error_reason": "required marker id '3' for corner 'bottom_right' was not detected"
+    },
+    {
+      "index": 34,
+      "file_name": "foto_var_034.jpg",
+      "augmentation": {
+        "angle_deg": 14.0731,
+        "blur_kernel": 3,
+        "noise_sigma": 4.5305,
+        "alpha": 1.1269,
+        "beta": 2.9951,
+        "jpeg_quality": 78
+      },
+      "status": "pipeline_error",
+      "accuracy": 0.0,
+      "exact_match": false,
+      "wrong_questions": [],
+      "error_reason": "required marker id '3' for corner 'bottom_right' was not detected"
+    },
+    {
+      "index": 35,
+      "file_name": "foto_var_035.jpg",
+      "augmentation": {
+        "angle_deg": -6.2776,
+        "blur_kernel": 1,
+        "noise_sigma": 13.3346,
+        "alpha": 0.8586,
+        "beta": -14.2503,
+        "jpeg_quality": 82
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 36,
+      "file_name": "foto_var_036.jpg",
+      "augmentation": {
+        "angle_deg": 3.6628,
+        "blur_kernel": 7,
+        "noise_sigma": 11.5771,
+        "alpha": 0.9521,
+        "beta": -21.8478,
+        "jpeg_quality": 62
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 37,
+      "file_name": "foto_var_037.jpg",
+      "augmentation": {
+        "angle_deg": 3.836,
+        "blur_kernel": 5,
+        "noise_sigma": 3.4766,
+        "alpha": 1.1274,
+        "beta": 14.7409,
+        "jpeg_quality": 94
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 38,
+      "file_name": "foto_var_038.jpg",
+      "augmentation": {
+        "angle_deg": 4.2342,
+        "blur_kernel": 1,
+        "noise_sigma": 18.2787,
+        "alpha": 1.1458,
+        "beta": 24.7925,
+        "jpeg_quality": 86
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 39,
+      "file_name": "foto_var_039.jpg",
+      "augmentation": {
+        "angle_deg": -4.2208,
+        "blur_kernel": 1,
+        "noise_sigma": 12.4762,
+        "alpha": 1.0735,
+        "beta": -10.5779,
+        "jpeg_quality": 63
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 40,
+      "file_name": "foto_var_040.jpg",
+      "augmentation": {
+        "angle_deg": 13.4472,
+        "blur_kernel": 3,
+        "noise_sigma": 7.4488,
+        "alpha": 0.83,
+        "beta": -14.7514,
+        "jpeg_quality": 68
+      },
+      "status": "pipeline_error",
+      "accuracy": 0.0,
+      "exact_match": false,
+      "wrong_questions": [],
+      "error_reason": "required marker id '3' for corner 'bottom_right' was not detected"
+    },
+    {
+      "index": 41,
+      "file_name": "foto_var_041.jpg",
+      "augmentation": {
+        "angle_deg": 7.4736,
+        "blur_kernel": 7,
+        "noise_sigma": 17.5425,
+        "alpha": 0.8792,
+        "beta": 29.5531,
+        "jpeg_quality": 77
+      },
+      "status": "mismatch",
+      "accuracy": 0.866667,
+      "exact_match": false,
+      "wrong_questions": [
+        {
+          "question_number": 19,
+          "expected": [
+            "C"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 23,
+          "expected": [
+            "A"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 25,
+          "expected": [
+            "C"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 26,
+          "expected": [
+            "D"
+          ],
+          "predicted": []
+        }
+      ],
+      "error_reason": "4 preguntas difieren de la clave"
+    },
+    {
+      "index": 42,
+      "file_name": "foto_var_042.jpg",
+      "augmentation": {
+        "angle_deg": 6.9212,
+        "blur_kernel": 5,
+        "noise_sigma": 10.2282,
+        "alpha": 0.8796,
+        "beta": 1.9953,
+        "jpeg_quality": 66
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 43,
+      "file_name": "foto_var_043.jpg",
+      "augmentation": {
+        "angle_deg": 8.7471,
+        "blur_kernel": 5,
+        "noise_sigma": 2.1129,
+        "alpha": 0.9911,
+        "beta": -26.709,
+        "jpeg_quality": 74
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 44,
+      "file_name": "foto_var_044.jpg",
+      "augmentation": {
+        "angle_deg": -6.0035,
+        "blur_kernel": 3,
+        "noise_sigma": 13.4791,
+        "alpha": 0.9495,
+        "beta": -20.4757,
+        "jpeg_quality": 91
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 45,
+      "file_name": "foto_var_045.jpg",
+      "augmentation": {
+        "angle_deg": -2.6574,
+        "blur_kernel": 1,
+        "noise_sigma": 10.9928,
+        "alpha": 0.9821,
+        "beta": 20.1049,
+        "jpeg_quality": 93
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 46,
+      "file_name": "foto_var_046.jpg",
+      "augmentation": {
+        "angle_deg": 13.9441,
+        "blur_kernel": 5,
+        "noise_sigma": 5.0424,
+        "alpha": 0.8235,
+        "beta": -27.7113,
+        "jpeg_quality": 81
+      },
+      "status": "pipeline_error",
+      "accuracy": 0.0,
+      "exact_match": false,
+      "wrong_questions": [],
+      "error_reason": "required marker id '3' for corner 'bottom_right' was not detected"
+    },
+    {
+      "index": 47,
+      "file_name": "foto_var_047.jpg",
+      "augmentation": {
+        "angle_deg": 5.7931,
+        "blur_kernel": 3,
+        "noise_sigma": 18.1297,
+        "alpha": 0.8273,
+        "beta": -16.9395,
+        "jpeg_quality": 58
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 48,
+      "file_name": "foto_var_048.jpg",
+      "augmentation": {
+        "angle_deg": -5.2798,
+        "blur_kernel": 7,
+        "noise_sigma": 11.6876,
+        "alpha": 0.8606,
+        "beta": -5.9148,
+        "jpeg_quality": 71
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 49,
+      "file_name": "foto_var_049.jpg",
+      "augmentation": {
+        "angle_deg": -9.0702,
+        "blur_kernel": 7,
+        "noise_sigma": 9.93,
+        "alpha": 0.9548,
+        "beta": -5.165,
+        "jpeg_quality": 95
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 50,
+      "file_name": "foto_var_050.jpg",
+      "augmentation": {
+        "angle_deg": 14.8017,
+        "blur_kernel": 1,
+        "noise_sigma": 0.3037,
+        "alpha": 1.1591,
+        "beta": 6.8102,
+        "jpeg_quality": 89
+      },
+      "status": "pipeline_error",
+      "accuracy": 0.0,
+      "exact_match": false,
+      "wrong_questions": [],
+      "error_reason": "required marker id '3' for corner 'bottom_right' was not detected"
+    },
+    {
+      "index": 51,
+      "file_name": "foto_var_051.jpg",
+      "augmentation": {
+        "angle_deg": 11.8741,
+        "blur_kernel": 1,
+        "noise_sigma": 6.8738,
+        "alpha": 0.9466,
+        "beta": 16.1683,
+        "jpeg_quality": 70
+      },
+      "status": "mismatch",
+      "accuracy": 0.4,
+      "exact_match": false,
+      "wrong_questions": [
+        {
+          "question_number": 4,
+          "expected": [
+            "C"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 6,
+          "expected": [
+            "D"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 7,
+          "expected": [
+            "C"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 12,
+          "expected": [
+            "C"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 16,
+          "expected": [
+            "A"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 17,
+          "expected": [
+            "A"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 18,
+          "expected": [
+            "B"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 19,
+          "expected": [
+            "C"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 20,
+          "expected": [
+            "C"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 21,
+          "expected": [
+            "D"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 22,
+          "expected": [
+            "A"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 23,
+          "expected": [
+            "A"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 24,
+          "expected": [
+            "B"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 25,
+          "expected": [
+            "C"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 26,
+          "expected": [
+            "D"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 27,
+          "expected": [
+            "D"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 28,
+          "expected": [
+            "D"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 29,
+          "expected": [
+            "C"
+          ],
+          "predicted": []
+        }
+      ],
+      "error_reason": "18 preguntas difieren de la clave"
+    },
+    {
+      "index": 52,
+      "file_name": "foto_var_052.jpg",
+      "augmentation": {
+        "angle_deg": -14.8918,
+        "blur_kernel": 7,
+        "noise_sigma": 17.9544,
+        "alpha": 0.8362,
+        "beta": 28.0165,
+        "jpeg_quality": 61
+      },
+      "status": "mismatch",
+      "accuracy": 0.133333,
+      "exact_match": false,
+      "wrong_questions": [
+        {
+          "question_number": 2,
+          "expected": [
+            "B"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 3,
+          "expected": [
+            "A"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 4,
+          "expected": [
+            "C"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 5,
+          "expected": [
+            "A"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 6,
+          "expected": [
+            "D"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 7,
+          "expected": [
+            "C"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 8,
+          "expected": [
+            "B"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 9,
+          "expected": [
+            "A"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 10,
+          "expected": [
+            "B"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 11,
+          "expected": [
+            "C"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 12,
+          "expected": [
+            "C"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 13,
+          "expected": [
+            "B"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 16,
+          "expected": [
+            "A"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 17,
+          "expected": [
+            "A"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 18,
+          "expected": [
+            "B"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 19,
+          "expected": [
+            "C"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 20,
+          "expected": [
+            "C"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 21,
+          "expected": [
+            "D"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 22,
+          "expected": [
+            "A"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 23,
+          "expected": [
+            "A"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 24,
+          "expected": [
+            "B"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 25,
+          "expected": [
+            "C"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 26,
+          "expected": [
+            "D"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 27,
+          "expected": [
+            "D"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 28,
+          "expected": [
+            "D"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 29,
+          "expected": [
+            "C"
+          ],
+          "predicted": []
+        }
+      ],
+      "error_reason": "26 preguntas difieren de la clave"
+    },
+    {
+      "index": 53,
+      "file_name": "foto_var_053.jpg",
+      "augmentation": {
+        "angle_deg": 9.7622,
+        "blur_kernel": 1,
+        "noise_sigma": 16.8319,
+        "alpha": 1.097,
+        "beta": 16.5437,
+        "jpeg_quality": 90
+      },
+      "status": "mismatch",
+      "accuracy": 0.866667,
+      "exact_match": false,
+      "wrong_questions": [
+        {
+          "question_number": 16,
+          "expected": [
+            "A"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 23,
+          "expected": [
+            "A"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 25,
+          "expected": [
+            "C"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 26,
+          "expected": [
+            "D"
+          ],
+          "predicted": []
+        }
+      ],
+      "error_reason": "4 preguntas difieren de la clave"
+    },
+    {
+      "index": 54,
+      "file_name": "foto_var_054.jpg",
+      "augmentation": {
+        "angle_deg": 11.6601,
+        "blur_kernel": 3,
+        "noise_sigma": 13.6989,
+        "alpha": 1.1575,
+        "beta": -7.122,
+        "jpeg_quality": 62
+      },
+      "status": "mismatch",
+      "accuracy": 0.9,
+      "exact_match": false,
+      "wrong_questions": [
+        {
+          "question_number": 23,
+          "expected": [
+            "A"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 25,
+          "expected": [
+            "C"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 26,
+          "expected": [
+            "D"
+          ],
+          "predicted": []
+        }
+      ],
+      "error_reason": "3 preguntas difieren de la clave"
+    },
+    {
+      "index": 55,
+      "file_name": "foto_var_055.jpg",
+      "augmentation": {
+        "angle_deg": 11.1439,
+        "blur_kernel": 3,
+        "noise_sigma": 14.3209,
+        "alpha": 1.0577,
+        "beta": -7.2436,
+        "jpeg_quality": 89
+      },
+      "status": "mismatch",
+      "accuracy": 0.933333,
+      "exact_match": false,
+      "wrong_questions": [
+        {
+          "question_number": 25,
+          "expected": [
+            "C"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 26,
+          "expected": [
+            "D"
+          ],
+          "predicted": []
+        }
+      ],
+      "error_reason": "2 preguntas difieren de la clave"
+    },
+    {
+      "index": 56,
+      "file_name": "foto_var_056.jpg",
+      "augmentation": {
+        "angle_deg": 12.5068,
+        "blur_kernel": 1,
+        "noise_sigma": 11.8463,
+        "alpha": 0.9378,
+        "beta": -3.955,
+        "jpeg_quality": 85
+      },
+      "status": "mismatch",
+      "accuracy": 0.9,
+      "exact_match": false,
+      "wrong_questions": [
+        {
+          "question_number": 23,
+          "expected": [
+            "A"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 25,
+          "expected": [
+            "C"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 26,
+          "expected": [
+            "D"
+          ],
+          "predicted": []
+        }
+      ],
+      "error_reason": "3 preguntas difieren de la clave"
+    },
+    {
+      "index": 57,
+      "file_name": "foto_var_057.jpg",
+      "augmentation": {
+        "angle_deg": -13.1065,
+        "blur_kernel": 3,
+        "noise_sigma": 10.3568,
+        "alpha": 0.8672,
+        "beta": -10.5374,
+        "jpeg_quality": 79
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 58,
+      "file_name": "foto_var_058.jpg",
+      "augmentation": {
+        "angle_deg": -8.5258,
+        "blur_kernel": 5,
+        "noise_sigma": 19.1411,
+        "alpha": 1.0772,
+        "beta": -25.2629,
+        "jpeg_quality": 82
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 59,
+      "file_name": "foto_var_059.jpg",
+      "augmentation": {
+        "angle_deg": -5.5299,
+        "blur_kernel": 3,
+        "noise_sigma": 5.35,
+        "alpha": 1.0753,
+        "beta": 9.8878,
+        "jpeg_quality": 63
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 60,
+      "file_name": "foto_var_060.jpg",
+      "augmentation": {
+        "angle_deg": 13.807,
+        "blur_kernel": 3,
+        "noise_sigma": 19.569,
+        "alpha": 0.9543,
+        "beta": 25.6069,
+        "jpeg_quality": 68
+      },
+      "status": "pipeline_error",
+      "accuracy": 0.0,
+      "exact_match": false,
+      "wrong_questions": [],
+      "error_reason": "required marker id '3' for corner 'bottom_right' was not detected"
+    },
+    {
+      "index": 61,
+      "file_name": "foto_var_061.jpg",
+      "augmentation": {
+        "angle_deg": -2.477,
+        "blur_kernel": 7,
+        "noise_sigma": 10.1859,
+        "alpha": 1.1644,
+        "beta": -24.3755,
+        "jpeg_quality": 89
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 62,
+      "file_name": "foto_var_062.jpg",
+      "augmentation": {
+        "angle_deg": -2.2757,
+        "blur_kernel": 3,
+        "noise_sigma": 9.4934,
+        "alpha": 0.914,
+        "beta": -8.2497,
+        "jpeg_quality": 73
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 63,
+      "file_name": "foto_var_063.jpg",
+      "augmentation": {
+        "angle_deg": -4.4654,
+        "blur_kernel": 1,
+        "noise_sigma": 8.0549,
+        "alpha": 1.1794,
+        "beta": 22.071,
+        "jpeg_quality": 72
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 64,
+      "file_name": "foto_var_064.jpg",
+      "augmentation": {
+        "angle_deg": -9.8152,
+        "blur_kernel": 3,
+        "noise_sigma": 14.0241,
+        "alpha": 0.9543,
+        "beta": 4.5964,
+        "jpeg_quality": 80
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 65,
+      "file_name": "foto_var_065.jpg",
+      "augmentation": {
+        "angle_deg": -9.3834,
+        "blur_kernel": 7,
+        "noise_sigma": 0.946,
+        "alpha": 1.109,
+        "beta": 29.6451,
+        "jpeg_quality": 61
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 66,
+      "file_name": "foto_var_066.jpg",
+      "augmentation": {
+        "angle_deg": 1.5977,
+        "blur_kernel": 5,
+        "noise_sigma": 11.9966,
+        "alpha": 0.8664,
+        "beta": 21.2532,
+        "jpeg_quality": 84
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 67,
+      "file_name": "foto_var_067.jpg",
+      "augmentation": {
+        "angle_deg": -8.3465,
+        "blur_kernel": 5,
+        "noise_sigma": 5.4148,
+        "alpha": 1.171,
+        "beta": -1.7466,
+        "jpeg_quality": 64
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 68,
+      "file_name": "foto_var_068.jpg",
+      "augmentation": {
+        "angle_deg": 2.3654,
+        "blur_kernel": 7,
+        "noise_sigma": 1.2235,
+        "alpha": 1.1502,
+        "beta": 5.4867,
+        "jpeg_quality": 76
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 69,
+      "file_name": "foto_var_069.jpg",
+      "augmentation": {
+        "angle_deg": 14.7642,
+        "blur_kernel": 1,
+        "noise_sigma": 18.8292,
+        "alpha": 1.0068,
+        "beta": -15.9476,
+        "jpeg_quality": 64
+      },
+      "status": "pipeline_error",
+      "accuracy": 0.0,
+      "exact_match": false,
+      "wrong_questions": [],
+      "error_reason": "required marker id '3' for corner 'bottom_right' was not detected"
+    },
+    {
+      "index": 70,
+      "file_name": "foto_var_070.jpg",
+      "augmentation": {
+        "angle_deg": 4.1277,
+        "blur_kernel": 1,
+        "noise_sigma": 6.2955,
+        "alpha": 0.945,
+        "beta": 6.945,
+        "jpeg_quality": 71
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 71,
+      "file_name": "foto_var_071.jpg",
+      "augmentation": {
+        "angle_deg": 9.341,
+        "blur_kernel": 7,
+        "noise_sigma": 11.2666,
+        "alpha": 0.9082,
+        "beta": -12.4453,
+        "jpeg_quality": 60
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 72,
+      "file_name": "foto_var_072.jpg",
+      "augmentation": {
+        "angle_deg": -10.6574,
+        "blur_kernel": 7,
+        "noise_sigma": 6.6655,
+        "alpha": 0.8966,
+        "beta": -15.4626,
+        "jpeg_quality": 91
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 73,
+      "file_name": "foto_var_073.jpg",
+      "augmentation": {
+        "angle_deg": -13.4552,
+        "blur_kernel": 3,
+        "noise_sigma": 13.2492,
+        "alpha": 0.9486,
+        "beta": 23.8245,
+        "jpeg_quality": 96
+      },
+      "status": "mismatch",
+      "accuracy": 0.566667,
+      "exact_match": false,
+      "wrong_questions": [
+        {
+          "question_number": 6,
+          "expected": [
+            "D"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 7,
+          "expected": [
+            "C"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 16,
+          "expected": [
+            "A"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 17,
+          "expected": [
+            "A"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 18,
+          "expected": [
+            "B"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 19,
+          "expected": [
+            "C"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 20,
+          "expected": [
+            "C"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 21,
+          "expected": [
+            "D"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 23,
+          "expected": [
+            "A"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 24,
+          "expected": [
+            "B"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 25,
+          "expected": [
+            "C"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 26,
+          "expected": [
+            "D"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 28,
+          "expected": [
+            "D"
+          ],
+          "predicted": []
+        }
+      ],
+      "error_reason": "13 preguntas difieren de la clave"
+    },
+    {
+      "index": 74,
+      "file_name": "foto_var_074.jpg",
+      "augmentation": {
+        "angle_deg": 10.6864,
+        "blur_kernel": 1,
+        "noise_sigma": 9.9495,
+        "alpha": 0.9638,
+        "beta": -11.0463,
+        "jpeg_quality": 71
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 75,
+      "file_name": "foto_var_075.jpg",
+      "augmentation": {
+        "angle_deg": 10.5312,
+        "blur_kernel": 7,
+        "noise_sigma": 19.782,
+        "alpha": 0.8295,
+        "beta": -16.7206,
+        "jpeg_quality": 78
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 76,
+      "file_name": "foto_var_076.jpg",
+      "augmentation": {
+        "angle_deg": 11.7784,
+        "blur_kernel": 7,
+        "noise_sigma": 5.0809,
+        "alpha": 0.8685,
+        "beta": -23.3716,
+        "jpeg_quality": 95
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 77,
+      "file_name": "foto_var_077.jpg",
+      "augmentation": {
+        "angle_deg": 6.2855,
+        "blur_kernel": 1,
+        "noise_sigma": 9.7147,
+        "alpha": 1.1402,
+        "beta": -28.4083,
+        "jpeg_quality": 89
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 78,
+      "file_name": "foto_var_078.jpg",
+      "augmentation": {
+        "angle_deg": 0.5244,
+        "blur_kernel": 5,
+        "noise_sigma": 8.4751,
+        "alpha": 0.9603,
+        "beta": 24.9658,
+        "jpeg_quality": 80
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 79,
+      "file_name": "foto_var_079.jpg",
+      "augmentation": {
+        "angle_deg": 10.3562,
+        "blur_kernel": 3,
+        "noise_sigma": 6.5527,
+        "alpha": 0.9389,
+        "beta": 23.5602,
+        "jpeg_quality": 91
+      },
+      "status": "mismatch",
+      "accuracy": 0.333333,
+      "exact_match": false,
+      "wrong_questions": [
+        {
+          "question_number": 4,
+          "expected": [
+            "C"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 6,
+          "expected": [
+            "D"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 7,
+          "expected": [
+            "C"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 8,
+          "expected": [
+            "B"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 10,
+          "expected": [
+            "B"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 12,
+          "expected": [
+            "C"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 16,
+          "expected": [
+            "A"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 17,
+          "expected": [
+            "A"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 18,
+          "expected": [
+            "B"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 19,
+          "expected": [
+            "C"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 20,
+          "expected": [
+            "C"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 21,
+          "expected": [
+            "D"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 22,
+          "expected": [
+            "A"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 23,
+          "expected": [
+            "A"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 24,
+          "expected": [
+            "B"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 25,
+          "expected": [
+            "C"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 26,
+          "expected": [
+            "D"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 27,
+          "expected": [
+            "D"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 28,
+          "expected": [
+            "D"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 29,
+          "expected": [
+            "C"
+          ],
+          "predicted": []
+        }
+      ],
+      "error_reason": "20 preguntas difieren de la clave"
+    },
+    {
+      "index": 80,
+      "file_name": "foto_var_080.jpg",
+      "augmentation": {
+        "angle_deg": 0.941,
+        "blur_kernel": 3,
+        "noise_sigma": 11.0067,
+        "alpha": 0.8244,
+        "beta": 4.9839,
+        "jpeg_quality": 78
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 81,
+      "file_name": "foto_var_081.jpg",
+      "augmentation": {
+        "angle_deg": -11.1418,
+        "blur_kernel": 3,
+        "noise_sigma": 2.7574,
+        "alpha": 0.8984,
+        "beta": 12.2876,
+        "jpeg_quality": 70
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 82,
+      "file_name": "foto_var_082.jpg",
+      "augmentation": {
+        "angle_deg": -13.7305,
+        "blur_kernel": 3,
+        "noise_sigma": 17.5792,
+        "alpha": 1.0652,
+        "beta": 24.2917,
+        "jpeg_quality": 96
+      },
+      "status": "mismatch",
+      "accuracy": 0.533333,
+      "exact_match": false,
+      "wrong_questions": [
+        {
+          "question_number": 6,
+          "expected": [
+            "D"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 7,
+          "expected": [
+            "C"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 16,
+          "expected": [
+            "A"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 17,
+          "expected": [
+            "A"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 18,
+          "expected": [
+            "B"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 19,
+          "expected": [
+            "C"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 20,
+          "expected": [
+            "C"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 21,
+          "expected": [
+            "D"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 22,
+          "expected": [
+            "A"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 23,
+          "expected": [
+            "A"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 24,
+          "expected": [
+            "B"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 25,
+          "expected": [
+            "C"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 26,
+          "expected": [
+            "D"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 28,
+          "expected": [
+            "D"
+          ],
+          "predicted": []
+        }
+      ],
+      "error_reason": "14 preguntas difieren de la clave"
+    },
+    {
+      "index": 83,
+      "file_name": "foto_var_083.jpg",
+      "augmentation": {
+        "angle_deg": 12.7623,
+        "blur_kernel": 1,
+        "noise_sigma": 10.946,
+        "alpha": 0.9801,
+        "beta": -22.7661,
+        "jpeg_quality": 72
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 84,
+      "file_name": "foto_var_084.jpg",
+      "augmentation": {
+        "angle_deg": -9.8038,
+        "blur_kernel": 3,
+        "noise_sigma": 13.6088,
+        "alpha": 0.8567,
+        "beta": 27.2557,
+        "jpeg_quality": 72
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 85,
+      "file_name": "foto_var_085.jpg",
+      "augmentation": {
+        "angle_deg": -7.99,
+        "blur_kernel": 5,
+        "noise_sigma": 0.201,
+        "alpha": 0.8573,
+        "beta": -19.7617,
+        "jpeg_quality": 96
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 86,
+      "file_name": "foto_var_086.jpg",
+      "augmentation": {
+        "angle_deg": 6.1882,
+        "blur_kernel": 3,
+        "noise_sigma": 5.2226,
+        "alpha": 0.8534,
+        "beta": 27.7639,
+        "jpeg_quality": 71
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 87,
+      "file_name": "foto_var_087.jpg",
+      "augmentation": {
+        "angle_deg": 6.2027,
+        "blur_kernel": 7,
+        "noise_sigma": 12.4478,
+        "alpha": 1.0225,
+        "beta": -17.2994,
+        "jpeg_quality": 85
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 88,
+      "file_name": "foto_var_088.jpg",
+      "augmentation": {
+        "angle_deg": 6.353,
+        "blur_kernel": 1,
+        "noise_sigma": 7.5099,
+        "alpha": 1.0743,
+        "beta": -2.5654,
+        "jpeg_quality": 95
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 89,
+      "file_name": "foto_var_089.jpg",
+      "augmentation": {
+        "angle_deg": 9.1445,
+        "blur_kernel": 3,
+        "noise_sigma": 0.4999,
+        "alpha": 1.0191,
+        "beta": 7.6809,
+        "jpeg_quality": 64
+      },
+      "status": "mismatch",
+      "accuracy": 0.9,
+      "exact_match": false,
+      "wrong_questions": [
+        {
+          "question_number": 23,
+          "expected": [
+            "A"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 25,
+          "expected": [
+            "C"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 26,
+          "expected": [
+            "D"
+          ],
+          "predicted": []
+        }
+      ],
+      "error_reason": "3 preguntas difieren de la clave"
+    },
+    {
+      "index": 90,
+      "file_name": "foto_var_090.jpg",
+      "augmentation": {
+        "angle_deg": -14.401,
+        "blur_kernel": 7,
+        "noise_sigma": 3.8896,
+        "alpha": 0.9534,
+        "beta": 9.0991,
+        "jpeg_quality": 70
+      },
+      "status": "mismatch",
+      "accuracy": 0.533333,
+      "exact_match": false,
+      "wrong_questions": [
+        {
+          "question_number": 6,
+          "expected": [
+            "D"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 7,
+          "expected": [
+            "C"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 16,
+          "expected": [
+            "A"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 17,
+          "expected": [
+            "A"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 18,
+          "expected": [
+            "B"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 19,
+          "expected": [
+            "C"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 20,
+          "expected": [
+            "C"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 21,
+          "expected": [
+            "D"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 23,
+          "expected": [
+            "A"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 24,
+          "expected": [
+            "B"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 25,
+          "expected": [
+            "C"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 26,
+          "expected": [
+            "D"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 27,
+          "expected": [
+            "D"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 28,
+          "expected": [
+            "D"
+          ],
+          "predicted": []
+        }
+      ],
+      "error_reason": "14 preguntas difieren de la clave"
+    },
+    {
+      "index": 91,
+      "file_name": "foto_var_091.jpg",
+      "augmentation": {
+        "angle_deg": 4.4961,
+        "blur_kernel": 5,
+        "noise_sigma": 15.4313,
+        "alpha": 0.861,
+        "beta": 1.1641,
+        "jpeg_quality": 55
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 92,
+      "file_name": "foto_var_092.jpg",
+      "augmentation": {
+        "angle_deg": -9.5928,
+        "blur_kernel": 1,
+        "noise_sigma": 1.3092,
+        "alpha": 0.9738,
+        "beta": -15.1963,
+        "jpeg_quality": 58
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 93,
+      "file_name": "foto_var_093.jpg",
+      "augmentation": {
+        "angle_deg": -13.348,
+        "blur_kernel": 1,
+        "noise_sigma": 6.6048,
+        "alpha": 1.1476,
+        "beta": -18.3588,
+        "jpeg_quality": 85
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 94,
+      "file_name": "foto_var_094.jpg",
+      "augmentation": {
+        "angle_deg": 1.5374,
+        "blur_kernel": 1,
+        "noise_sigma": 7.2715,
+        "alpha": 0.9266,
+        "beta": -19.6849,
+        "jpeg_quality": 85
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 95,
+      "file_name": "foto_var_095.jpg",
+      "augmentation": {
+        "angle_deg": -12.1062,
+        "blur_kernel": 3,
+        "noise_sigma": 11.9188,
+        "alpha": 1.0035,
+        "beta": 28.0688,
+        "jpeg_quality": 89
+      },
+      "status": "mismatch",
+      "accuracy": 0.9,
+      "exact_match": false,
+      "wrong_questions": [
+        {
+          "question_number": 23,
+          "expected": [
+            "A"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 25,
+          "expected": [
+            "C"
+          ],
+          "predicted": []
+        },
+        {
+          "question_number": 26,
+          "expected": [
+            "D"
+          ],
+          "predicted": []
+        }
+      ],
+      "error_reason": "3 preguntas difieren de la clave"
+    },
+    {
+      "index": 96,
+      "file_name": "foto_var_096.jpg",
+      "augmentation": {
+        "angle_deg": 1.9677,
+        "blur_kernel": 1,
+        "noise_sigma": 8.4101,
+        "alpha": 0.8292,
+        "beta": 21.4247,
+        "jpeg_quality": 61
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 97,
+      "file_name": "foto_var_097.jpg",
+      "augmentation": {
+        "angle_deg": -10.5482,
+        "blur_kernel": 7,
+        "noise_sigma": 12.5453,
+        "alpha": 0.8673,
+        "beta": -1.2811,
+        "jpeg_quality": 71
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 98,
+      "file_name": "foto_var_098.jpg",
+      "augmentation": {
+        "angle_deg": 6.9304,
+        "blur_kernel": 7,
+        "noise_sigma": 7.7137,
+        "alpha": 0.9049,
+        "beta": 19.5596,
+        "jpeg_quality": 83
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 99,
+      "file_name": "foto_var_099.jpg",
+      "augmentation": {
+        "angle_deg": -3.4404,
+        "blur_kernel": 7,
+        "noise_sigma": 2.2865,
+        "alpha": 0.8264,
+        "beta": -8.3251,
+        "jpeg_quality": 70
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    },
+    {
+      "index": 100,
+      "file_name": "foto_var_100.jpg",
+      "augmentation": {
+        "angle_deg": 0.4858,
+        "blur_kernel": 7,
+        "noise_sigma": 5.3069,
+        "alpha": 0.9203,
+        "beta": 19.1317,
+        "jpeg_quality": 76
+      },
+      "status": "ok",
+      "accuracy": 1.0,
+      "exact_match": true,
+      "wrong_questions": [],
+      "error_reason": null
+    }
+  ]
+}

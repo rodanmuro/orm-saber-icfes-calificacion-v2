@@ -1,0 +1,2151 @@
+{
+  "template_id": "template_basica_omr",
+  "version": "v1",
+  "timestamp": "2026-02-23T16:29:27.402478+00:00",
+  "quality_summary": {
+    "total_questions": 30,
+    "total_options": 120,
+    "marked_options": 30,
+    "unmarked_options": 90,
+    "ambiguous_options": 0,
+    "ambiguous_questions": 0
+  },
+  "questions": [
+    {
+      "question_number": 1,
+      "group_id": "G01",
+      "row": 0,
+      "options": [
+        {
+          "bubble_id": "G01_00_00",
+          "label": "A",
+          "state": "marcada",
+          "fill_ratio": 1.0
+        },
+        {
+          "bubble_id": "G01_00_01",
+          "label": "B",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G01_00_02",
+          "label": "C",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G01_00_03",
+          "label": "D",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        }
+      ],
+      "marked_options": [
+        "A"
+      ],
+      "ambiguous_options": []
+    },
+    {
+      "question_number": 2,
+      "group_id": "G01",
+      "row": 1,
+      "options": [
+        {
+          "bubble_id": "G01_01_00",
+          "label": "A",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G01_01_01",
+          "label": "B",
+          "state": "marcada",
+          "fill_ratio": 1.0
+        },
+        {
+          "bubble_id": "G01_01_02",
+          "label": "C",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G01_01_03",
+          "label": "D",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        }
+      ],
+      "marked_options": [
+        "B"
+      ],
+      "ambiguous_options": []
+    },
+    {
+      "question_number": 3,
+      "group_id": "G01",
+      "row": 2,
+      "options": [
+        {
+          "bubble_id": "G01_02_00",
+          "label": "A",
+          "state": "marcada",
+          "fill_ratio": 1.0
+        },
+        {
+          "bubble_id": "G01_02_01",
+          "label": "B",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G01_02_02",
+          "label": "C",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G01_02_03",
+          "label": "D",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        }
+      ],
+      "marked_options": [
+        "A"
+      ],
+      "ambiguous_options": []
+    },
+    {
+      "question_number": 4,
+      "group_id": "G01",
+      "row": 3,
+      "options": [
+        {
+          "bubble_id": "G01_03_00",
+          "label": "A",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G01_03_01",
+          "label": "B",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G01_03_02",
+          "label": "C",
+          "state": "marcada",
+          "fill_ratio": 1.0
+        },
+        {
+          "bubble_id": "G01_03_03",
+          "label": "D",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        }
+      ],
+      "marked_options": [
+        "C"
+      ],
+      "ambiguous_options": []
+    },
+    {
+      "question_number": 5,
+      "group_id": "G01",
+      "row": 4,
+      "options": [
+        {
+          "bubble_id": "G01_04_00",
+          "label": "A",
+          "state": "marcada",
+          "fill_ratio": 1.0
+        },
+        {
+          "bubble_id": "G01_04_01",
+          "label": "B",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G01_04_02",
+          "label": "C",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G01_04_03",
+          "label": "D",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        }
+      ],
+      "marked_options": [
+        "A"
+      ],
+      "ambiguous_options": []
+    },
+    {
+      "question_number": 6,
+      "group_id": "G01",
+      "row": 5,
+      "options": [
+        {
+          "bubble_id": "G01_05_00",
+          "label": "A",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G01_05_01",
+          "label": "B",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G01_05_02",
+          "label": "C",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G01_05_03",
+          "label": "D",
+          "state": "marcada",
+          "fill_ratio": 1.0
+        }
+      ],
+      "marked_options": [
+        "D"
+      ],
+      "ambiguous_options": []
+    },
+    {
+      "question_number": 7,
+      "group_id": "G01",
+      "row": 6,
+      "options": [
+        {
+          "bubble_id": "G01_06_00",
+          "label": "A",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G01_06_01",
+          "label": "B",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G01_06_02",
+          "label": "C",
+          "state": "marcada",
+          "fill_ratio": 1.0
+        },
+        {
+          "bubble_id": "G01_06_03",
+          "label": "D",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        }
+      ],
+      "marked_options": [
+        "C"
+      ],
+      "ambiguous_options": []
+    },
+    {
+      "question_number": 8,
+      "group_id": "G01",
+      "row": 7,
+      "options": [
+        {
+          "bubble_id": "G01_07_00",
+          "label": "A",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G01_07_01",
+          "label": "B",
+          "state": "marcada",
+          "fill_ratio": 1.0
+        },
+        {
+          "bubble_id": "G01_07_02",
+          "label": "C",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G01_07_03",
+          "label": "D",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        }
+      ],
+      "marked_options": [
+        "B"
+      ],
+      "ambiguous_options": []
+    },
+    {
+      "question_number": 9,
+      "group_id": "G01",
+      "row": 8,
+      "options": [
+        {
+          "bubble_id": "G01_08_00",
+          "label": "A",
+          "state": "marcada",
+          "fill_ratio": 1.0
+        },
+        {
+          "bubble_id": "G01_08_01",
+          "label": "B",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G01_08_02",
+          "label": "C",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G01_08_03",
+          "label": "D",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        }
+      ],
+      "marked_options": [
+        "A"
+      ],
+      "ambiguous_options": []
+    },
+    {
+      "question_number": 10,
+      "group_id": "G01",
+      "row": 9,
+      "options": [
+        {
+          "bubble_id": "G01_09_00",
+          "label": "A",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G01_09_01",
+          "label": "B",
+          "state": "marcada",
+          "fill_ratio": 1.0
+        },
+        {
+          "bubble_id": "G01_09_02",
+          "label": "C",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G01_09_03",
+          "label": "D",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        }
+      ],
+      "marked_options": [
+        "B"
+      ],
+      "ambiguous_options": []
+    },
+    {
+      "question_number": 11,
+      "group_id": "G01",
+      "row": 10,
+      "options": [
+        {
+          "bubble_id": "G01_10_00",
+          "label": "A",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G01_10_01",
+          "label": "B",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G01_10_02",
+          "label": "C",
+          "state": "marcada",
+          "fill_ratio": 1.0
+        },
+        {
+          "bubble_id": "G01_10_03",
+          "label": "D",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        }
+      ],
+      "marked_options": [
+        "C"
+      ],
+      "ambiguous_options": []
+    },
+    {
+      "question_number": 12,
+      "group_id": "G01",
+      "row": 11,
+      "options": [
+        {
+          "bubble_id": "G01_11_00",
+          "label": "A",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G01_11_01",
+          "label": "B",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G01_11_02",
+          "label": "C",
+          "state": "marcada",
+          "fill_ratio": 1.0
+        },
+        {
+          "bubble_id": "G01_11_03",
+          "label": "D",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        }
+      ],
+      "marked_options": [
+        "C"
+      ],
+      "ambiguous_options": []
+    },
+    {
+      "question_number": 13,
+      "group_id": "G01",
+      "row": 12,
+      "options": [
+        {
+          "bubble_id": "G01_12_00",
+          "label": "A",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G01_12_01",
+          "label": "B",
+          "state": "marcada",
+          "fill_ratio": 1.0
+        },
+        {
+          "bubble_id": "G01_12_02",
+          "label": "C",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G01_12_03",
+          "label": "D",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        }
+      ],
+      "marked_options": [
+        "B"
+      ],
+      "ambiguous_options": []
+    },
+    {
+      "question_number": 14,
+      "group_id": "G01",
+      "row": 13,
+      "options": [
+        {
+          "bubble_id": "G01_13_00",
+          "label": "A",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G01_13_01",
+          "label": "B",
+          "state": "marcada",
+          "fill_ratio": 1.0
+        },
+        {
+          "bubble_id": "G01_13_02",
+          "label": "C",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G01_13_03",
+          "label": "D",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        }
+      ],
+      "marked_options": [
+        "B"
+      ],
+      "ambiguous_options": []
+    },
+    {
+      "question_number": 15,
+      "group_id": "G01",
+      "row": 14,
+      "options": [
+        {
+          "bubble_id": "G01_14_00",
+          "label": "A",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G01_14_01",
+          "label": "B",
+          "state": "marcada",
+          "fill_ratio": 1.0
+        },
+        {
+          "bubble_id": "G01_14_02",
+          "label": "C",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G01_14_03",
+          "label": "D",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        }
+      ],
+      "marked_options": [
+        "B"
+      ],
+      "ambiguous_options": []
+    },
+    {
+      "question_number": 16,
+      "group_id": "G02",
+      "row": 0,
+      "options": [
+        {
+          "bubble_id": "G02_00_00",
+          "label": "A",
+          "state": "marcada",
+          "fill_ratio": 1.0
+        },
+        {
+          "bubble_id": "G02_00_01",
+          "label": "B",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G02_00_02",
+          "label": "C",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G02_00_03",
+          "label": "D",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        }
+      ],
+      "marked_options": [
+        "A"
+      ],
+      "ambiguous_options": []
+    },
+    {
+      "question_number": 17,
+      "group_id": "G02",
+      "row": 1,
+      "options": [
+        {
+          "bubble_id": "G02_01_00",
+          "label": "A",
+          "state": "marcada",
+          "fill_ratio": 1.0
+        },
+        {
+          "bubble_id": "G02_01_01",
+          "label": "B",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G02_01_02",
+          "label": "C",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G02_01_03",
+          "label": "D",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        }
+      ],
+      "marked_options": [
+        "A"
+      ],
+      "ambiguous_options": []
+    },
+    {
+      "question_number": 18,
+      "group_id": "G02",
+      "row": 2,
+      "options": [
+        {
+          "bubble_id": "G02_02_00",
+          "label": "A",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G02_02_01",
+          "label": "B",
+          "state": "marcada",
+          "fill_ratio": 1.0
+        },
+        {
+          "bubble_id": "G02_02_02",
+          "label": "C",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G02_02_03",
+          "label": "D",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        }
+      ],
+      "marked_options": [
+        "B"
+      ],
+      "ambiguous_options": []
+    },
+    {
+      "question_number": 19,
+      "group_id": "G02",
+      "row": 3,
+      "options": [
+        {
+          "bubble_id": "G02_03_00",
+          "label": "A",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G02_03_01",
+          "label": "B",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G02_03_02",
+          "label": "C",
+          "state": "marcada",
+          "fill_ratio": 1.0
+        },
+        {
+          "bubble_id": "G02_03_03",
+          "label": "D",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        }
+      ],
+      "marked_options": [
+        "C"
+      ],
+      "ambiguous_options": []
+    },
+    {
+      "question_number": 20,
+      "group_id": "G02",
+      "row": 4,
+      "options": [
+        {
+          "bubble_id": "G02_04_00",
+          "label": "A",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G02_04_01",
+          "label": "B",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G02_04_02",
+          "label": "C",
+          "state": "marcada",
+          "fill_ratio": 1.0
+        },
+        {
+          "bubble_id": "G02_04_03",
+          "label": "D",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        }
+      ],
+      "marked_options": [
+        "C"
+      ],
+      "ambiguous_options": []
+    },
+    {
+      "question_number": 21,
+      "group_id": "G02",
+      "row": 5,
+      "options": [
+        {
+          "bubble_id": "G02_05_00",
+          "label": "A",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G02_05_01",
+          "label": "B",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G02_05_02",
+          "label": "C",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G02_05_03",
+          "label": "D",
+          "state": "marcada",
+          "fill_ratio": 1.0
+        }
+      ],
+      "marked_options": [
+        "D"
+      ],
+      "ambiguous_options": []
+    },
+    {
+      "question_number": 22,
+      "group_id": "G02",
+      "row": 6,
+      "options": [
+        {
+          "bubble_id": "G02_06_00",
+          "label": "A",
+          "state": "marcada",
+          "fill_ratio": 1.0
+        },
+        {
+          "bubble_id": "G02_06_01",
+          "label": "B",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G02_06_02",
+          "label": "C",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G02_06_03",
+          "label": "D",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        }
+      ],
+      "marked_options": [
+        "A"
+      ],
+      "ambiguous_options": []
+    },
+    {
+      "question_number": 23,
+      "group_id": "G02",
+      "row": 7,
+      "options": [
+        {
+          "bubble_id": "G02_07_00",
+          "label": "A",
+          "state": "marcada",
+          "fill_ratio": 0.991843
+        },
+        {
+          "bubble_id": "G02_07_01",
+          "label": "B",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G02_07_02",
+          "label": "C",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G02_07_03",
+          "label": "D",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        }
+      ],
+      "marked_options": [
+        "A"
+      ],
+      "ambiguous_options": []
+    },
+    {
+      "question_number": 24,
+      "group_id": "G02",
+      "row": 8,
+      "options": [
+        {
+          "bubble_id": "G02_08_00",
+          "label": "A",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G02_08_01",
+          "label": "B",
+          "state": "marcada",
+          "fill_ratio": 1.0
+        },
+        {
+          "bubble_id": "G02_08_02",
+          "label": "C",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G02_08_03",
+          "label": "D",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        }
+      ],
+      "marked_options": [
+        "B"
+      ],
+      "ambiguous_options": []
+    },
+    {
+      "question_number": 25,
+      "group_id": "G02",
+      "row": 9,
+      "options": [
+        {
+          "bubble_id": "G02_09_00",
+          "label": "A",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G02_09_01",
+          "label": "B",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G02_09_02",
+          "label": "C",
+          "state": "marcada",
+          "fill_ratio": 0.970636
+        },
+        {
+          "bubble_id": "G02_09_03",
+          "label": "D",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        }
+      ],
+      "marked_options": [
+        "C"
+      ],
+      "ambiguous_options": []
+    },
+    {
+      "question_number": 26,
+      "group_id": "G02",
+      "row": 10,
+      "options": [
+        {
+          "bubble_id": "G02_10_00",
+          "label": "A",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G02_10_01",
+          "label": "B",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G02_10_02",
+          "label": "C",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G02_10_03",
+          "label": "D",
+          "state": "marcada",
+          "fill_ratio": 1.0
+        }
+      ],
+      "marked_options": [
+        "D"
+      ],
+      "ambiguous_options": []
+    },
+    {
+      "question_number": 27,
+      "group_id": "G02",
+      "row": 11,
+      "options": [
+        {
+          "bubble_id": "G02_11_00",
+          "label": "A",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G02_11_01",
+          "label": "B",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G02_11_02",
+          "label": "C",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G02_11_03",
+          "label": "D",
+          "state": "marcada",
+          "fill_ratio": 1.0
+        }
+      ],
+      "marked_options": [
+        "D"
+      ],
+      "ambiguous_options": []
+    },
+    {
+      "question_number": 28,
+      "group_id": "G02",
+      "row": 12,
+      "options": [
+        {
+          "bubble_id": "G02_12_00",
+          "label": "A",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G02_12_01",
+          "label": "B",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G02_12_02",
+          "label": "C",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G02_12_03",
+          "label": "D",
+          "state": "marcada",
+          "fill_ratio": 1.0
+        }
+      ],
+      "marked_options": [
+        "D"
+      ],
+      "ambiguous_options": []
+    },
+    {
+      "question_number": 29,
+      "group_id": "G02",
+      "row": 13,
+      "options": [
+        {
+          "bubble_id": "G02_13_00",
+          "label": "A",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G02_13_01",
+          "label": "B",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G02_13_02",
+          "label": "C",
+          "state": "marcada",
+          "fill_ratio": 1.0
+        },
+        {
+          "bubble_id": "G02_13_03",
+          "label": "D",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        }
+      ],
+      "marked_options": [
+        "C"
+      ],
+      "ambiguous_options": []
+    },
+    {
+      "question_number": 30,
+      "group_id": "G02",
+      "row": 14,
+      "options": [
+        {
+          "bubble_id": "G02_14_00",
+          "label": "A",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G02_14_01",
+          "label": "B",
+          "state": "marcada",
+          "fill_ratio": 1.0
+        },
+        {
+          "bubble_id": "G02_14_02",
+          "label": "C",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        },
+        {
+          "bubble_id": "G02_14_03",
+          "label": "D",
+          "state": "no_marcada",
+          "fill_ratio": 0.0
+        }
+      ],
+      "marked_options": [
+        "B"
+      ],
+      "ambiguous_options": []
+    }
+  ],
+  "thresholds": {
+    "marked": 0.33,
+    "unmarked": 0.18
+  },
+  "bubbles": [
+    {
+      "bubble_id": "G01_00_00",
+      "group_id": "G01",
+      "row": 0,
+      "col": 0,
+      "label": "A",
+      "fill_ratio": 1.0,
+      "state": "marcada"
+    },
+    {
+      "bubble_id": "G01_00_01",
+      "group_id": "G01",
+      "row": 0,
+      "col": 1,
+      "label": "B",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G01_00_02",
+      "group_id": "G01",
+      "row": 0,
+      "col": 2,
+      "label": "C",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G01_00_03",
+      "group_id": "G01",
+      "row": 0,
+      "col": 3,
+      "label": "D",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G01_01_00",
+      "group_id": "G01",
+      "row": 1,
+      "col": 0,
+      "label": "A",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G01_01_01",
+      "group_id": "G01",
+      "row": 1,
+      "col": 1,
+      "label": "B",
+      "fill_ratio": 1.0,
+      "state": "marcada"
+    },
+    {
+      "bubble_id": "G01_01_02",
+      "group_id": "G01",
+      "row": 1,
+      "col": 2,
+      "label": "C",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G01_01_03",
+      "group_id": "G01",
+      "row": 1,
+      "col": 3,
+      "label": "D",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G01_02_00",
+      "group_id": "G01",
+      "row": 2,
+      "col": 0,
+      "label": "A",
+      "fill_ratio": 1.0,
+      "state": "marcada"
+    },
+    {
+      "bubble_id": "G01_02_01",
+      "group_id": "G01",
+      "row": 2,
+      "col": 1,
+      "label": "B",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G01_02_02",
+      "group_id": "G01",
+      "row": 2,
+      "col": 2,
+      "label": "C",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G01_02_03",
+      "group_id": "G01",
+      "row": 2,
+      "col": 3,
+      "label": "D",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G01_03_00",
+      "group_id": "G01",
+      "row": 3,
+      "col": 0,
+      "label": "A",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G01_03_01",
+      "group_id": "G01",
+      "row": 3,
+      "col": 1,
+      "label": "B",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G01_03_02",
+      "group_id": "G01",
+      "row": 3,
+      "col": 2,
+      "label": "C",
+      "fill_ratio": 1.0,
+      "state": "marcada"
+    },
+    {
+      "bubble_id": "G01_03_03",
+      "group_id": "G01",
+      "row": 3,
+      "col": 3,
+      "label": "D",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G01_04_00",
+      "group_id": "G01",
+      "row": 4,
+      "col": 0,
+      "label": "A",
+      "fill_ratio": 1.0,
+      "state": "marcada"
+    },
+    {
+      "bubble_id": "G01_04_01",
+      "group_id": "G01",
+      "row": 4,
+      "col": 1,
+      "label": "B",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G01_04_02",
+      "group_id": "G01",
+      "row": 4,
+      "col": 2,
+      "label": "C",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G01_04_03",
+      "group_id": "G01",
+      "row": 4,
+      "col": 3,
+      "label": "D",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G01_05_00",
+      "group_id": "G01",
+      "row": 5,
+      "col": 0,
+      "label": "A",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G01_05_01",
+      "group_id": "G01",
+      "row": 5,
+      "col": 1,
+      "label": "B",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G01_05_02",
+      "group_id": "G01",
+      "row": 5,
+      "col": 2,
+      "label": "C",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G01_05_03",
+      "group_id": "G01",
+      "row": 5,
+      "col": 3,
+      "label": "D",
+      "fill_ratio": 1.0,
+      "state": "marcada"
+    },
+    {
+      "bubble_id": "G01_06_00",
+      "group_id": "G01",
+      "row": 6,
+      "col": 0,
+      "label": "A",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G01_06_01",
+      "group_id": "G01",
+      "row": 6,
+      "col": 1,
+      "label": "B",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G01_06_02",
+      "group_id": "G01",
+      "row": 6,
+      "col": 2,
+      "label": "C",
+      "fill_ratio": 1.0,
+      "state": "marcada"
+    },
+    {
+      "bubble_id": "G01_06_03",
+      "group_id": "G01",
+      "row": 6,
+      "col": 3,
+      "label": "D",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G01_07_00",
+      "group_id": "G01",
+      "row": 7,
+      "col": 0,
+      "label": "A",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G01_07_01",
+      "group_id": "G01",
+      "row": 7,
+      "col": 1,
+      "label": "B",
+      "fill_ratio": 1.0,
+      "state": "marcada"
+    },
+    {
+      "bubble_id": "G01_07_02",
+      "group_id": "G01",
+      "row": 7,
+      "col": 2,
+      "label": "C",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G01_07_03",
+      "group_id": "G01",
+      "row": 7,
+      "col": 3,
+      "label": "D",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G01_08_00",
+      "group_id": "G01",
+      "row": 8,
+      "col": 0,
+      "label": "A",
+      "fill_ratio": 1.0,
+      "state": "marcada"
+    },
+    {
+      "bubble_id": "G01_08_01",
+      "group_id": "G01",
+      "row": 8,
+      "col": 1,
+      "label": "B",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G01_08_02",
+      "group_id": "G01",
+      "row": 8,
+      "col": 2,
+      "label": "C",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G01_08_03",
+      "group_id": "G01",
+      "row": 8,
+      "col": 3,
+      "label": "D",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G01_09_00",
+      "group_id": "G01",
+      "row": 9,
+      "col": 0,
+      "label": "A",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G01_09_01",
+      "group_id": "G01",
+      "row": 9,
+      "col": 1,
+      "label": "B",
+      "fill_ratio": 1.0,
+      "state": "marcada"
+    },
+    {
+      "bubble_id": "G01_09_02",
+      "group_id": "G01",
+      "row": 9,
+      "col": 2,
+      "label": "C",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G01_09_03",
+      "group_id": "G01",
+      "row": 9,
+      "col": 3,
+      "label": "D",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G01_10_00",
+      "group_id": "G01",
+      "row": 10,
+      "col": 0,
+      "label": "A",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G01_10_01",
+      "group_id": "G01",
+      "row": 10,
+      "col": 1,
+      "label": "B",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G01_10_02",
+      "group_id": "G01",
+      "row": 10,
+      "col": 2,
+      "label": "C",
+      "fill_ratio": 1.0,
+      "state": "marcada"
+    },
+    {
+      "bubble_id": "G01_10_03",
+      "group_id": "G01",
+      "row": 10,
+      "col": 3,
+      "label": "D",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G01_11_00",
+      "group_id": "G01",
+      "row": 11,
+      "col": 0,
+      "label": "A",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G01_11_01",
+      "group_id": "G01",
+      "row": 11,
+      "col": 1,
+      "label": "B",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G01_11_02",
+      "group_id": "G01",
+      "row": 11,
+      "col": 2,
+      "label": "C",
+      "fill_ratio": 1.0,
+      "state": "marcada"
+    },
+    {
+      "bubble_id": "G01_11_03",
+      "group_id": "G01",
+      "row": 11,
+      "col": 3,
+      "label": "D",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G01_12_00",
+      "group_id": "G01",
+      "row": 12,
+      "col": 0,
+      "label": "A",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G01_12_01",
+      "group_id": "G01",
+      "row": 12,
+      "col": 1,
+      "label": "B",
+      "fill_ratio": 1.0,
+      "state": "marcada"
+    },
+    {
+      "bubble_id": "G01_12_02",
+      "group_id": "G01",
+      "row": 12,
+      "col": 2,
+      "label": "C",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G01_12_03",
+      "group_id": "G01",
+      "row": 12,
+      "col": 3,
+      "label": "D",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G01_13_00",
+      "group_id": "G01",
+      "row": 13,
+      "col": 0,
+      "label": "A",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G01_13_01",
+      "group_id": "G01",
+      "row": 13,
+      "col": 1,
+      "label": "B",
+      "fill_ratio": 1.0,
+      "state": "marcada"
+    },
+    {
+      "bubble_id": "G01_13_02",
+      "group_id": "G01",
+      "row": 13,
+      "col": 2,
+      "label": "C",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G01_13_03",
+      "group_id": "G01",
+      "row": 13,
+      "col": 3,
+      "label": "D",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G01_14_00",
+      "group_id": "G01",
+      "row": 14,
+      "col": 0,
+      "label": "A",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G01_14_01",
+      "group_id": "G01",
+      "row": 14,
+      "col": 1,
+      "label": "B",
+      "fill_ratio": 1.0,
+      "state": "marcada"
+    },
+    {
+      "bubble_id": "G01_14_02",
+      "group_id": "G01",
+      "row": 14,
+      "col": 2,
+      "label": "C",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G01_14_03",
+      "group_id": "G01",
+      "row": 14,
+      "col": 3,
+      "label": "D",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G02_00_00",
+      "group_id": "G02",
+      "row": 0,
+      "col": 0,
+      "label": "A",
+      "fill_ratio": 1.0,
+      "state": "marcada"
+    },
+    {
+      "bubble_id": "G02_00_01",
+      "group_id": "G02",
+      "row": 0,
+      "col": 1,
+      "label": "B",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G02_00_02",
+      "group_id": "G02",
+      "row": 0,
+      "col": 2,
+      "label": "C",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G02_00_03",
+      "group_id": "G02",
+      "row": 0,
+      "col": 3,
+      "label": "D",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G02_01_00",
+      "group_id": "G02",
+      "row": 1,
+      "col": 0,
+      "label": "A",
+      "fill_ratio": 1.0,
+      "state": "marcada"
+    },
+    {
+      "bubble_id": "G02_01_01",
+      "group_id": "G02",
+      "row": 1,
+      "col": 1,
+      "label": "B",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G02_01_02",
+      "group_id": "G02",
+      "row": 1,
+      "col": 2,
+      "label": "C",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G02_01_03",
+      "group_id": "G02",
+      "row": 1,
+      "col": 3,
+      "label": "D",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G02_02_00",
+      "group_id": "G02",
+      "row": 2,
+      "col": 0,
+      "label": "A",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G02_02_01",
+      "group_id": "G02",
+      "row": 2,
+      "col": 1,
+      "label": "B",
+      "fill_ratio": 1.0,
+      "state": "marcada"
+    },
+    {
+      "bubble_id": "G02_02_02",
+      "group_id": "G02",
+      "row": 2,
+      "col": 2,
+      "label": "C",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G02_02_03",
+      "group_id": "G02",
+      "row": 2,
+      "col": 3,
+      "label": "D",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G02_03_00",
+      "group_id": "G02",
+      "row": 3,
+      "col": 0,
+      "label": "A",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G02_03_01",
+      "group_id": "G02",
+      "row": 3,
+      "col": 1,
+      "label": "B",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G02_03_02",
+      "group_id": "G02",
+      "row": 3,
+      "col": 2,
+      "label": "C",
+      "fill_ratio": 1.0,
+      "state": "marcada"
+    },
+    {
+      "bubble_id": "G02_03_03",
+      "group_id": "G02",
+      "row": 3,
+      "col": 3,
+      "label": "D",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G02_04_00",
+      "group_id": "G02",
+      "row": 4,
+      "col": 0,
+      "label": "A",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G02_04_01",
+      "group_id": "G02",
+      "row": 4,
+      "col": 1,
+      "label": "B",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G02_04_02",
+      "group_id": "G02",
+      "row": 4,
+      "col": 2,
+      "label": "C",
+      "fill_ratio": 1.0,
+      "state": "marcada"
+    },
+    {
+      "bubble_id": "G02_04_03",
+      "group_id": "G02",
+      "row": 4,
+      "col": 3,
+      "label": "D",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G02_05_00",
+      "group_id": "G02",
+      "row": 5,
+      "col": 0,
+      "label": "A",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G02_05_01",
+      "group_id": "G02",
+      "row": 5,
+      "col": 1,
+      "label": "B",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G02_05_02",
+      "group_id": "G02",
+      "row": 5,
+      "col": 2,
+      "label": "C",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G02_05_03",
+      "group_id": "G02",
+      "row": 5,
+      "col": 3,
+      "label": "D",
+      "fill_ratio": 1.0,
+      "state": "marcada"
+    },
+    {
+      "bubble_id": "G02_06_00",
+      "group_id": "G02",
+      "row": 6,
+      "col": 0,
+      "label": "A",
+      "fill_ratio": 1.0,
+      "state": "marcada"
+    },
+    {
+      "bubble_id": "G02_06_01",
+      "group_id": "G02",
+      "row": 6,
+      "col": 1,
+      "label": "B",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G02_06_02",
+      "group_id": "G02",
+      "row": 6,
+      "col": 2,
+      "label": "C",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G02_06_03",
+      "group_id": "G02",
+      "row": 6,
+      "col": 3,
+      "label": "D",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G02_07_00",
+      "group_id": "G02",
+      "row": 7,
+      "col": 0,
+      "label": "A",
+      "fill_ratio": 0.9918433931484503,
+      "state": "marcada"
+    },
+    {
+      "bubble_id": "G02_07_01",
+      "group_id": "G02",
+      "row": 7,
+      "col": 1,
+      "label": "B",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G02_07_02",
+      "group_id": "G02",
+      "row": 7,
+      "col": 2,
+      "label": "C",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G02_07_03",
+      "group_id": "G02",
+      "row": 7,
+      "col": 3,
+      "label": "D",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G02_08_00",
+      "group_id": "G02",
+      "row": 8,
+      "col": 0,
+      "label": "A",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G02_08_01",
+      "group_id": "G02",
+      "row": 8,
+      "col": 1,
+      "label": "B",
+      "fill_ratio": 1.0,
+      "state": "marcada"
+    },
+    {
+      "bubble_id": "G02_08_02",
+      "group_id": "G02",
+      "row": 8,
+      "col": 2,
+      "label": "C",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G02_08_03",
+      "group_id": "G02",
+      "row": 8,
+      "col": 3,
+      "label": "D",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G02_09_00",
+      "group_id": "G02",
+      "row": 9,
+      "col": 0,
+      "label": "A",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G02_09_01",
+      "group_id": "G02",
+      "row": 9,
+      "col": 1,
+      "label": "B",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G02_09_02",
+      "group_id": "G02",
+      "row": 9,
+      "col": 2,
+      "label": "C",
+      "fill_ratio": 0.9706362153344209,
+      "state": "marcada"
+    },
+    {
+      "bubble_id": "G02_09_03",
+      "group_id": "G02",
+      "row": 9,
+      "col": 3,
+      "label": "D",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G02_10_00",
+      "group_id": "G02",
+      "row": 10,
+      "col": 0,
+      "label": "A",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G02_10_01",
+      "group_id": "G02",
+      "row": 10,
+      "col": 1,
+      "label": "B",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G02_10_02",
+      "group_id": "G02",
+      "row": 10,
+      "col": 2,
+      "label": "C",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G02_10_03",
+      "group_id": "G02",
+      "row": 10,
+      "col": 3,
+      "label": "D",
+      "fill_ratio": 1.0,
+      "state": "marcada"
+    },
+    {
+      "bubble_id": "G02_11_00",
+      "group_id": "G02",
+      "row": 11,
+      "col": 0,
+      "label": "A",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G02_11_01",
+      "group_id": "G02",
+      "row": 11,
+      "col": 1,
+      "label": "B",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G02_11_02",
+      "group_id": "G02",
+      "row": 11,
+      "col": 2,
+      "label": "C",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G02_11_03",
+      "group_id": "G02",
+      "row": 11,
+      "col": 3,
+      "label": "D",
+      "fill_ratio": 1.0,
+      "state": "marcada"
+    },
+    {
+      "bubble_id": "G02_12_00",
+      "group_id": "G02",
+      "row": 12,
+      "col": 0,
+      "label": "A",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G02_12_01",
+      "group_id": "G02",
+      "row": 12,
+      "col": 1,
+      "label": "B",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G02_12_02",
+      "group_id": "G02",
+      "row": 12,
+      "col": 2,
+      "label": "C",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G02_12_03",
+      "group_id": "G02",
+      "row": 12,
+      "col": 3,
+      "label": "D",
+      "fill_ratio": 1.0,
+      "state": "marcada"
+    },
+    {
+      "bubble_id": "G02_13_00",
+      "group_id": "G02",
+      "row": 13,
+      "col": 0,
+      "label": "A",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G02_13_01",
+      "group_id": "G02",
+      "row": 13,
+      "col": 1,
+      "label": "B",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G02_13_02",
+      "group_id": "G02",
+      "row": 13,
+      "col": 2,
+      "label": "C",
+      "fill_ratio": 1.0,
+      "state": "marcada"
+    },
+    {
+      "bubble_id": "G02_13_03",
+      "group_id": "G02",
+      "row": 13,
+      "col": 3,
+      "label": "D",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G02_14_00",
+      "group_id": "G02",
+      "row": 14,
+      "col": 0,
+      "label": "A",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G02_14_01",
+      "group_id": "G02",
+      "row": 14,
+      "col": 1,
+      "label": "B",
+      "fill_ratio": 1.0,
+      "state": "marcada"
+    },
+    {
+      "bubble_id": "G02_14_02",
+      "group_id": "G02",
+      "row": 14,
+      "col": 2,
+      "label": "C",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    },
+    {
+      "bubble_id": "G02_14_03",
+      "group_id": "G02",
+      "row": 14,
+      "col": 3,
+      "label": "D",
+      "fill_ratio": 0.0,
+      "state": "no_marcada"
+    }
+  ]
+}
