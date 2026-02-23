@@ -70,3 +70,18 @@ python -m app.modules.template_generator.scripts.generate_template \
   --config src/backend/config/template.base.json \
   --output-dir src/backend/output
 ```
+
+## Generacion reproducible multi-configuracion
+Comando unico para generar y validar varias configuraciones:
+
+```bash
+python -m app.modules.template_generator.scripts.generate_templates_batch \
+  --configs \
+    src/backend/config/template.base.json \
+    src/backend/config/template.single_column_20.json \
+    src/backend/config/template.two_columns_24.json \
+  --output-dir src/backend/output
+```
+
+Opcional:
+- `--fail-fast` para detenerse en la primera configuracion invalida.
