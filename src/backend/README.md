@@ -48,6 +48,17 @@ Notas de `aruco_config`:
 - `ids` validados por rango segun diccionario.
 - `corner_inset_mm` y `corner_offsets_mm` para mover cada marcador por esquina.
 
+Notas de `bubble_config`:
+- `group_id` debe ser unico por grupo.
+- IDs de burbuja deterministas con formato `GROUP_ROW_COL` (ej: `G01_00_03`).
+- Validaciones activas para burbujas fuera del bloque o solapadas.
+- Etiquetas internas por columna (`A/B/C/D` o personalizadas con `column_labels`).
+- Estilo de etiqueta configurable con `label_style` (gris claro y tamano de fuente).
+- `num_questions` parametrizable por grupo (si se define, prevalece sobre `rows`).
+- Numeracion de preguntas por fila configurable con `question_number_style`.
+- Separacion numero -> primera burbuja por centros en `question_number_style.center_gap_mm`.
+- Salida estructurada `question_items` (unidad logica de pregunta con numero + opciones).
+
 Base de ejemplo:
 - `src/backend/config/template.base.json`
 

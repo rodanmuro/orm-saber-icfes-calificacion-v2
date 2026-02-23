@@ -85,15 +85,54 @@ class BubbleGroupConfig(BaseModel):
     group_id: str = Field(min_length=1)
     rows: int = Field(gt=0)
     cols: int = Field(gt=0)
+    num_questions: int | None = Field(default=None, gt=0)
+    question_start_number: int = Field(default=1, ge=1)
     radius_mm: float = Field(gt=0)
     spacing_x_mm: float = Field(gt=0)
     spacing_y_mm: float = Field(gt=0)
     offset_x_mm: float = Field(ge=0)
     offset_y_mm: float = Field(ge=0)
+    column_labels: list[str] | None = None
+
+    @model_validator(mode="after")
+    def validate_column_labels(self) -> "BubbleGroupConfig":
+        if self.column_labels is None:
+            return self
+        if len(self.column_labels) != self.cols:
+            raise ValueError("column_labels length must match cols")
+        for label in self.column_labels:
+            if not label or not label.strip():
+                raise ValueError("column_labels cannot contain empty values")
+        return self
+
+
+class BubbleLabelStyle(BaseModel):
+    gray_level: float = Field(default=0.78, ge=0.0, le=1.0)
+    font_name: str = Field(default="Helvetica")
+    font_size_pt: float = Field(default=8.0, gt=0.0)
+
+
+class QuestionNumberStyle(BaseModel):
+    enabled: bool = True
+    center_gap_mm: float = Field(default=10.0, gt=0.0)
+    gray_level: float = Field(default=0.40, ge=0.0, le=1.0)
+    font_name: str = Field(default="Helvetica")
+    font_size_pt: float = Field(default=8.0, gt=0.0)
 
 
 class BubbleConfig(BaseModel):
     groups: list[BubbleGroupConfig] = Field(min_length=1)
+    label_style: BubbleLabelStyle = Field(default_factory=BubbleLabelStyle)
+    question_number_style: QuestionNumberStyle = Field(default_factory=QuestionNumberStyle)
+
+    @model_validator(mode="after")
+    def validate_unique_group_ids(self) -> "BubbleConfig":
+        seen: set[str] = set()
+        for group in self.groups:
+            if group.group_id in seen:
+                raise ValueError(f"duplicate bubble group_id '{group.group_id}'")
+            seen.add(group.group_id)
+        return self
 
 
 class OutputConfig(BaseModel):
@@ -131,9 +170,27 @@ class BubblePlacement(BaseModel):
     group_id: str
     row: int
     col: int
+    label: str
     center_x_mm: float
     center_y_mm: float
     radius_mm: float
+
+
+class QuestionNumberPlacement(BaseModel):
+    group_id: str
+    row: int
+    question_number: int
+    center_x_mm: float
+    center_y_mm: float
+
+
+class QuestionItem(BaseModel):
+    group_id: str
+    row: int
+    question_number: int
+    number_center_x_mm: float
+    number_center_y_mm: float
+    options: list[BubblePlacement]
 
 
 class BlockGeometry(BaseModel):
@@ -152,3 +209,7 @@ class TemplateLayout(BaseModel):
     block: BlockGeometry
     aruco_markers: list[MarkerPlacement]
     bubbles: list[BubblePlacement]
+    bubble_label_style: BubbleLabelStyle
+    question_numbers: list[QuestionNumberPlacement]
+    question_number_style: QuestionNumberStyle
+    question_items: list[QuestionItem]

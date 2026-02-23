@@ -19,4 +19,12 @@ def test_pipeline_generates_pdf_and_json(base_config_json: Path, tmp_path: Path)
     assert payload["template_id"] == "template_test"
     assert payload["version"] == "v1"
     assert "main_block_bbox" in payload
+    assert "bubble_label_style" in payload
+    assert "question_numbers" in payload
+    assert "question_number_style" in payload
+    assert "question_items" in payload
+    assert payload["bubbles"][0]["label"] == "A"
+    assert payload["question_numbers"][0]["question_number"] == 1
+    assert payload["question_items"][0]["question_number"] == 1
+    assert len(payload["question_items"][0]["options"]) == 4
     assert len(payload["bubbles"]) == 40

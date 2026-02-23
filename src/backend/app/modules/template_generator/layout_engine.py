@@ -30,7 +30,7 @@ def build_template_layout(config: TemplateConfig) -> TemplateLayout:
 
     aruco_markers = build_aruco_layout(printable_area, config.aruco_config)
     _validate_aruco_layout(aruco_markers, printable_area, block)
-    bubbles = build_bubble_layout(block, config.bubble_config)
+    bubbles, question_numbers, question_items = build_bubble_layout(block, config.bubble_config)
 
     return TemplateLayout(
         template_id=config.output_config.template_id,
@@ -41,6 +41,10 @@ def build_template_layout(config: TemplateConfig) -> TemplateLayout:
         block=block,
         aruco_markers=aruco_markers,
         bubbles=bubbles,
+        bubble_label_style=config.bubble_config.label_style,
+        question_numbers=question_numbers,
+        question_number_style=config.bubble_config.question_number_style,
+        question_items=question_items,
     )
 
 
