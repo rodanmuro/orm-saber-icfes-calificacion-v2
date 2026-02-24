@@ -1,4 +1,4 @@
-estado: todo
+estado: blocked
 prioridad: media
 sprint: S2
 owner: por_definir
@@ -20,3 +20,7 @@ Consolidar metricas de rendimiento de lectura por imagen para seguimiento de cal
 
 ## Criterio de terminado
 Se dispone de un benchmark reproducible que permite medir progreso entre iteraciones de robustez.
+
+## Estado de pausa
+- Actividad pausada temporalmente por priorizacion del enfoque de motor alterno LLM (Gemini).
+- Se reactivara al cerrar HU_003 (ACT_0022+).

@@ -1,4 +1,4 @@
-estado: todo
+estado: blocked
 prioridad: media
 sprint: S2
 owner: por_definir
@@ -20,3 +20,7 @@ Definir y exponer senales de confianza por pregunta para preparar una fase futur
 
 ## Criterio de terminado
 El sistema entrega senales de confianza trazables por pregunta, listas para consumir en una futura interfaz de revision.
+
+## Estado de pausa
+- Actividad pausada temporalmente por priorizacion del enfoque de motor alterno LLM (Gemini).
+- Se reactivara al cerrar HU_003 (ACT_0022+).

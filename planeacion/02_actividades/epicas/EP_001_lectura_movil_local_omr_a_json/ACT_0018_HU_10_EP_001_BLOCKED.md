@@ -1,4 +1,4 @@
-estado: todo
+estado: blocked
 prioridad: alta
 sprint: S2
 owner: por_definir
@@ -20,3 +20,7 @@ Comparar variantes de preprocesamiento con metricas objetivas para evaluar mejor
 
 ## Criterio de terminado
 Existe un reporte reproducible que permite decidir con evidencia si la variante adicional aporta mejora neta.
+
+## Estado de pausa
+- Actividad pausada temporalmente por priorizacion del enfoque de motor alterno LLM (Gemini).
+- Se reactivara al cerrar HU_003 (ACT_0022+).

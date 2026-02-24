@@ -37,18 +37,29 @@
   - protocolo de captura movil (luz, angulo, distancia, marcadores visibles).
   - evaluacion de variantes de preproceso y costo computacional.
 - Convertir decisiones adoptadas en tareas tecnicas concretas dentro de la planeacion de EP_001.
+- Cambio de prioridad acordado:
+  - Las actividades de robustez por variantes (`ACT_0017` a `ACT_0021`) quedan pausadas temporalmente para abrir frente de motor alterno LLM.
+  - Dichas actividades se movieron a estado `BLOCKED` hasta cerrar el primer ciclo comparativo `classic vs gemini`.
+- Nuevo frente de trabajo formalizado:
+  - HU nueva: `planeacion/01_historias_de_usuario/HU_003_EP_001_motor_alterno_lectura_llm_gemini.md`
+  - Actividades nuevas:
+    - `planeacion/02_actividades/epicas/EP_001_lectura_movil_local_omr_a_json/ACT_0022_HU_13_EP_001_TODO.md`
+    - `planeacion/02_actividades/epicas/EP_001_lectura_movil_local_omr_a_json/ACT_0023_HU_13_EP_001_TODO.md`
+    - `planeacion/02_actividades/epicas/EP_001_lectura_movil_local_omr_a_json/ACT_0024_HU_13_EP_001_TODO.md`
+    - `planeacion/02_actividades/epicas/EP_001_lectura_movil_local_omr_a_json/ACT_0025_HU_14_EP_001_TODO.md`
+    - `planeacion/02_actividades/epicas/EP_001_lectura_movil_local_omr_a_json/ACT_0026_HU_15_EP_001_TODO.md`
 - Mantener deuda tecnica visible:
   - multiple marca real del estudiante,
   - marca espuria (puntos/trazos leves),
   - dashboard futuro de revision/correccion manual.
 - Enlace operativo ya creado para continuidad:
   - HU nueva: `planeacion/01_historias_de_usuario/HU_002_EP_001_mejoras_robustez_lectura_omr.md`
-  - Actividades nuevas:
-    - `planeacion/02_actividades/epicas/EP_001_lectura_movil_local_omr_a_json/ACT_0017_HU_10_EP_001_TODO.md`
-    - `planeacion/02_actividades/epicas/EP_001_lectura_movil_local_omr_a_json/ACT_0018_HU_10_EP_001_TODO.md`
-    - `planeacion/02_actividades/epicas/EP_001_lectura_movil_local_omr_a_json/ACT_0019_HU_11_EP_001_TODO.md`
-    - `planeacion/02_actividades/epicas/EP_001_lectura_movil_local_omr_a_json/ACT_0020_HU_11_EP_001_TODO.md`
-    - `planeacion/02_actividades/epicas/EP_001_lectura_movil_local_omr_a_json/ACT_0021_HU_12_EP_001_TODO.md`
+  - Actividades de robustez (pausadas temporalmente):
+    - `planeacion/02_actividades/epicas/EP_001_lectura_movil_local_omr_a_json/ACT_0017_HU_10_EP_001_BLOCKED.md`
+    - `planeacion/02_actividades/epicas/EP_001_lectura_movil_local_omr_a_json/ACT_0018_HU_10_EP_001_BLOCKED.md`
+    - `planeacion/02_actividades/epicas/EP_001_lectura_movil_local_omr_a_json/ACT_0019_HU_11_EP_001_BLOCKED.md`
+    - `planeacion/02_actividades/epicas/EP_001_lectura_movil_local_omr_a_json/ACT_0020_HU_11_EP_001_BLOCKED.md`
+    - `planeacion/02_actividades/epicas/EP_001_lectura_movil_local_omr_a_json/ACT_0021_HU_12_EP_001_BLOCKED.md`
 
 ## Fuentes consultadas
 - RescueOMR:

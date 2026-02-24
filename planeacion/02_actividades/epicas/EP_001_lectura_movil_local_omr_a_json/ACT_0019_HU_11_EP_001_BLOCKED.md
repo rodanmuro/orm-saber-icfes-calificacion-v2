@@ -1,4 +1,4 @@
-estado: todo
+estado: blocked
 prioridad: media
 sprint: S2
 owner: por_definir
@@ -20,3 +20,7 @@ Implementar una regla determinista para seleccionar automaticamente la variante 
 
 ## Criterio de terminado
 El pipeline selecciona variante automaticamente con trazabilidad clara de la decision y resultados consistentes.
+
+## Estado de pausa
+- Actividad pausada temporalmente por priorizacion del enfoque de motor alterno LLM (Gemini).
+- Se reactivara al cerrar HU_003 (ACT_0022+).
