@@ -63,6 +63,13 @@ async def read_photo_omr(
         result["diagnostics"]["uploaded_image_path"] = str(uploaded_path)
         result["diagnostics"]["trace_json_path"] = str(trace_json_path)
         result["diagnostics"]["request_total_ms"] = round((time.perf_counter() - request_start) * 1000.0, 2)
+        review_questions = sorted(
+            int(item.get("question_number"))
+            for item in result.get("questions", [])
+            if item.get("ambiguous_options")
+        )
+        result["diagnostics"]["manual_review_questions"] = review_questions
+        result["diagnostics"]["manual_review_required"] = bool(review_questions)
         logger.info(
             "OMR read completed | template=%s version=%s summary=%s",
             result.get("template_id"),
@@ -91,12 +98,21 @@ async def read_photo_omr(
             gemini_latency_ms,
             request_total_ms,
         )
+        if review_questions:
+            logger.warning(
+                "OMR alerta revisión manual | ambiguous_questions=%s",
+                review_questions,
+            )
         lines: list[str] = []
         for item in result.get("questions", []):
             question_number = item.get("question_number")
             marked_options = item.get("marked_options", [])
             marked_text = ", ".join(marked_options) if marked_options else "-"
-            lines.append(f"pregunta {question_number}: {marked_text}")
+            ambiguous_options = item.get("ambiguous_options", [])
+            review_suffix = ""
+            if ambiguous_options:
+                review_suffix = f" [REVISAR ambigua: {', '.join(ambiguous_options)}]"
+            lines.append(f"pregunta {question_number}: {marked_text}{review_suffix}")
 
         logger.info("OMR respuestas leidas:\n%s", "\n".join(lines))
         return result

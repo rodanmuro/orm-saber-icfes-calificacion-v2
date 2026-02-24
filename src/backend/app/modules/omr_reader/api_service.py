@@ -228,12 +228,15 @@ def persist_omr_trace_json(
                 "marked_options": marked,
                 "ambiguous_options": ambiguous,
                 "status": (
-                    "marked"
+                    "marked_with_ambiguity"
+                    if marked and ambiguous
+                    else "marked"
                     if marked
                     else "ambiguous"
                     if ambiguous
                     else "blank"
                 ),
+                "manual_review_required": bool(ambiguous),
             }
         )
 
