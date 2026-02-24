@@ -9,10 +9,24 @@ from uuid import uuid4
 import cv2
 import numpy as np
 
+from app.core.config import settings
 from app.modules.omr_reader.alignment import align_image_to_template
 from app.modules.omr_reader.bubble_classifier import classify_bubbles
-from app.modules.omr_reader.errors import InvalidImageError, InvalidMetadataError
+from app.modules.omr_reader.errors import (
+    InvalidImageError,
+    InvalidMetadataError,
+    ReaderBackendNotReadyError,
+    UnsupportedReaderBackendError,
+)
 from app.modules.omr_reader.loader import load_read_metadata
+from app.modules.omr_reader.reader_strategy import (
+    BACKEND_CLASSIC,
+    BACKEND_GEMINI,
+    OMRReadEngine,
+    OMRReadRequest,
+    SUPPORTED_OMR_BACKENDS,
+    normalize_reader_backend,
+)
 from app.modules.omr_reader.result_builder import build_omr_read_result
 
 DEFAULT_METADATA_PATH = "data/output/template_basica_omr_v1.json"
@@ -31,42 +45,92 @@ def run_omr_read_from_image_bytes(
     save_debug_artifacts: bool = False,
     debug_base_name: str | None = None,
     debug_output_dir: str = DEFAULT_DEBUG_OUTPUT_DIR,
+    reader_backend: str | None = None,
 ) -> dict[str, Any]:
-    metadata_file = resolve_backend_relative_path(metadata_path)
-    metadata = load_read_metadata(metadata_file)
-    image = decode_image_bytes(image_bytes=image_bytes)
-
-    aligned = align_image_to_template(
-        image=image,
-        metadata=metadata,
-        px_per_mm=px_per_mm,
-    )
-    debug_artifacts: dict[str, np.ndarray] | None = {} if save_debug_artifacts else None
-    bubbles = classify_bubbles(
-        aligned_image=aligned.aligned_image,
-        metadata=metadata,
+    backend = resolve_reader_backend(reader_backend)
+    request = OMRReadRequest(
+        image_bytes=image_bytes,
+        metadata_path=metadata_path,
         px_per_mm=px_per_mm,
         marked_threshold=marked_threshold,
         unmarked_threshold=unmarked_threshold,
         robust_mode=robust_mode,
+        save_debug_artifacts=save_debug_artifacts,
+        debug_base_name=debug_base_name,
+        debug_output_dir=debug_output_dir,
+    )
+    engine = get_omr_reader_engine(backend)
+    result = engine.read(request)
+    result.setdefault("diagnostics", {})
+    result["diagnostics"]["reader_backend"] = backend
+    return result
+
+
+class ClassicOMRReadEngine:
+    def read(self, request: OMRReadRequest) -> dict[str, Any]:
+        return _run_classic_omr_read_from_image_bytes(request=request)
+
+
+class GeminiOMRReadEngine:
+    def read(self, request: OMRReadRequest) -> dict[str, Any]:
+        raise ReaderBackendNotReadyError("reader backend 'gemini' is not implemented yet")
+
+
+def resolve_reader_backend(reader_backend: str | None) -> str:
+    backend = normalize_reader_backend(reader_backend or settings.omr_reader_backend)
+    if backend not in SUPPORTED_OMR_BACKENDS:
+        raise UnsupportedReaderBackendError(
+            f"reader backend '{backend}' is not supported; valid values: {sorted(SUPPORTED_OMR_BACKENDS)}"
+        )
+    return backend
+
+
+def get_omr_reader_engine(backend: str) -> OMRReadEngine:
+    if backend == BACKEND_CLASSIC:
+        return ClassicOMRReadEngine()
+    if backend == BACKEND_GEMINI:
+        return GeminiOMRReadEngine()
+    raise UnsupportedReaderBackendError(
+        f"reader backend '{backend}' is not supported; valid values: {sorted(SUPPORTED_OMR_BACKENDS)}"
+    )
+
+
+def _run_classic_omr_read_from_image_bytes(*, request: OMRReadRequest) -> dict[str, Any]:
+    metadata_file = resolve_backend_relative_path(request.metadata_path)
+    metadata = load_read_metadata(metadata_file)
+    image = decode_image_bytes(image_bytes=request.image_bytes)
+
+    aligned = align_image_to_template(
+        image=image,
+        metadata=metadata,
+        px_per_mm=request.px_per_mm,
+    )
+    debug_artifacts: dict[str, np.ndarray] | None = {} if request.save_debug_artifacts else None
+    bubbles = classify_bubbles(
+        aligned_image=aligned.aligned_image,
+        metadata=metadata,
+        px_per_mm=request.px_per_mm,
+        marked_threshold=request.marked_threshold,
+        unmarked_threshold=request.unmarked_threshold,
+        robust_mode=request.robust_mode,
         debug_artifacts=debug_artifacts,
     )
     result = build_omr_read_result(metadata=metadata, bubble_results=bubbles)
     result["thresholds"] = {
-        "marked": marked_threshold,
-        "unmarked": unmarked_threshold,
+        "marked": request.marked_threshold,
+        "unmarked": request.unmarked_threshold,
     }
     result["diagnostics"] = {
         "metadata_path": str(metadata_file),
         "detected_marker_ids": aligned.detected_marker_ids,
-        "robust_mode": robust_mode,
+        "robust_mode": request.robust_mode,
     }
-    if save_debug_artifacts:
+    if request.save_debug_artifacts:
         debug_paths = persist_debug_artifacts(
             aligned_image=aligned.aligned_image,
             binary_inv=debug_artifacts["binary_inv"] if debug_artifacts else None,
-            debug_base_name=debug_base_name,
-            output_dir=debug_output_dir,
+            debug_base_name=request.debug_base_name,
+            output_dir=request.debug_output_dir,
         )
         result["diagnostics"]["debug_artifacts"] = {k: str(v) for k, v in debug_paths.items()}
     return result

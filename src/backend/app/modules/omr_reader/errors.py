@@ -31,3 +31,11 @@ class CaptureQualityError(OMRReadInputError):
 
 class BubbleReadError(OMRReadInputError):
     """Raised when bubble classification cannot be completed."""
+
+
+class UnsupportedReaderBackendError(OMRReadInputError):
+    """Raised when a configured OMR reader backend is not supported."""
+
+
+class ReaderBackendNotReadyError(OMRReadInputError):
+    """Raised when a supported backend exists but is not implemented yet."""

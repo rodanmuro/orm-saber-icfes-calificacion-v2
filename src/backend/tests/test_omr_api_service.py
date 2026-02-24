@@ -7,10 +7,17 @@ import pytest
 
 from app.modules.omr_reader.api_service import (
     decode_image_bytes,
+    get_omr_reader_engine,
     resolve_backend_relative_path,
+    resolve_reader_backend,
     run_omr_read_from_image_bytes,
 )
-from app.modules.omr_reader.errors import InvalidImageError, InvalidMetadataError
+from app.modules.omr_reader.errors import (
+    InvalidImageError,
+    InvalidMetadataError,
+    ReaderBackendNotReadyError,
+    UnsupportedReaderBackendError,
+)
 
 
 def test_decode_image_bytes_fails_on_empty() -> None:
@@ -71,5 +78,29 @@ def test_run_omr_read_from_image_bytes_orchestrates_pipeline(monkeypatch) -> Non
     assert payload["version"] == "v1"
     assert payload["diagnostics"]["detected_marker_ids"] == [0, 1, 2, 3]
     assert payload["diagnostics"]["robust_mode"] is False
+    assert payload["diagnostics"]["reader_backend"] == "classic"
     assert payload["thresholds"]["marked"] == 0.33
     assert payload["thresholds"]["unmarked"] == 0.18
+
+
+def test_resolve_reader_backend_rejects_unknown() -> None:
+    with pytest.raises(UnsupportedReaderBackendError, match="is not supported"):
+        resolve_reader_backend("otro")
+
+
+def test_get_omr_reader_engine_gemini_not_ready() -> None:
+    engine = get_omr_reader_engine("gemini")
+    with pytest.raises(ReaderBackendNotReadyError, match="not implemented yet"):
+        engine.read(
+            request=SimpleNamespace(
+                image_bytes=b"",
+                metadata_path="",
+                px_per_mm=10.0,
+                marked_threshold=0.12,
+                unmarked_threshold=0.18,
+                robust_mode=False,
+                save_debug_artifacts=False,
+                debug_base_name=None,
+                debug_output_dir="",
+            )
+        )
