@@ -41,6 +41,14 @@
   - multiple marca real del estudiante,
   - marca espuria (puntos/trazos leves),
   - dashboard futuro de revision/correccion manual.
+- Enlace operativo ya creado para continuidad:
+  - HU nueva: `planeacion/01_historias_de_usuario/HU_002_EP_001_mejoras_robustez_lectura_omr.md`
+  - Actividades nuevas:
+    - `planeacion/02_actividades/epicas/EP_001_lectura_movil_local_omr_a_json/ACT_0017_HU_10_EP_001_TODO.md`
+    - `planeacion/02_actividades/epicas/EP_001_lectura_movil_local_omr_a_json/ACT_0018_HU_10_EP_001_TODO.md`
+    - `planeacion/02_actividades/epicas/EP_001_lectura_movil_local_omr_a_json/ACT_0019_HU_11_EP_001_TODO.md`
+    - `planeacion/02_actividades/epicas/EP_001_lectura_movil_local_omr_a_json/ACT_0020_HU_11_EP_001_TODO.md`
+    - `planeacion/02_actividades/epicas/EP_001_lectura_movil_local_omr_a_json/ACT_0021_HU_12_EP_001_TODO.md`
 
 ## Fuentes consultadas
 - RescueOMR:
