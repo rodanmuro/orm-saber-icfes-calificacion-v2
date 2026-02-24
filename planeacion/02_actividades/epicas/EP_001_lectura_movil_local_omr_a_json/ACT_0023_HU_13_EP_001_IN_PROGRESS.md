@@ -1,4 +1,4 @@
-estado: todo
+estado: in_progress
 prioridad: alta
 sprint: S2
 owner: por_definir

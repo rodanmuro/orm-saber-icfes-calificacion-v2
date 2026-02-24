@@ -13,21 +13,26 @@ from app.core.config import settings
 from app.modules.omr_reader.alignment import align_image_to_template
 from app.modules.omr_reader.bubble_classifier import classify_bubbles
 from app.modules.omr_reader.errors import (
+    GeminiReadError,
     InvalidImageError,
     InvalidMetadataError,
-    ReaderBackendNotReadyError,
+    OpenAIReadError,
     UnsupportedReaderBackendError,
 )
+from app.modules.omr_reader.gemini_reader import run_gemini_omr_read
 from app.modules.omr_reader.loader import load_read_metadata
+from app.modules.omr_reader.llm_preprocess import prepare_llm_image_bytes
 from app.modules.omr_reader.reader_strategy import (
     BACKEND_CLASSIC,
     BACKEND_GEMINI,
+    BACKEND_OPENAI,
     OMRReadEngine,
     OMRReadRequest,
     SUPPORTED_OMR_BACKENDS,
     normalize_reader_backend,
 )
 from app.modules.omr_reader.result_builder import build_omr_read_result
+from app.modules.omr_reader.openai_reader import run_openai_omr_read
 
 DEFAULT_METADATA_PATH = "data/output/template_basica_omr_v1.json"
 DEFAULT_UPLOADS_DIR = "data/input/mobile_uploads"
@@ -73,7 +78,42 @@ class ClassicOMRReadEngine:
 
 class GeminiOMRReadEngine:
     def read(self, request: OMRReadRequest) -> dict[str, Any]:
-        raise ReaderBackendNotReadyError("reader backend 'gemini' is not implemented yet")
+        if not settings.gemini_api_key:
+            raise GeminiReadError("GEMINI_API_KEY is not configured")
+        metadata_file = resolve_backend_relative_path(request.metadata_path)
+        metadata = load_read_metadata(metadata_file)
+        image = decode_image_bytes(image_bytes=request.image_bytes)
+        prepared = prepare_llm_image_bytes(
+            image=image,
+            metadata=metadata,
+            px_per_mm=request.px_per_mm,
+        )
+        return run_gemini_omr_read(
+            image_bytes=prepared["image_bytes"],
+            metadata=metadata,
+            metadata_file=metadata_file,
+            preprocess_diagnostics=prepared["diagnostics"],
+        )
+
+
+class OpenAIOMRReadEngine:
+    def read(self, request: OMRReadRequest) -> dict[str, Any]:
+        if not settings.openai_api_key:
+            raise OpenAIReadError("OPENAI_API_KEY is not configured")
+        metadata_file = resolve_backend_relative_path(request.metadata_path)
+        metadata = load_read_metadata(metadata_file)
+        image = decode_image_bytes(image_bytes=request.image_bytes)
+        prepared = prepare_llm_image_bytes(
+            image=image,
+            metadata=metadata,
+            px_per_mm=request.px_per_mm,
+        )
+        return run_openai_omr_read(
+            image_bytes=prepared["image_bytes"],
+            metadata=metadata,
+            metadata_file=metadata_file,
+            preprocess_diagnostics=prepared["diagnostics"],
+        )
 
 
 def resolve_reader_backend(reader_backend: str | None) -> str:
@@ -90,6 +130,8 @@ def get_omr_reader_engine(backend: str) -> OMRReadEngine:
         return ClassicOMRReadEngine()
     if backend == BACKEND_GEMINI:
         return GeminiOMRReadEngine()
+    if backend == BACKEND_OPENAI:
+        return OpenAIOMRReadEngine()
     raise UnsupportedReaderBackendError(
         f"reader backend '{backend}' is not supported; valid values: {sorted(SUPPORTED_OMR_BACKENDS)}"
     )

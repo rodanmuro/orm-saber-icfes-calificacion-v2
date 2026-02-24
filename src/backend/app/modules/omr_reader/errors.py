@@ -39,3 +39,11 @@ class UnsupportedReaderBackendError(OMRReadInputError):
 
 class ReaderBackendNotReadyError(OMRReadInputError):
     """Raised when a supported backend exists but is not implemented yet."""
+
+
+class GeminiReadError(OMRReadInputError):
+    """Raised when Gemini read fails due to network, auth, or invalid output."""
+
+
+class OpenAIReadError(OMRReadInputError):
+    """Raised when OpenAI read fails due to network, auth, or invalid output."""

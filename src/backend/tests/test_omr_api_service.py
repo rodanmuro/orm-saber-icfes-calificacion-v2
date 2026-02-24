@@ -13,9 +13,10 @@ from app.modules.omr_reader.api_service import (
     run_omr_read_from_image_bytes,
 )
 from app.modules.omr_reader.errors import (
+    GeminiReadError,
     InvalidImageError,
     InvalidMetadataError,
-    ReaderBackendNotReadyError,
+    OpenAIReadError,
     UnsupportedReaderBackendError,
 )
 
@@ -88,13 +89,33 @@ def test_resolve_reader_backend_rejects_unknown() -> None:
         resolve_reader_backend("otro")
 
 
-def test_get_omr_reader_engine_gemini_not_ready() -> None:
+def test_get_omr_reader_engine_gemini_requires_api_key(monkeypatch) -> None:
     engine = get_omr_reader_engine("gemini")
-    with pytest.raises(ReaderBackendNotReadyError, match="not implemented yet"):
+    monkeypatch.setattr("app.modules.omr_reader.gemini_reader.settings.gemini_api_key", None)
+    with pytest.raises(GeminiReadError, match="GEMINI_API_KEY is not configured"):
         engine.read(
             request=SimpleNamespace(
-                image_bytes=b"",
-                metadata_path="",
+                image_bytes=b"fake-image-bytes",
+                metadata_path="data/output/template_basica_omr_v1.json",
+                px_per_mm=10.0,
+                marked_threshold=0.12,
+                unmarked_threshold=0.18,
+                robust_mode=False,
+                save_debug_artifacts=False,
+                debug_base_name=None,
+                debug_output_dir="",
+            )
+        )
+
+
+def test_get_omr_reader_engine_openai_requires_api_key(monkeypatch) -> None:
+    engine = get_omr_reader_engine("openai")
+    monkeypatch.setattr("app.modules.omr_reader.openai_reader.settings.openai_api_key", None)
+    with pytest.raises(OpenAIReadError, match="OPENAI_API_KEY is not configured"):
+        engine.read(
+            request=SimpleNamespace(
+                image_bytes=b"fake-image-bytes",
+                metadata_path="data/output/template_basica_omr_v1.json",
                 px_per_mm=10.0,
                 marked_threshold=0.12,
                 unmarked_threshold=0.18,

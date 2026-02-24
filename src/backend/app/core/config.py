@@ -7,6 +7,12 @@ class Settings(BaseSettings):
     debug: bool = False
     api_v1_prefix: str = "/api/v1"
     omr_reader_backend: str = "classic"
+    gemini_api_key: str | None = None
+    gemini_model: str = "gemini-3-flash-preview"
+    gemini_timeout_seconds: float = 60.0
+    openai_api_key: str | None = None
+    openai_model: str = "gpt-4.1"
+    openai_timeout_seconds: float = 60.0
 
     model_config = SettingsConfigDict(
         env_file=".env",
