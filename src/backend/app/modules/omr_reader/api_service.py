@@ -11,6 +11,7 @@ import numpy as np
 
 from app.core.config import settings
 from app.modules.omr_reader.alignment import align_image_to_template
+from app.modules.omr_reader.auxiliary_blocks import read_auxiliary_blocks
 from app.modules.omr_reader.bubble_classifier import classify_bubbles
 from app.modules.omr_reader.errors import (
     GeminiReadError,
@@ -158,6 +159,15 @@ def _run_classic_omr_read_from_image_bytes(*, request: OMRReadRequest) -> dict[s
         debug_artifacts=debug_artifacts,
     )
     result = build_omr_read_result(metadata=metadata, bubble_results=bubbles)
+    auxiliary = read_auxiliary_blocks(
+        aligned_image=aligned.aligned_image,
+        metadata=metadata,
+        px_per_mm=request.px_per_mm,
+        marked_threshold=request.marked_threshold,
+        unmarked_threshold=request.unmarked_threshold,
+        robust_mode=request.robust_mode,
+    )
+    result["auxiliary"] = auxiliary
     result["thresholds"] = {
         "marked": request.marked_threshold,
         "unmarked": request.unmarked_threshold,
@@ -166,6 +176,7 @@ def _run_classic_omr_read_from_image_bytes(*, request: OMRReadRequest) -> dict[s
         "metadata_path": str(metadata_file),
         "detected_marker_ids": aligned.detected_marker_ids,
         "robust_mode": request.robust_mode,
+        "auxiliary_summary": auxiliary.get("summary", {}),
     }
     if request.save_debug_artifacts:
         debug_paths = persist_debug_artifacts(
@@ -247,6 +258,7 @@ def persist_omr_trace_json(
         "uploaded_image_path": str(uploaded_image_path),
         "quality_summary": result_payload.get("quality_summary", {}),
         "answers_by_question": answers_by_question,
+        "auxiliary": result_payload.get("auxiliary", {}),
     }
     trace_path.write_text(
         json.dumps(trace_payload, ensure_ascii=False, indent=2),
