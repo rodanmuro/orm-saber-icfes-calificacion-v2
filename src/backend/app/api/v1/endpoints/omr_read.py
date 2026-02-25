@@ -23,7 +23,7 @@ logger = logging.getLogger("uvicorn.error")
 @router.post("/read-photo")
 async def read_photo_omr(
     photo: UploadFile = File(...),
-    metadata_path: str = Form(DEFAULT_METADATA_PATH),
+    metadata_path: str | None = Form(None),
     px_per_mm: float = Form(10.0),
     marked_threshold: float = Form(0.12),
     unmarked_threshold: float = Form(0.08),
@@ -41,13 +41,20 @@ async def read_photo_omr(
             logger.info("Procesando lectura OMR con motor=%s", configured_backend)
 
         image_bytes = await photo.read()
+        effective_metadata_path = settings.omr_default_metadata_path
+        if metadata_path and metadata_path != effective_metadata_path:
+            logger.info(
+                "OMR metadata_path recibido desde front fue ignorado | received=%s configured=%s",
+                metadata_path,
+                effective_metadata_path,
+            )
         uploaded_path = persist_uploaded_image_bytes(
             image_bytes=image_bytes,
             original_filename=photo.filename,
         )
         result = run_omr_read_from_image_bytes(
             image_bytes=image_bytes,
-            metadata_path=metadata_path,
+            metadata_path=effective_metadata_path,
             px_per_mm=px_per_mm,
             marked_threshold=marked_threshold,
             unmarked_threshold=unmarked_threshold,

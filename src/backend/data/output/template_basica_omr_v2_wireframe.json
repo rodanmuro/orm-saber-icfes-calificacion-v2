@@ -1,0 +1,4027 @@
+{
+  "template_id": "template_basica_omr_wireframe",
+  "version": "v2_wireframe",
+  "aruco_dictionary_name": "DICT_4X4_50",
+  "page": {
+    "width_mm": 215.9,
+    "height_mm": 279.4,
+    "margin_top_mm": 10.0,
+    "margin_right_mm": 10.0,
+    "margin_bottom_mm": 10.0,
+    "margin_left_mm": 10.0
+  },
+  "printable_area": {
+    "x_mm": 10.0,
+    "y_mm": 10.0,
+    "width_mm": 195.9,
+    "height_mm": 259.4
+  },
+  "main_block_bbox": {
+    "x_mm": 22.0,
+    "y_mm": 138.0,
+    "width_mm": 171.9,
+    "height_mm": 104.4
+  },
+  "block": {
+    "x_mm": 22.0,
+    "y_mm": 138.0,
+    "width_mm": 171.9,
+    "height_mm": 104.4
+  },
+  "aruco_markers": [
+    {
+      "marker_id": 0,
+      "corner": "top_left",
+      "center_x_mm": 26.0,
+      "center_y_mm": 26.0,
+      "size_mm": 12.0
+    },
+    {
+      "marker_id": 1,
+      "corner": "top_right",
+      "center_x_mm": 189.9,
+      "center_y_mm": 26.0,
+      "size_mm": 12.0
+    },
+    {
+      "marker_id": 2,
+      "corner": "bottom_left",
+      "center_x_mm": 26.0,
+      "center_y_mm": 253.39999999999998,
+      "size_mm": 12.0
+    },
+    {
+      "marker_id": 3,
+      "corner": "bottom_right",
+      "center_x_mm": 189.9,
+      "center_y_mm": 253.39999999999998,
+      "size_mm": 12.0
+    }
+  ],
+  "bubbles": [
+    {
+      "bubble_id": "R01_00_A",
+      "group_id": "R01",
+      "row": 0,
+      "col": 0,
+      "label": "A",
+      "center_x_mm": 35.45,
+      "center_y_mm": 154.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R01_00_B",
+      "group_id": "R01",
+      "row": 0,
+      "col": 1,
+      "label": "B",
+      "center_x_mm": 43.45,
+      "center_y_mm": 154.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R01_00_C",
+      "group_id": "R01",
+      "row": 0,
+      "col": 2,
+      "label": "C",
+      "center_x_mm": 51.45,
+      "center_y_mm": 154.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R01_00_D",
+      "group_id": "R01",
+      "row": 0,
+      "col": 3,
+      "label": "D",
+      "center_x_mm": 59.45,
+      "center_y_mm": 154.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R01_01_A",
+      "group_id": "R01",
+      "row": 1,
+      "col": 0,
+      "label": "A",
+      "center_x_mm": 35.45,
+      "center_y_mm": 162.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R01_01_B",
+      "group_id": "R01",
+      "row": 1,
+      "col": 1,
+      "label": "B",
+      "center_x_mm": 43.45,
+      "center_y_mm": 162.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R01_01_C",
+      "group_id": "R01",
+      "row": 1,
+      "col": 2,
+      "label": "C",
+      "center_x_mm": 51.45,
+      "center_y_mm": 162.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R01_01_D",
+      "group_id": "R01",
+      "row": 1,
+      "col": 3,
+      "label": "D",
+      "center_x_mm": 59.45,
+      "center_y_mm": 162.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R01_02_A",
+      "group_id": "R01",
+      "row": 2,
+      "col": 0,
+      "label": "A",
+      "center_x_mm": 35.45,
+      "center_y_mm": 170.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R01_02_B",
+      "group_id": "R01",
+      "row": 2,
+      "col": 1,
+      "label": "B",
+      "center_x_mm": 43.45,
+      "center_y_mm": 170.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R01_02_C",
+      "group_id": "R01",
+      "row": 2,
+      "col": 2,
+      "label": "C",
+      "center_x_mm": 51.45,
+      "center_y_mm": 170.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R01_02_D",
+      "group_id": "R01",
+      "row": 2,
+      "col": 3,
+      "label": "D",
+      "center_x_mm": 59.45,
+      "center_y_mm": 170.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R01_03_A",
+      "group_id": "R01",
+      "row": 3,
+      "col": 0,
+      "label": "A",
+      "center_x_mm": 35.45,
+      "center_y_mm": 178.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R01_03_B",
+      "group_id": "R01",
+      "row": 3,
+      "col": 1,
+      "label": "B",
+      "center_x_mm": 43.45,
+      "center_y_mm": 178.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R01_03_C",
+      "group_id": "R01",
+      "row": 3,
+      "col": 2,
+      "label": "C",
+      "center_x_mm": 51.45,
+      "center_y_mm": 178.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R01_03_D",
+      "group_id": "R01",
+      "row": 3,
+      "col": 3,
+      "label": "D",
+      "center_x_mm": 59.45,
+      "center_y_mm": 178.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R01_04_A",
+      "group_id": "R01",
+      "row": 4,
+      "col": 0,
+      "label": "A",
+      "center_x_mm": 35.45,
+      "center_y_mm": 186.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R01_04_B",
+      "group_id": "R01",
+      "row": 4,
+      "col": 1,
+      "label": "B",
+      "center_x_mm": 43.45,
+      "center_y_mm": 186.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R01_04_C",
+      "group_id": "R01",
+      "row": 4,
+      "col": 2,
+      "label": "C",
+      "center_x_mm": 51.45,
+      "center_y_mm": 186.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R01_04_D",
+      "group_id": "R01",
+      "row": 4,
+      "col": 3,
+      "label": "D",
+      "center_x_mm": 59.45,
+      "center_y_mm": 186.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R01_05_A",
+      "group_id": "R01",
+      "row": 5,
+      "col": 0,
+      "label": "A",
+      "center_x_mm": 35.45,
+      "center_y_mm": 194.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R01_05_B",
+      "group_id": "R01",
+      "row": 5,
+      "col": 1,
+      "label": "B",
+      "center_x_mm": 43.45,
+      "center_y_mm": 194.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R01_05_C",
+      "group_id": "R01",
+      "row": 5,
+      "col": 2,
+      "label": "C",
+      "center_x_mm": 51.45,
+      "center_y_mm": 194.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R01_05_D",
+      "group_id": "R01",
+      "row": 5,
+      "col": 3,
+      "label": "D",
+      "center_x_mm": 59.45,
+      "center_y_mm": 194.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R01_06_A",
+      "group_id": "R01",
+      "row": 6,
+      "col": 0,
+      "label": "A",
+      "center_x_mm": 35.45,
+      "center_y_mm": 202.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R01_06_B",
+      "group_id": "R01",
+      "row": 6,
+      "col": 1,
+      "label": "B",
+      "center_x_mm": 43.45,
+      "center_y_mm": 202.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R01_06_C",
+      "group_id": "R01",
+      "row": 6,
+      "col": 2,
+      "label": "C",
+      "center_x_mm": 51.45,
+      "center_y_mm": 202.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R01_06_D",
+      "group_id": "R01",
+      "row": 6,
+      "col": 3,
+      "label": "D",
+      "center_x_mm": 59.45,
+      "center_y_mm": 202.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R01_07_A",
+      "group_id": "R01",
+      "row": 7,
+      "col": 0,
+      "label": "A",
+      "center_x_mm": 35.45,
+      "center_y_mm": 210.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R01_07_B",
+      "group_id": "R01",
+      "row": 7,
+      "col": 1,
+      "label": "B",
+      "center_x_mm": 43.45,
+      "center_y_mm": 210.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R01_07_C",
+      "group_id": "R01",
+      "row": 7,
+      "col": 2,
+      "label": "C",
+      "center_x_mm": 51.45,
+      "center_y_mm": 210.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R01_07_D",
+      "group_id": "R01",
+      "row": 7,
+      "col": 3,
+      "label": "D",
+      "center_x_mm": 59.45,
+      "center_y_mm": 210.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R01_08_A",
+      "group_id": "R01",
+      "row": 8,
+      "col": 0,
+      "label": "A",
+      "center_x_mm": 35.45,
+      "center_y_mm": 218.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R01_08_B",
+      "group_id": "R01",
+      "row": 8,
+      "col": 1,
+      "label": "B",
+      "center_x_mm": 43.45,
+      "center_y_mm": 218.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R01_08_C",
+      "group_id": "R01",
+      "row": 8,
+      "col": 2,
+      "label": "C",
+      "center_x_mm": 51.45,
+      "center_y_mm": 218.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R01_08_D",
+      "group_id": "R01",
+      "row": 8,
+      "col": 3,
+      "label": "D",
+      "center_x_mm": 59.45,
+      "center_y_mm": 218.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R01_09_A",
+      "group_id": "R01",
+      "row": 9,
+      "col": 0,
+      "label": "A",
+      "center_x_mm": 35.45,
+      "center_y_mm": 226.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R01_09_B",
+      "group_id": "R01",
+      "row": 9,
+      "col": 1,
+      "label": "B",
+      "center_x_mm": 43.45,
+      "center_y_mm": 226.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R01_09_C",
+      "group_id": "R01",
+      "row": 9,
+      "col": 2,
+      "label": "C",
+      "center_x_mm": 51.45,
+      "center_y_mm": 226.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R01_09_D",
+      "group_id": "R01",
+      "row": 9,
+      "col": 3,
+      "label": "D",
+      "center_x_mm": 59.45,
+      "center_y_mm": 226.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R02_00_A",
+      "group_id": "R02",
+      "row": 0,
+      "col": 0,
+      "label": "A",
+      "center_x_mm": 77.95,
+      "center_y_mm": 154.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R02_00_B",
+      "group_id": "R02",
+      "row": 0,
+      "col": 1,
+      "label": "B",
+      "center_x_mm": 85.95,
+      "center_y_mm": 154.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R02_00_C",
+      "group_id": "R02",
+      "row": 0,
+      "col": 2,
+      "label": "C",
+      "center_x_mm": 93.95,
+      "center_y_mm": 154.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R02_00_D",
+      "group_id": "R02",
+      "row": 0,
+      "col": 3,
+      "label": "D",
+      "center_x_mm": 101.95,
+      "center_y_mm": 154.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R02_01_A",
+      "group_id": "R02",
+      "row": 1,
+      "col": 0,
+      "label": "A",
+      "center_x_mm": 77.95,
+      "center_y_mm": 162.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R02_01_B",
+      "group_id": "R02",
+      "row": 1,
+      "col": 1,
+      "label": "B",
+      "center_x_mm": 85.95,
+      "center_y_mm": 162.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R02_01_C",
+      "group_id": "R02",
+      "row": 1,
+      "col": 2,
+      "label": "C",
+      "center_x_mm": 93.95,
+      "center_y_mm": 162.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R02_01_D",
+      "group_id": "R02",
+      "row": 1,
+      "col": 3,
+      "label": "D",
+      "center_x_mm": 101.95,
+      "center_y_mm": 162.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R02_02_A",
+      "group_id": "R02",
+      "row": 2,
+      "col": 0,
+      "label": "A",
+      "center_x_mm": 77.95,
+      "center_y_mm": 170.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R02_02_B",
+      "group_id": "R02",
+      "row": 2,
+      "col": 1,
+      "label": "B",
+      "center_x_mm": 85.95,
+      "center_y_mm": 170.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R02_02_C",
+      "group_id": "R02",
+      "row": 2,
+      "col": 2,
+      "label": "C",
+      "center_x_mm": 93.95,
+      "center_y_mm": 170.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R02_02_D",
+      "group_id": "R02",
+      "row": 2,
+      "col": 3,
+      "label": "D",
+      "center_x_mm": 101.95,
+      "center_y_mm": 170.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R02_03_A",
+      "group_id": "R02",
+      "row": 3,
+      "col": 0,
+      "label": "A",
+      "center_x_mm": 77.95,
+      "center_y_mm": 178.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R02_03_B",
+      "group_id": "R02",
+      "row": 3,
+      "col": 1,
+      "label": "B",
+      "center_x_mm": 85.95,
+      "center_y_mm": 178.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R02_03_C",
+      "group_id": "R02",
+      "row": 3,
+      "col": 2,
+      "label": "C",
+      "center_x_mm": 93.95,
+      "center_y_mm": 178.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R02_03_D",
+      "group_id": "R02",
+      "row": 3,
+      "col": 3,
+      "label": "D",
+      "center_x_mm": 101.95,
+      "center_y_mm": 178.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R02_04_A",
+      "group_id": "R02",
+      "row": 4,
+      "col": 0,
+      "label": "A",
+      "center_x_mm": 77.95,
+      "center_y_mm": 186.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R02_04_B",
+      "group_id": "R02",
+      "row": 4,
+      "col": 1,
+      "label": "B",
+      "center_x_mm": 85.95,
+      "center_y_mm": 186.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R02_04_C",
+      "group_id": "R02",
+      "row": 4,
+      "col": 2,
+      "label": "C",
+      "center_x_mm": 93.95,
+      "center_y_mm": 186.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R02_04_D",
+      "group_id": "R02",
+      "row": 4,
+      "col": 3,
+      "label": "D",
+      "center_x_mm": 101.95,
+      "center_y_mm": 186.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R02_05_A",
+      "group_id": "R02",
+      "row": 5,
+      "col": 0,
+      "label": "A",
+      "center_x_mm": 77.95,
+      "center_y_mm": 194.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R02_05_B",
+      "group_id": "R02",
+      "row": 5,
+      "col": 1,
+      "label": "B",
+      "center_x_mm": 85.95,
+      "center_y_mm": 194.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R02_05_C",
+      "group_id": "R02",
+      "row": 5,
+      "col": 2,
+      "label": "C",
+      "center_x_mm": 93.95,
+      "center_y_mm": 194.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R02_05_D",
+      "group_id": "R02",
+      "row": 5,
+      "col": 3,
+      "label": "D",
+      "center_x_mm": 101.95,
+      "center_y_mm": 194.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R02_06_A",
+      "group_id": "R02",
+      "row": 6,
+      "col": 0,
+      "label": "A",
+      "center_x_mm": 77.95,
+      "center_y_mm": 202.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R02_06_B",
+      "group_id": "R02",
+      "row": 6,
+      "col": 1,
+      "label": "B",
+      "center_x_mm": 85.95,
+      "center_y_mm": 202.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R02_06_C",
+      "group_id": "R02",
+      "row": 6,
+      "col": 2,
+      "label": "C",
+      "center_x_mm": 93.95,
+      "center_y_mm": 202.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R02_06_D",
+      "group_id": "R02",
+      "row": 6,
+      "col": 3,
+      "label": "D",
+      "center_x_mm": 101.95,
+      "center_y_mm": 202.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R02_07_A",
+      "group_id": "R02",
+      "row": 7,
+      "col": 0,
+      "label": "A",
+      "center_x_mm": 77.95,
+      "center_y_mm": 210.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R02_07_B",
+      "group_id": "R02",
+      "row": 7,
+      "col": 1,
+      "label": "B",
+      "center_x_mm": 85.95,
+      "center_y_mm": 210.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R02_07_C",
+      "group_id": "R02",
+      "row": 7,
+      "col": 2,
+      "label": "C",
+      "center_x_mm": 93.95,
+      "center_y_mm": 210.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R02_07_D",
+      "group_id": "R02",
+      "row": 7,
+      "col": 3,
+      "label": "D",
+      "center_x_mm": 101.95,
+      "center_y_mm": 210.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R02_08_A",
+      "group_id": "R02",
+      "row": 8,
+      "col": 0,
+      "label": "A",
+      "center_x_mm": 77.95,
+      "center_y_mm": 218.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R02_08_B",
+      "group_id": "R02",
+      "row": 8,
+      "col": 1,
+      "label": "B",
+      "center_x_mm": 85.95,
+      "center_y_mm": 218.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R02_08_C",
+      "group_id": "R02",
+      "row": 8,
+      "col": 2,
+      "label": "C",
+      "center_x_mm": 93.95,
+      "center_y_mm": 218.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R02_08_D",
+      "group_id": "R02",
+      "row": 8,
+      "col": 3,
+      "label": "D",
+      "center_x_mm": 101.95,
+      "center_y_mm": 218.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R02_09_A",
+      "group_id": "R02",
+      "row": 9,
+      "col": 0,
+      "label": "A",
+      "center_x_mm": 77.95,
+      "center_y_mm": 226.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R02_09_B",
+      "group_id": "R02",
+      "row": 9,
+      "col": 1,
+      "label": "B",
+      "center_x_mm": 85.95,
+      "center_y_mm": 226.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R02_09_C",
+      "group_id": "R02",
+      "row": 9,
+      "col": 2,
+      "label": "C",
+      "center_x_mm": 93.95,
+      "center_y_mm": 226.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R02_09_D",
+      "group_id": "R02",
+      "row": 9,
+      "col": 3,
+      "label": "D",
+      "center_x_mm": 101.95,
+      "center_y_mm": 226.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R03_00_A",
+      "group_id": "R03",
+      "row": 0,
+      "col": 0,
+      "label": "A",
+      "center_x_mm": 120.45,
+      "center_y_mm": 154.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R03_00_B",
+      "group_id": "R03",
+      "row": 0,
+      "col": 1,
+      "label": "B",
+      "center_x_mm": 128.45,
+      "center_y_mm": 154.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R03_00_C",
+      "group_id": "R03",
+      "row": 0,
+      "col": 2,
+      "label": "C",
+      "center_x_mm": 136.45,
+      "center_y_mm": 154.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R03_00_D",
+      "group_id": "R03",
+      "row": 0,
+      "col": 3,
+      "label": "D",
+      "center_x_mm": 144.45,
+      "center_y_mm": 154.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R03_01_A",
+      "group_id": "R03",
+      "row": 1,
+      "col": 0,
+      "label": "A",
+      "center_x_mm": 120.45,
+      "center_y_mm": 162.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R03_01_B",
+      "group_id": "R03",
+      "row": 1,
+      "col": 1,
+      "label": "B",
+      "center_x_mm": 128.45,
+      "center_y_mm": 162.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R03_01_C",
+      "group_id": "R03",
+      "row": 1,
+      "col": 2,
+      "label": "C",
+      "center_x_mm": 136.45,
+      "center_y_mm": 162.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R03_01_D",
+      "group_id": "R03",
+      "row": 1,
+      "col": 3,
+      "label": "D",
+      "center_x_mm": 144.45,
+      "center_y_mm": 162.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R03_02_A",
+      "group_id": "R03",
+      "row": 2,
+      "col": 0,
+      "label": "A",
+      "center_x_mm": 120.45,
+      "center_y_mm": 170.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R03_02_B",
+      "group_id": "R03",
+      "row": 2,
+      "col": 1,
+      "label": "B",
+      "center_x_mm": 128.45,
+      "center_y_mm": 170.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R03_02_C",
+      "group_id": "R03",
+      "row": 2,
+      "col": 2,
+      "label": "C",
+      "center_x_mm": 136.45,
+      "center_y_mm": 170.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R03_02_D",
+      "group_id": "R03",
+      "row": 2,
+      "col": 3,
+      "label": "D",
+      "center_x_mm": 144.45,
+      "center_y_mm": 170.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R03_03_A",
+      "group_id": "R03",
+      "row": 3,
+      "col": 0,
+      "label": "A",
+      "center_x_mm": 120.45,
+      "center_y_mm": 178.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R03_03_B",
+      "group_id": "R03",
+      "row": 3,
+      "col": 1,
+      "label": "B",
+      "center_x_mm": 128.45,
+      "center_y_mm": 178.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R03_03_C",
+      "group_id": "R03",
+      "row": 3,
+      "col": 2,
+      "label": "C",
+      "center_x_mm": 136.45,
+      "center_y_mm": 178.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R03_03_D",
+      "group_id": "R03",
+      "row": 3,
+      "col": 3,
+      "label": "D",
+      "center_x_mm": 144.45,
+      "center_y_mm": 178.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R03_04_A",
+      "group_id": "R03",
+      "row": 4,
+      "col": 0,
+      "label": "A",
+      "center_x_mm": 120.45,
+      "center_y_mm": 186.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R03_04_B",
+      "group_id": "R03",
+      "row": 4,
+      "col": 1,
+      "label": "B",
+      "center_x_mm": 128.45,
+      "center_y_mm": 186.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R03_04_C",
+      "group_id": "R03",
+      "row": 4,
+      "col": 2,
+      "label": "C",
+      "center_x_mm": 136.45,
+      "center_y_mm": 186.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R03_04_D",
+      "group_id": "R03",
+      "row": 4,
+      "col": 3,
+      "label": "D",
+      "center_x_mm": 144.45,
+      "center_y_mm": 186.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R03_05_A",
+      "group_id": "R03",
+      "row": 5,
+      "col": 0,
+      "label": "A",
+      "center_x_mm": 120.45,
+      "center_y_mm": 194.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R03_05_B",
+      "group_id": "R03",
+      "row": 5,
+      "col": 1,
+      "label": "B",
+      "center_x_mm": 128.45,
+      "center_y_mm": 194.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R03_05_C",
+      "group_id": "R03",
+      "row": 5,
+      "col": 2,
+      "label": "C",
+      "center_x_mm": 136.45,
+      "center_y_mm": 194.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R03_05_D",
+      "group_id": "R03",
+      "row": 5,
+      "col": 3,
+      "label": "D",
+      "center_x_mm": 144.45,
+      "center_y_mm": 194.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R03_06_A",
+      "group_id": "R03",
+      "row": 6,
+      "col": 0,
+      "label": "A",
+      "center_x_mm": 120.45,
+      "center_y_mm": 202.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R03_06_B",
+      "group_id": "R03",
+      "row": 6,
+      "col": 1,
+      "label": "B",
+      "center_x_mm": 128.45,
+      "center_y_mm": 202.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R03_06_C",
+      "group_id": "R03",
+      "row": 6,
+      "col": 2,
+      "label": "C",
+      "center_x_mm": 136.45,
+      "center_y_mm": 202.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R03_06_D",
+      "group_id": "R03",
+      "row": 6,
+      "col": 3,
+      "label": "D",
+      "center_x_mm": 144.45,
+      "center_y_mm": 202.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R03_07_A",
+      "group_id": "R03",
+      "row": 7,
+      "col": 0,
+      "label": "A",
+      "center_x_mm": 120.45,
+      "center_y_mm": 210.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R03_07_B",
+      "group_id": "R03",
+      "row": 7,
+      "col": 1,
+      "label": "B",
+      "center_x_mm": 128.45,
+      "center_y_mm": 210.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R03_07_C",
+      "group_id": "R03",
+      "row": 7,
+      "col": 2,
+      "label": "C",
+      "center_x_mm": 136.45,
+      "center_y_mm": 210.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R03_07_D",
+      "group_id": "R03",
+      "row": 7,
+      "col": 3,
+      "label": "D",
+      "center_x_mm": 144.45,
+      "center_y_mm": 210.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R03_08_A",
+      "group_id": "R03",
+      "row": 8,
+      "col": 0,
+      "label": "A",
+      "center_x_mm": 120.45,
+      "center_y_mm": 218.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R03_08_B",
+      "group_id": "R03",
+      "row": 8,
+      "col": 1,
+      "label": "B",
+      "center_x_mm": 128.45,
+      "center_y_mm": 218.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R03_08_C",
+      "group_id": "R03",
+      "row": 8,
+      "col": 2,
+      "label": "C",
+      "center_x_mm": 136.45,
+      "center_y_mm": 218.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R03_08_D",
+      "group_id": "R03",
+      "row": 8,
+      "col": 3,
+      "label": "D",
+      "center_x_mm": 144.45,
+      "center_y_mm": 218.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R03_09_A",
+      "group_id": "R03",
+      "row": 9,
+      "col": 0,
+      "label": "A",
+      "center_x_mm": 120.45,
+      "center_y_mm": 226.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R03_09_B",
+      "group_id": "R03",
+      "row": 9,
+      "col": 1,
+      "label": "B",
+      "center_x_mm": 128.45,
+      "center_y_mm": 226.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R03_09_C",
+      "group_id": "R03",
+      "row": 9,
+      "col": 2,
+      "label": "C",
+      "center_x_mm": 136.45,
+      "center_y_mm": 226.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R03_09_D",
+      "group_id": "R03",
+      "row": 9,
+      "col": 3,
+      "label": "D",
+      "center_x_mm": 144.45,
+      "center_y_mm": 226.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R04_00_A",
+      "group_id": "R04",
+      "row": 0,
+      "col": 0,
+      "label": "A",
+      "center_x_mm": 162.95,
+      "center_y_mm": 154.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R04_00_B",
+      "group_id": "R04",
+      "row": 0,
+      "col": 1,
+      "label": "B",
+      "center_x_mm": 170.95,
+      "center_y_mm": 154.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R04_00_C",
+      "group_id": "R04",
+      "row": 0,
+      "col": 2,
+      "label": "C",
+      "center_x_mm": 178.95,
+      "center_y_mm": 154.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R04_00_D",
+      "group_id": "R04",
+      "row": 0,
+      "col": 3,
+      "label": "D",
+      "center_x_mm": 186.95,
+      "center_y_mm": 154.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R04_01_A",
+      "group_id": "R04",
+      "row": 1,
+      "col": 0,
+      "label": "A",
+      "center_x_mm": 162.95,
+      "center_y_mm": 162.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R04_01_B",
+      "group_id": "R04",
+      "row": 1,
+      "col": 1,
+      "label": "B",
+      "center_x_mm": 170.95,
+      "center_y_mm": 162.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R04_01_C",
+      "group_id": "R04",
+      "row": 1,
+      "col": 2,
+      "label": "C",
+      "center_x_mm": 178.95,
+      "center_y_mm": 162.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R04_01_D",
+      "group_id": "R04",
+      "row": 1,
+      "col": 3,
+      "label": "D",
+      "center_x_mm": 186.95,
+      "center_y_mm": 162.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R04_02_A",
+      "group_id": "R04",
+      "row": 2,
+      "col": 0,
+      "label": "A",
+      "center_x_mm": 162.95,
+      "center_y_mm": 170.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R04_02_B",
+      "group_id": "R04",
+      "row": 2,
+      "col": 1,
+      "label": "B",
+      "center_x_mm": 170.95,
+      "center_y_mm": 170.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R04_02_C",
+      "group_id": "R04",
+      "row": 2,
+      "col": 2,
+      "label": "C",
+      "center_x_mm": 178.95,
+      "center_y_mm": 170.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R04_02_D",
+      "group_id": "R04",
+      "row": 2,
+      "col": 3,
+      "label": "D",
+      "center_x_mm": 186.95,
+      "center_y_mm": 170.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R04_03_A",
+      "group_id": "R04",
+      "row": 3,
+      "col": 0,
+      "label": "A",
+      "center_x_mm": 162.95,
+      "center_y_mm": 178.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R04_03_B",
+      "group_id": "R04",
+      "row": 3,
+      "col": 1,
+      "label": "B",
+      "center_x_mm": 170.95,
+      "center_y_mm": 178.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R04_03_C",
+      "group_id": "R04",
+      "row": 3,
+      "col": 2,
+      "label": "C",
+      "center_x_mm": 178.95,
+      "center_y_mm": 178.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R04_03_D",
+      "group_id": "R04",
+      "row": 3,
+      "col": 3,
+      "label": "D",
+      "center_x_mm": 186.95,
+      "center_y_mm": 178.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R04_04_A",
+      "group_id": "R04",
+      "row": 4,
+      "col": 0,
+      "label": "A",
+      "center_x_mm": 162.95,
+      "center_y_mm": 186.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R04_04_B",
+      "group_id": "R04",
+      "row": 4,
+      "col": 1,
+      "label": "B",
+      "center_x_mm": 170.95,
+      "center_y_mm": 186.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R04_04_C",
+      "group_id": "R04",
+      "row": 4,
+      "col": 2,
+      "label": "C",
+      "center_x_mm": 178.95,
+      "center_y_mm": 186.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R04_04_D",
+      "group_id": "R04",
+      "row": 4,
+      "col": 3,
+      "label": "D",
+      "center_x_mm": 186.95,
+      "center_y_mm": 186.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R04_05_A",
+      "group_id": "R04",
+      "row": 5,
+      "col": 0,
+      "label": "A",
+      "center_x_mm": 162.95,
+      "center_y_mm": 194.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R04_05_B",
+      "group_id": "R04",
+      "row": 5,
+      "col": 1,
+      "label": "B",
+      "center_x_mm": 170.95,
+      "center_y_mm": 194.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R04_05_C",
+      "group_id": "R04",
+      "row": 5,
+      "col": 2,
+      "label": "C",
+      "center_x_mm": 178.95,
+      "center_y_mm": 194.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R04_05_D",
+      "group_id": "R04",
+      "row": 5,
+      "col": 3,
+      "label": "D",
+      "center_x_mm": 186.95,
+      "center_y_mm": 194.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R04_06_A",
+      "group_id": "R04",
+      "row": 6,
+      "col": 0,
+      "label": "A",
+      "center_x_mm": 162.95,
+      "center_y_mm": 202.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R04_06_B",
+      "group_id": "R04",
+      "row": 6,
+      "col": 1,
+      "label": "B",
+      "center_x_mm": 170.95,
+      "center_y_mm": 202.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R04_06_C",
+      "group_id": "R04",
+      "row": 6,
+      "col": 2,
+      "label": "C",
+      "center_x_mm": 178.95,
+      "center_y_mm": 202.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R04_06_D",
+      "group_id": "R04",
+      "row": 6,
+      "col": 3,
+      "label": "D",
+      "center_x_mm": 186.95,
+      "center_y_mm": 202.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R04_07_A",
+      "group_id": "R04",
+      "row": 7,
+      "col": 0,
+      "label": "A",
+      "center_x_mm": 162.95,
+      "center_y_mm": 210.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R04_07_B",
+      "group_id": "R04",
+      "row": 7,
+      "col": 1,
+      "label": "B",
+      "center_x_mm": 170.95,
+      "center_y_mm": 210.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R04_07_C",
+      "group_id": "R04",
+      "row": 7,
+      "col": 2,
+      "label": "C",
+      "center_x_mm": 178.95,
+      "center_y_mm": 210.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R04_07_D",
+      "group_id": "R04",
+      "row": 7,
+      "col": 3,
+      "label": "D",
+      "center_x_mm": 186.95,
+      "center_y_mm": 210.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R04_08_A",
+      "group_id": "R04",
+      "row": 8,
+      "col": 0,
+      "label": "A",
+      "center_x_mm": 162.95,
+      "center_y_mm": 218.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R04_08_B",
+      "group_id": "R04",
+      "row": 8,
+      "col": 1,
+      "label": "B",
+      "center_x_mm": 170.95,
+      "center_y_mm": 218.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R04_08_C",
+      "group_id": "R04",
+      "row": 8,
+      "col": 2,
+      "label": "C",
+      "center_x_mm": 178.95,
+      "center_y_mm": 218.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R04_08_D",
+      "group_id": "R04",
+      "row": 8,
+      "col": 3,
+      "label": "D",
+      "center_x_mm": 186.95,
+      "center_y_mm": 218.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R04_09_A",
+      "group_id": "R04",
+      "row": 9,
+      "col": 0,
+      "label": "A",
+      "center_x_mm": 162.95,
+      "center_y_mm": 226.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R04_09_B",
+      "group_id": "R04",
+      "row": 9,
+      "col": 1,
+      "label": "B",
+      "center_x_mm": 170.95,
+      "center_y_mm": 226.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R04_09_C",
+      "group_id": "R04",
+      "row": 9,
+      "col": 2,
+      "label": "C",
+      "center_x_mm": 178.95,
+      "center_y_mm": 226.2,
+      "radius_mm": 2.0
+    },
+    {
+      "bubble_id": "R04_09_D",
+      "group_id": "R04",
+      "row": 9,
+      "col": 3,
+      "label": "D",
+      "center_x_mm": 186.95,
+      "center_y_mm": 226.2,
+      "radius_mm": 2.0
+    }
+  ],
+  "bubble_label_style": {
+    "gray_level": 0.62,
+    "font_name": "Helvetica",
+    "font_size_pt": 5.5
+  },
+  "question_numbers": [
+    {
+      "group_id": "R01",
+      "row": 0,
+      "question_number": 1,
+      "center_x_mm": 28.95,
+      "center_y_mm": 154.2
+    },
+    {
+      "group_id": "R01",
+      "row": 1,
+      "question_number": 2,
+      "center_x_mm": 28.95,
+      "center_y_mm": 162.2
+    },
+    {
+      "group_id": "R01",
+      "row": 2,
+      "question_number": 3,
+      "center_x_mm": 28.95,
+      "center_y_mm": 170.2
+    },
+    {
+      "group_id": "R01",
+      "row": 3,
+      "question_number": 4,
+      "center_x_mm": 28.95,
+      "center_y_mm": 178.2
+    },
+    {
+      "group_id": "R01",
+      "row": 4,
+      "question_number": 5,
+      "center_x_mm": 28.95,
+      "center_y_mm": 186.2
+    },
+    {
+      "group_id": "R01",
+      "row": 5,
+      "question_number": 6,
+      "center_x_mm": 28.95,
+      "center_y_mm": 194.2
+    },
+    {
+      "group_id": "R01",
+      "row": 6,
+      "question_number": 7,
+      "center_x_mm": 28.95,
+      "center_y_mm": 202.2
+    },
+    {
+      "group_id": "R01",
+      "row": 7,
+      "question_number": 8,
+      "center_x_mm": 28.95,
+      "center_y_mm": 210.2
+    },
+    {
+      "group_id": "R01",
+      "row": 8,
+      "question_number": 9,
+      "center_x_mm": 28.95,
+      "center_y_mm": 218.2
+    },
+    {
+      "group_id": "R01",
+      "row": 9,
+      "question_number": 10,
+      "center_x_mm": 28.95,
+      "center_y_mm": 226.2
+    },
+    {
+      "group_id": "R02",
+      "row": 0,
+      "question_number": 11,
+      "center_x_mm": 71.45,
+      "center_y_mm": 154.2
+    },
+    {
+      "group_id": "R02",
+      "row": 1,
+      "question_number": 12,
+      "center_x_mm": 71.45,
+      "center_y_mm": 162.2
+    },
+    {
+      "group_id": "R02",
+      "row": 2,
+      "question_number": 13,
+      "center_x_mm": 71.45,
+      "center_y_mm": 170.2
+    },
+    {
+      "group_id": "R02",
+      "row": 3,
+      "question_number": 14,
+      "center_x_mm": 71.45,
+      "center_y_mm": 178.2
+    },
+    {
+      "group_id": "R02",
+      "row": 4,
+      "question_number": 15,
+      "center_x_mm": 71.45,
+      "center_y_mm": 186.2
+    },
+    {
+      "group_id": "R02",
+      "row": 5,
+      "question_number": 16,
+      "center_x_mm": 71.45,
+      "center_y_mm": 194.2
+    },
+    {
+      "group_id": "R02",
+      "row": 6,
+      "question_number": 17,
+      "center_x_mm": 71.45,
+      "center_y_mm": 202.2
+    },
+    {
+      "group_id": "R02",
+      "row": 7,
+      "question_number": 18,
+      "center_x_mm": 71.45,
+      "center_y_mm": 210.2
+    },
+    {
+      "group_id": "R02",
+      "row": 8,
+      "question_number": 19,
+      "center_x_mm": 71.45,
+      "center_y_mm": 218.2
+    },
+    {
+      "group_id": "R02",
+      "row": 9,
+      "question_number": 20,
+      "center_x_mm": 71.45,
+      "center_y_mm": 226.2
+    },
+    {
+      "group_id": "R03",
+      "row": 0,
+      "question_number": 21,
+      "center_x_mm": 113.95,
+      "center_y_mm": 154.2
+    },
+    {
+      "group_id": "R03",
+      "row": 1,
+      "question_number": 22,
+      "center_x_mm": 113.95,
+      "center_y_mm": 162.2
+    },
+    {
+      "group_id": "R03",
+      "row": 2,
+      "question_number": 23,
+      "center_x_mm": 113.95,
+      "center_y_mm": 170.2
+    },
+    {
+      "group_id": "R03",
+      "row": 3,
+      "question_number": 24,
+      "center_x_mm": 113.95,
+      "center_y_mm": 178.2
+    },
+    {
+      "group_id": "R03",
+      "row": 4,
+      "question_number": 25,
+      "center_x_mm": 113.95,
+      "center_y_mm": 186.2
+    },
+    {
+      "group_id": "R03",
+      "row": 5,
+      "question_number": 26,
+      "center_x_mm": 113.95,
+      "center_y_mm": 194.2
+    },
+    {
+      "group_id": "R03",
+      "row": 6,
+      "question_number": 27,
+      "center_x_mm": 113.95,
+      "center_y_mm": 202.2
+    },
+    {
+      "group_id": "R03",
+      "row": 7,
+      "question_number": 28,
+      "center_x_mm": 113.95,
+      "center_y_mm": 210.2
+    },
+    {
+      "group_id": "R03",
+      "row": 8,
+      "question_number": 29,
+      "center_x_mm": 113.95,
+      "center_y_mm": 218.2
+    },
+    {
+      "group_id": "R03",
+      "row": 9,
+      "question_number": 30,
+      "center_x_mm": 113.95,
+      "center_y_mm": 226.2
+    },
+    {
+      "group_id": "R04",
+      "row": 0,
+      "question_number": 31,
+      "center_x_mm": 156.45,
+      "center_y_mm": 154.2
+    },
+    {
+      "group_id": "R04",
+      "row": 1,
+      "question_number": 32,
+      "center_x_mm": 156.45,
+      "center_y_mm": 162.2
+    },
+    {
+      "group_id": "R04",
+      "row": 2,
+      "question_number": 33,
+      "center_x_mm": 156.45,
+      "center_y_mm": 170.2
+    },
+    {
+      "group_id": "R04",
+      "row": 3,
+      "question_number": 34,
+      "center_x_mm": 156.45,
+      "center_y_mm": 178.2
+    },
+    {
+      "group_id": "R04",
+      "row": 4,
+      "question_number": 35,
+      "center_x_mm": 156.45,
+      "center_y_mm": 186.2
+    },
+    {
+      "group_id": "R04",
+      "row": 5,
+      "question_number": 36,
+      "center_x_mm": 156.45,
+      "center_y_mm": 194.2
+    },
+    {
+      "group_id": "R04",
+      "row": 6,
+      "question_number": 37,
+      "center_x_mm": 156.45,
+      "center_y_mm": 202.2
+    },
+    {
+      "group_id": "R04",
+      "row": 7,
+      "question_number": 38,
+      "center_x_mm": 156.45,
+      "center_y_mm": 210.2
+    },
+    {
+      "group_id": "R04",
+      "row": 8,
+      "question_number": 39,
+      "center_x_mm": 156.45,
+      "center_y_mm": 218.2
+    },
+    {
+      "group_id": "R04",
+      "row": 9,
+      "question_number": 40,
+      "center_x_mm": 156.45,
+      "center_y_mm": 226.2
+    }
+  ],
+  "question_number_style": {
+    "enabled": true,
+    "center_gap_mm": 6.5,
+    "gray_level": 0.62,
+    "font_name": "Helvetica",
+    "font_size_pt": 6.0
+  },
+  "question_items": [
+    {
+      "group_id": "R01",
+      "row": 0,
+      "question_number": 1,
+      "number_center_x_mm": 28.95,
+      "number_center_y_mm": 154.2,
+      "options": [
+        {
+          "bubble_id": "R01_00_A",
+          "group_id": "R01",
+          "row": 0,
+          "col": 0,
+          "label": "A",
+          "center_x_mm": 35.45,
+          "center_y_mm": 154.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R01_00_B",
+          "group_id": "R01",
+          "row": 0,
+          "col": 1,
+          "label": "B",
+          "center_x_mm": 43.45,
+          "center_y_mm": 154.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R01_00_C",
+          "group_id": "R01",
+          "row": 0,
+          "col": 2,
+          "label": "C",
+          "center_x_mm": 51.45,
+          "center_y_mm": 154.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R01_00_D",
+          "group_id": "R01",
+          "row": 0,
+          "col": 3,
+          "label": "D",
+          "center_x_mm": 59.45,
+          "center_y_mm": 154.2,
+          "radius_mm": 2.0
+        }
+      ]
+    },
+    {
+      "group_id": "R01",
+      "row": 1,
+      "question_number": 2,
+      "number_center_x_mm": 28.95,
+      "number_center_y_mm": 162.2,
+      "options": [
+        {
+          "bubble_id": "R01_01_A",
+          "group_id": "R01",
+          "row": 1,
+          "col": 0,
+          "label": "A",
+          "center_x_mm": 35.45,
+          "center_y_mm": 162.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R01_01_B",
+          "group_id": "R01",
+          "row": 1,
+          "col": 1,
+          "label": "B",
+          "center_x_mm": 43.45,
+          "center_y_mm": 162.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R01_01_C",
+          "group_id": "R01",
+          "row": 1,
+          "col": 2,
+          "label": "C",
+          "center_x_mm": 51.45,
+          "center_y_mm": 162.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R01_01_D",
+          "group_id": "R01",
+          "row": 1,
+          "col": 3,
+          "label": "D",
+          "center_x_mm": 59.45,
+          "center_y_mm": 162.2,
+          "radius_mm": 2.0
+        }
+      ]
+    },
+    {
+      "group_id": "R01",
+      "row": 2,
+      "question_number": 3,
+      "number_center_x_mm": 28.95,
+      "number_center_y_mm": 170.2,
+      "options": [
+        {
+          "bubble_id": "R01_02_A",
+          "group_id": "R01",
+          "row": 2,
+          "col": 0,
+          "label": "A",
+          "center_x_mm": 35.45,
+          "center_y_mm": 170.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R01_02_B",
+          "group_id": "R01",
+          "row": 2,
+          "col": 1,
+          "label": "B",
+          "center_x_mm": 43.45,
+          "center_y_mm": 170.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R01_02_C",
+          "group_id": "R01",
+          "row": 2,
+          "col": 2,
+          "label": "C",
+          "center_x_mm": 51.45,
+          "center_y_mm": 170.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R01_02_D",
+          "group_id": "R01",
+          "row": 2,
+          "col": 3,
+          "label": "D",
+          "center_x_mm": 59.45,
+          "center_y_mm": 170.2,
+          "radius_mm": 2.0
+        }
+      ]
+    },
+    {
+      "group_id": "R01",
+      "row": 3,
+      "question_number": 4,
+      "number_center_x_mm": 28.95,
+      "number_center_y_mm": 178.2,
+      "options": [
+        {
+          "bubble_id": "R01_03_A",
+          "group_id": "R01",
+          "row": 3,
+          "col": 0,
+          "label": "A",
+          "center_x_mm": 35.45,
+          "center_y_mm": 178.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R01_03_B",
+          "group_id": "R01",
+          "row": 3,
+          "col": 1,
+          "label": "B",
+          "center_x_mm": 43.45,
+          "center_y_mm": 178.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R01_03_C",
+          "group_id": "R01",
+          "row": 3,
+          "col": 2,
+          "label": "C",
+          "center_x_mm": 51.45,
+          "center_y_mm": 178.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R01_03_D",
+          "group_id": "R01",
+          "row": 3,
+          "col": 3,
+          "label": "D",
+          "center_x_mm": 59.45,
+          "center_y_mm": 178.2,
+          "radius_mm": 2.0
+        }
+      ]
+    },
+    {
+      "group_id": "R01",
+      "row": 4,
+      "question_number": 5,
+      "number_center_x_mm": 28.95,
+      "number_center_y_mm": 186.2,
+      "options": [
+        {
+          "bubble_id": "R01_04_A",
+          "group_id": "R01",
+          "row": 4,
+          "col": 0,
+          "label": "A",
+          "center_x_mm": 35.45,
+          "center_y_mm": 186.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R01_04_B",
+          "group_id": "R01",
+          "row": 4,
+          "col": 1,
+          "label": "B",
+          "center_x_mm": 43.45,
+          "center_y_mm": 186.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R01_04_C",
+          "group_id": "R01",
+          "row": 4,
+          "col": 2,
+          "label": "C",
+          "center_x_mm": 51.45,
+          "center_y_mm": 186.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R01_04_D",
+          "group_id": "R01",
+          "row": 4,
+          "col": 3,
+          "label": "D",
+          "center_x_mm": 59.45,
+          "center_y_mm": 186.2,
+          "radius_mm": 2.0
+        }
+      ]
+    },
+    {
+      "group_id": "R01",
+      "row": 5,
+      "question_number": 6,
+      "number_center_x_mm": 28.95,
+      "number_center_y_mm": 194.2,
+      "options": [
+        {
+          "bubble_id": "R01_05_A",
+          "group_id": "R01",
+          "row": 5,
+          "col": 0,
+          "label": "A",
+          "center_x_mm": 35.45,
+          "center_y_mm": 194.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R01_05_B",
+          "group_id": "R01",
+          "row": 5,
+          "col": 1,
+          "label": "B",
+          "center_x_mm": 43.45,
+          "center_y_mm": 194.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R01_05_C",
+          "group_id": "R01",
+          "row": 5,
+          "col": 2,
+          "label": "C",
+          "center_x_mm": 51.45,
+          "center_y_mm": 194.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R01_05_D",
+          "group_id": "R01",
+          "row": 5,
+          "col": 3,
+          "label": "D",
+          "center_x_mm": 59.45,
+          "center_y_mm": 194.2,
+          "radius_mm": 2.0
+        }
+      ]
+    },
+    {
+      "group_id": "R01",
+      "row": 6,
+      "question_number": 7,
+      "number_center_x_mm": 28.95,
+      "number_center_y_mm": 202.2,
+      "options": [
+        {
+          "bubble_id": "R01_06_A",
+          "group_id": "R01",
+          "row": 6,
+          "col": 0,
+          "label": "A",
+          "center_x_mm": 35.45,
+          "center_y_mm": 202.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R01_06_B",
+          "group_id": "R01",
+          "row": 6,
+          "col": 1,
+          "label": "B",
+          "center_x_mm": 43.45,
+          "center_y_mm": 202.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R01_06_C",
+          "group_id": "R01",
+          "row": 6,
+          "col": 2,
+          "label": "C",
+          "center_x_mm": 51.45,
+          "center_y_mm": 202.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R01_06_D",
+          "group_id": "R01",
+          "row": 6,
+          "col": 3,
+          "label": "D",
+          "center_x_mm": 59.45,
+          "center_y_mm": 202.2,
+          "radius_mm": 2.0
+        }
+      ]
+    },
+    {
+      "group_id": "R01",
+      "row": 7,
+      "question_number": 8,
+      "number_center_x_mm": 28.95,
+      "number_center_y_mm": 210.2,
+      "options": [
+        {
+          "bubble_id": "R01_07_A",
+          "group_id": "R01",
+          "row": 7,
+          "col": 0,
+          "label": "A",
+          "center_x_mm": 35.45,
+          "center_y_mm": 210.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R01_07_B",
+          "group_id": "R01",
+          "row": 7,
+          "col": 1,
+          "label": "B",
+          "center_x_mm": 43.45,
+          "center_y_mm": 210.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R01_07_C",
+          "group_id": "R01",
+          "row": 7,
+          "col": 2,
+          "label": "C",
+          "center_x_mm": 51.45,
+          "center_y_mm": 210.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R01_07_D",
+          "group_id": "R01",
+          "row": 7,
+          "col": 3,
+          "label": "D",
+          "center_x_mm": 59.45,
+          "center_y_mm": 210.2,
+          "radius_mm": 2.0
+        }
+      ]
+    },
+    {
+      "group_id": "R01",
+      "row": 8,
+      "question_number": 9,
+      "number_center_x_mm": 28.95,
+      "number_center_y_mm": 218.2,
+      "options": [
+        {
+          "bubble_id": "R01_08_A",
+          "group_id": "R01",
+          "row": 8,
+          "col": 0,
+          "label": "A",
+          "center_x_mm": 35.45,
+          "center_y_mm": 218.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R01_08_B",
+          "group_id": "R01",
+          "row": 8,
+          "col": 1,
+          "label": "B",
+          "center_x_mm": 43.45,
+          "center_y_mm": 218.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R01_08_C",
+          "group_id": "R01",
+          "row": 8,
+          "col": 2,
+          "label": "C",
+          "center_x_mm": 51.45,
+          "center_y_mm": 218.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R01_08_D",
+          "group_id": "R01",
+          "row": 8,
+          "col": 3,
+          "label": "D",
+          "center_x_mm": 59.45,
+          "center_y_mm": 218.2,
+          "radius_mm": 2.0
+        }
+      ]
+    },
+    {
+      "group_id": "R01",
+      "row": 9,
+      "question_number": 10,
+      "number_center_x_mm": 28.95,
+      "number_center_y_mm": 226.2,
+      "options": [
+        {
+          "bubble_id": "R01_09_A",
+          "group_id": "R01",
+          "row": 9,
+          "col": 0,
+          "label": "A",
+          "center_x_mm": 35.45,
+          "center_y_mm": 226.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R01_09_B",
+          "group_id": "R01",
+          "row": 9,
+          "col": 1,
+          "label": "B",
+          "center_x_mm": 43.45,
+          "center_y_mm": 226.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R01_09_C",
+          "group_id": "R01",
+          "row": 9,
+          "col": 2,
+          "label": "C",
+          "center_x_mm": 51.45,
+          "center_y_mm": 226.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R01_09_D",
+          "group_id": "R01",
+          "row": 9,
+          "col": 3,
+          "label": "D",
+          "center_x_mm": 59.45,
+          "center_y_mm": 226.2,
+          "radius_mm": 2.0
+        }
+      ]
+    },
+    {
+      "group_id": "R02",
+      "row": 0,
+      "question_number": 11,
+      "number_center_x_mm": 71.45,
+      "number_center_y_mm": 154.2,
+      "options": [
+        {
+          "bubble_id": "R02_00_A",
+          "group_id": "R02",
+          "row": 0,
+          "col": 0,
+          "label": "A",
+          "center_x_mm": 77.95,
+          "center_y_mm": 154.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R02_00_B",
+          "group_id": "R02",
+          "row": 0,
+          "col": 1,
+          "label": "B",
+          "center_x_mm": 85.95,
+          "center_y_mm": 154.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R02_00_C",
+          "group_id": "R02",
+          "row": 0,
+          "col": 2,
+          "label": "C",
+          "center_x_mm": 93.95,
+          "center_y_mm": 154.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R02_00_D",
+          "group_id": "R02",
+          "row": 0,
+          "col": 3,
+          "label": "D",
+          "center_x_mm": 101.95,
+          "center_y_mm": 154.2,
+          "radius_mm": 2.0
+        }
+      ]
+    },
+    {
+      "group_id": "R02",
+      "row": 1,
+      "question_number": 12,
+      "number_center_x_mm": 71.45,
+      "number_center_y_mm": 162.2,
+      "options": [
+        {
+          "bubble_id": "R02_01_A",
+          "group_id": "R02",
+          "row": 1,
+          "col": 0,
+          "label": "A",
+          "center_x_mm": 77.95,
+          "center_y_mm": 162.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R02_01_B",
+          "group_id": "R02",
+          "row": 1,
+          "col": 1,
+          "label": "B",
+          "center_x_mm": 85.95,
+          "center_y_mm": 162.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R02_01_C",
+          "group_id": "R02",
+          "row": 1,
+          "col": 2,
+          "label": "C",
+          "center_x_mm": 93.95,
+          "center_y_mm": 162.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R02_01_D",
+          "group_id": "R02",
+          "row": 1,
+          "col": 3,
+          "label": "D",
+          "center_x_mm": 101.95,
+          "center_y_mm": 162.2,
+          "radius_mm": 2.0
+        }
+      ]
+    },
+    {
+      "group_id": "R02",
+      "row": 2,
+      "question_number": 13,
+      "number_center_x_mm": 71.45,
+      "number_center_y_mm": 170.2,
+      "options": [
+        {
+          "bubble_id": "R02_02_A",
+          "group_id": "R02",
+          "row": 2,
+          "col": 0,
+          "label": "A",
+          "center_x_mm": 77.95,
+          "center_y_mm": 170.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R02_02_B",
+          "group_id": "R02",
+          "row": 2,
+          "col": 1,
+          "label": "B",
+          "center_x_mm": 85.95,
+          "center_y_mm": 170.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R02_02_C",
+          "group_id": "R02",
+          "row": 2,
+          "col": 2,
+          "label": "C",
+          "center_x_mm": 93.95,
+          "center_y_mm": 170.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R02_02_D",
+          "group_id": "R02",
+          "row": 2,
+          "col": 3,
+          "label": "D",
+          "center_x_mm": 101.95,
+          "center_y_mm": 170.2,
+          "radius_mm": 2.0
+        }
+      ]
+    },
+    {
+      "group_id": "R02",
+      "row": 3,
+      "question_number": 14,
+      "number_center_x_mm": 71.45,
+      "number_center_y_mm": 178.2,
+      "options": [
+        {
+          "bubble_id": "R02_03_A",
+          "group_id": "R02",
+          "row": 3,
+          "col": 0,
+          "label": "A",
+          "center_x_mm": 77.95,
+          "center_y_mm": 178.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R02_03_B",
+          "group_id": "R02",
+          "row": 3,
+          "col": 1,
+          "label": "B",
+          "center_x_mm": 85.95,
+          "center_y_mm": 178.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R02_03_C",
+          "group_id": "R02",
+          "row": 3,
+          "col": 2,
+          "label": "C",
+          "center_x_mm": 93.95,
+          "center_y_mm": 178.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R02_03_D",
+          "group_id": "R02",
+          "row": 3,
+          "col": 3,
+          "label": "D",
+          "center_x_mm": 101.95,
+          "center_y_mm": 178.2,
+          "radius_mm": 2.0
+        }
+      ]
+    },
+    {
+      "group_id": "R02",
+      "row": 4,
+      "question_number": 15,
+      "number_center_x_mm": 71.45,
+      "number_center_y_mm": 186.2,
+      "options": [
+        {
+          "bubble_id": "R02_04_A",
+          "group_id": "R02",
+          "row": 4,
+          "col": 0,
+          "label": "A",
+          "center_x_mm": 77.95,
+          "center_y_mm": 186.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R02_04_B",
+          "group_id": "R02",
+          "row": 4,
+          "col": 1,
+          "label": "B",
+          "center_x_mm": 85.95,
+          "center_y_mm": 186.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R02_04_C",
+          "group_id": "R02",
+          "row": 4,
+          "col": 2,
+          "label": "C",
+          "center_x_mm": 93.95,
+          "center_y_mm": 186.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R02_04_D",
+          "group_id": "R02",
+          "row": 4,
+          "col": 3,
+          "label": "D",
+          "center_x_mm": 101.95,
+          "center_y_mm": 186.2,
+          "radius_mm": 2.0
+        }
+      ]
+    },
+    {
+      "group_id": "R02",
+      "row": 5,
+      "question_number": 16,
+      "number_center_x_mm": 71.45,
+      "number_center_y_mm": 194.2,
+      "options": [
+        {
+          "bubble_id": "R02_05_A",
+          "group_id": "R02",
+          "row": 5,
+          "col": 0,
+          "label": "A",
+          "center_x_mm": 77.95,
+          "center_y_mm": 194.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R02_05_B",
+          "group_id": "R02",
+          "row": 5,
+          "col": 1,
+          "label": "B",
+          "center_x_mm": 85.95,
+          "center_y_mm": 194.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R02_05_C",
+          "group_id": "R02",
+          "row": 5,
+          "col": 2,
+          "label": "C",
+          "center_x_mm": 93.95,
+          "center_y_mm": 194.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R02_05_D",
+          "group_id": "R02",
+          "row": 5,
+          "col": 3,
+          "label": "D",
+          "center_x_mm": 101.95,
+          "center_y_mm": 194.2,
+          "radius_mm": 2.0
+        }
+      ]
+    },
+    {
+      "group_id": "R02",
+      "row": 6,
+      "question_number": 17,
+      "number_center_x_mm": 71.45,
+      "number_center_y_mm": 202.2,
+      "options": [
+        {
+          "bubble_id": "R02_06_A",
+          "group_id": "R02",
+          "row": 6,
+          "col": 0,
+          "label": "A",
+          "center_x_mm": 77.95,
+          "center_y_mm": 202.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R02_06_B",
+          "group_id": "R02",
+          "row": 6,
+          "col": 1,
+          "label": "B",
+          "center_x_mm": 85.95,
+          "center_y_mm": 202.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R02_06_C",
+          "group_id": "R02",
+          "row": 6,
+          "col": 2,
+          "label": "C",
+          "center_x_mm": 93.95,
+          "center_y_mm": 202.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R02_06_D",
+          "group_id": "R02",
+          "row": 6,
+          "col": 3,
+          "label": "D",
+          "center_x_mm": 101.95,
+          "center_y_mm": 202.2,
+          "radius_mm": 2.0
+        }
+      ]
+    },
+    {
+      "group_id": "R02",
+      "row": 7,
+      "question_number": 18,
+      "number_center_x_mm": 71.45,
+      "number_center_y_mm": 210.2,
+      "options": [
+        {
+          "bubble_id": "R02_07_A",
+          "group_id": "R02",
+          "row": 7,
+          "col": 0,
+          "label": "A",
+          "center_x_mm": 77.95,
+          "center_y_mm": 210.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R02_07_B",
+          "group_id": "R02",
+          "row": 7,
+          "col": 1,
+          "label": "B",
+          "center_x_mm": 85.95,
+          "center_y_mm": 210.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R02_07_C",
+          "group_id": "R02",
+          "row": 7,
+          "col": 2,
+          "label": "C",
+          "center_x_mm": 93.95,
+          "center_y_mm": 210.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R02_07_D",
+          "group_id": "R02",
+          "row": 7,
+          "col": 3,
+          "label": "D",
+          "center_x_mm": 101.95,
+          "center_y_mm": 210.2,
+          "radius_mm": 2.0
+        }
+      ]
+    },
+    {
+      "group_id": "R02",
+      "row": 8,
+      "question_number": 19,
+      "number_center_x_mm": 71.45,
+      "number_center_y_mm": 218.2,
+      "options": [
+        {
+          "bubble_id": "R02_08_A",
+          "group_id": "R02",
+          "row": 8,
+          "col": 0,
+          "label": "A",
+          "center_x_mm": 77.95,
+          "center_y_mm": 218.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R02_08_B",
+          "group_id": "R02",
+          "row": 8,
+          "col": 1,
+          "label": "B",
+          "center_x_mm": 85.95,
+          "center_y_mm": 218.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R02_08_C",
+          "group_id": "R02",
+          "row": 8,
+          "col": 2,
+          "label": "C",
+          "center_x_mm": 93.95,
+          "center_y_mm": 218.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R02_08_D",
+          "group_id": "R02",
+          "row": 8,
+          "col": 3,
+          "label": "D",
+          "center_x_mm": 101.95,
+          "center_y_mm": 218.2,
+          "radius_mm": 2.0
+        }
+      ]
+    },
+    {
+      "group_id": "R02",
+      "row": 9,
+      "question_number": 20,
+      "number_center_x_mm": 71.45,
+      "number_center_y_mm": 226.2,
+      "options": [
+        {
+          "bubble_id": "R02_09_A",
+          "group_id": "R02",
+          "row": 9,
+          "col": 0,
+          "label": "A",
+          "center_x_mm": 77.95,
+          "center_y_mm": 226.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R02_09_B",
+          "group_id": "R02",
+          "row": 9,
+          "col": 1,
+          "label": "B",
+          "center_x_mm": 85.95,
+          "center_y_mm": 226.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R02_09_C",
+          "group_id": "R02",
+          "row": 9,
+          "col": 2,
+          "label": "C",
+          "center_x_mm": 93.95,
+          "center_y_mm": 226.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R02_09_D",
+          "group_id": "R02",
+          "row": 9,
+          "col": 3,
+          "label": "D",
+          "center_x_mm": 101.95,
+          "center_y_mm": 226.2,
+          "radius_mm": 2.0
+        }
+      ]
+    },
+    {
+      "group_id": "R03",
+      "row": 0,
+      "question_number": 21,
+      "number_center_x_mm": 113.95,
+      "number_center_y_mm": 154.2,
+      "options": [
+        {
+          "bubble_id": "R03_00_A",
+          "group_id": "R03",
+          "row": 0,
+          "col": 0,
+          "label": "A",
+          "center_x_mm": 120.45,
+          "center_y_mm": 154.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R03_00_B",
+          "group_id": "R03",
+          "row": 0,
+          "col": 1,
+          "label": "B",
+          "center_x_mm": 128.45,
+          "center_y_mm": 154.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R03_00_C",
+          "group_id": "R03",
+          "row": 0,
+          "col": 2,
+          "label": "C",
+          "center_x_mm": 136.45,
+          "center_y_mm": 154.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R03_00_D",
+          "group_id": "R03",
+          "row": 0,
+          "col": 3,
+          "label": "D",
+          "center_x_mm": 144.45,
+          "center_y_mm": 154.2,
+          "radius_mm": 2.0
+        }
+      ]
+    },
+    {
+      "group_id": "R03",
+      "row": 1,
+      "question_number": 22,
+      "number_center_x_mm": 113.95,
+      "number_center_y_mm": 162.2,
+      "options": [
+        {
+          "bubble_id": "R03_01_A",
+          "group_id": "R03",
+          "row": 1,
+          "col": 0,
+          "label": "A",
+          "center_x_mm": 120.45,
+          "center_y_mm": 162.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R03_01_B",
+          "group_id": "R03",
+          "row": 1,
+          "col": 1,
+          "label": "B",
+          "center_x_mm": 128.45,
+          "center_y_mm": 162.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R03_01_C",
+          "group_id": "R03",
+          "row": 1,
+          "col": 2,
+          "label": "C",
+          "center_x_mm": 136.45,
+          "center_y_mm": 162.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R03_01_D",
+          "group_id": "R03",
+          "row": 1,
+          "col": 3,
+          "label": "D",
+          "center_x_mm": 144.45,
+          "center_y_mm": 162.2,
+          "radius_mm": 2.0
+        }
+      ]
+    },
+    {
+      "group_id": "R03",
+      "row": 2,
+      "question_number": 23,
+      "number_center_x_mm": 113.95,
+      "number_center_y_mm": 170.2,
+      "options": [
+        {
+          "bubble_id": "R03_02_A",
+          "group_id": "R03",
+          "row": 2,
+          "col": 0,
+          "label": "A",
+          "center_x_mm": 120.45,
+          "center_y_mm": 170.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R03_02_B",
+          "group_id": "R03",
+          "row": 2,
+          "col": 1,
+          "label": "B",
+          "center_x_mm": 128.45,
+          "center_y_mm": 170.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R03_02_C",
+          "group_id": "R03",
+          "row": 2,
+          "col": 2,
+          "label": "C",
+          "center_x_mm": 136.45,
+          "center_y_mm": 170.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R03_02_D",
+          "group_id": "R03",
+          "row": 2,
+          "col": 3,
+          "label": "D",
+          "center_x_mm": 144.45,
+          "center_y_mm": 170.2,
+          "radius_mm": 2.0
+        }
+      ]
+    },
+    {
+      "group_id": "R03",
+      "row": 3,
+      "question_number": 24,
+      "number_center_x_mm": 113.95,
+      "number_center_y_mm": 178.2,
+      "options": [
+        {
+          "bubble_id": "R03_03_A",
+          "group_id": "R03",
+          "row": 3,
+          "col": 0,
+          "label": "A",
+          "center_x_mm": 120.45,
+          "center_y_mm": 178.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R03_03_B",
+          "group_id": "R03",
+          "row": 3,
+          "col": 1,
+          "label": "B",
+          "center_x_mm": 128.45,
+          "center_y_mm": 178.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R03_03_C",
+          "group_id": "R03",
+          "row": 3,
+          "col": 2,
+          "label": "C",
+          "center_x_mm": 136.45,
+          "center_y_mm": 178.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R03_03_D",
+          "group_id": "R03",
+          "row": 3,
+          "col": 3,
+          "label": "D",
+          "center_x_mm": 144.45,
+          "center_y_mm": 178.2,
+          "radius_mm": 2.0
+        }
+      ]
+    },
+    {
+      "group_id": "R03",
+      "row": 4,
+      "question_number": 25,
+      "number_center_x_mm": 113.95,
+      "number_center_y_mm": 186.2,
+      "options": [
+        {
+          "bubble_id": "R03_04_A",
+          "group_id": "R03",
+          "row": 4,
+          "col": 0,
+          "label": "A",
+          "center_x_mm": 120.45,
+          "center_y_mm": 186.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R03_04_B",
+          "group_id": "R03",
+          "row": 4,
+          "col": 1,
+          "label": "B",
+          "center_x_mm": 128.45,
+          "center_y_mm": 186.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R03_04_C",
+          "group_id": "R03",
+          "row": 4,
+          "col": 2,
+          "label": "C",
+          "center_x_mm": 136.45,
+          "center_y_mm": 186.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R03_04_D",
+          "group_id": "R03",
+          "row": 4,
+          "col": 3,
+          "label": "D",
+          "center_x_mm": 144.45,
+          "center_y_mm": 186.2,
+          "radius_mm": 2.0
+        }
+      ]
+    },
+    {
+      "group_id": "R03",
+      "row": 5,
+      "question_number": 26,
+      "number_center_x_mm": 113.95,
+      "number_center_y_mm": 194.2,
+      "options": [
+        {
+          "bubble_id": "R03_05_A",
+          "group_id": "R03",
+          "row": 5,
+          "col": 0,
+          "label": "A",
+          "center_x_mm": 120.45,
+          "center_y_mm": 194.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R03_05_B",
+          "group_id": "R03",
+          "row": 5,
+          "col": 1,
+          "label": "B",
+          "center_x_mm": 128.45,
+          "center_y_mm": 194.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R03_05_C",
+          "group_id": "R03",
+          "row": 5,
+          "col": 2,
+          "label": "C",
+          "center_x_mm": 136.45,
+          "center_y_mm": 194.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R03_05_D",
+          "group_id": "R03",
+          "row": 5,
+          "col": 3,
+          "label": "D",
+          "center_x_mm": 144.45,
+          "center_y_mm": 194.2,
+          "radius_mm": 2.0
+        }
+      ]
+    },
+    {
+      "group_id": "R03",
+      "row": 6,
+      "question_number": 27,
+      "number_center_x_mm": 113.95,
+      "number_center_y_mm": 202.2,
+      "options": [
+        {
+          "bubble_id": "R03_06_A",
+          "group_id": "R03",
+          "row": 6,
+          "col": 0,
+          "label": "A",
+          "center_x_mm": 120.45,
+          "center_y_mm": 202.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R03_06_B",
+          "group_id": "R03",
+          "row": 6,
+          "col": 1,
+          "label": "B",
+          "center_x_mm": 128.45,
+          "center_y_mm": 202.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R03_06_C",
+          "group_id": "R03",
+          "row": 6,
+          "col": 2,
+          "label": "C",
+          "center_x_mm": 136.45,
+          "center_y_mm": 202.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R03_06_D",
+          "group_id": "R03",
+          "row": 6,
+          "col": 3,
+          "label": "D",
+          "center_x_mm": 144.45,
+          "center_y_mm": 202.2,
+          "radius_mm": 2.0
+        }
+      ]
+    },
+    {
+      "group_id": "R03",
+      "row": 7,
+      "question_number": 28,
+      "number_center_x_mm": 113.95,
+      "number_center_y_mm": 210.2,
+      "options": [
+        {
+          "bubble_id": "R03_07_A",
+          "group_id": "R03",
+          "row": 7,
+          "col": 0,
+          "label": "A",
+          "center_x_mm": 120.45,
+          "center_y_mm": 210.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R03_07_B",
+          "group_id": "R03",
+          "row": 7,
+          "col": 1,
+          "label": "B",
+          "center_x_mm": 128.45,
+          "center_y_mm": 210.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R03_07_C",
+          "group_id": "R03",
+          "row": 7,
+          "col": 2,
+          "label": "C",
+          "center_x_mm": 136.45,
+          "center_y_mm": 210.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R03_07_D",
+          "group_id": "R03",
+          "row": 7,
+          "col": 3,
+          "label": "D",
+          "center_x_mm": 144.45,
+          "center_y_mm": 210.2,
+          "radius_mm": 2.0
+        }
+      ]
+    },
+    {
+      "group_id": "R03",
+      "row": 8,
+      "question_number": 29,
+      "number_center_x_mm": 113.95,
+      "number_center_y_mm": 218.2,
+      "options": [
+        {
+          "bubble_id": "R03_08_A",
+          "group_id": "R03",
+          "row": 8,
+          "col": 0,
+          "label": "A",
+          "center_x_mm": 120.45,
+          "center_y_mm": 218.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R03_08_B",
+          "group_id": "R03",
+          "row": 8,
+          "col": 1,
+          "label": "B",
+          "center_x_mm": 128.45,
+          "center_y_mm": 218.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R03_08_C",
+          "group_id": "R03",
+          "row": 8,
+          "col": 2,
+          "label": "C",
+          "center_x_mm": 136.45,
+          "center_y_mm": 218.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R03_08_D",
+          "group_id": "R03",
+          "row": 8,
+          "col": 3,
+          "label": "D",
+          "center_x_mm": 144.45,
+          "center_y_mm": 218.2,
+          "radius_mm": 2.0
+        }
+      ]
+    },
+    {
+      "group_id": "R03",
+      "row": 9,
+      "question_number": 30,
+      "number_center_x_mm": 113.95,
+      "number_center_y_mm": 226.2,
+      "options": [
+        {
+          "bubble_id": "R03_09_A",
+          "group_id": "R03",
+          "row": 9,
+          "col": 0,
+          "label": "A",
+          "center_x_mm": 120.45,
+          "center_y_mm": 226.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R03_09_B",
+          "group_id": "R03",
+          "row": 9,
+          "col": 1,
+          "label": "B",
+          "center_x_mm": 128.45,
+          "center_y_mm": 226.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R03_09_C",
+          "group_id": "R03",
+          "row": 9,
+          "col": 2,
+          "label": "C",
+          "center_x_mm": 136.45,
+          "center_y_mm": 226.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R03_09_D",
+          "group_id": "R03",
+          "row": 9,
+          "col": 3,
+          "label": "D",
+          "center_x_mm": 144.45,
+          "center_y_mm": 226.2,
+          "radius_mm": 2.0
+        }
+      ]
+    },
+    {
+      "group_id": "R04",
+      "row": 0,
+      "question_number": 31,
+      "number_center_x_mm": 156.45,
+      "number_center_y_mm": 154.2,
+      "options": [
+        {
+          "bubble_id": "R04_00_A",
+          "group_id": "R04",
+          "row": 0,
+          "col": 0,
+          "label": "A",
+          "center_x_mm": 162.95,
+          "center_y_mm": 154.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R04_00_B",
+          "group_id": "R04",
+          "row": 0,
+          "col": 1,
+          "label": "B",
+          "center_x_mm": 170.95,
+          "center_y_mm": 154.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R04_00_C",
+          "group_id": "R04",
+          "row": 0,
+          "col": 2,
+          "label": "C",
+          "center_x_mm": 178.95,
+          "center_y_mm": 154.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R04_00_D",
+          "group_id": "R04",
+          "row": 0,
+          "col": 3,
+          "label": "D",
+          "center_x_mm": 186.95,
+          "center_y_mm": 154.2,
+          "radius_mm": 2.0
+        }
+      ]
+    },
+    {
+      "group_id": "R04",
+      "row": 1,
+      "question_number": 32,
+      "number_center_x_mm": 156.45,
+      "number_center_y_mm": 162.2,
+      "options": [
+        {
+          "bubble_id": "R04_01_A",
+          "group_id": "R04",
+          "row": 1,
+          "col": 0,
+          "label": "A",
+          "center_x_mm": 162.95,
+          "center_y_mm": 162.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R04_01_B",
+          "group_id": "R04",
+          "row": 1,
+          "col": 1,
+          "label": "B",
+          "center_x_mm": 170.95,
+          "center_y_mm": 162.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R04_01_C",
+          "group_id": "R04",
+          "row": 1,
+          "col": 2,
+          "label": "C",
+          "center_x_mm": 178.95,
+          "center_y_mm": 162.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R04_01_D",
+          "group_id": "R04",
+          "row": 1,
+          "col": 3,
+          "label": "D",
+          "center_x_mm": 186.95,
+          "center_y_mm": 162.2,
+          "radius_mm": 2.0
+        }
+      ]
+    },
+    {
+      "group_id": "R04",
+      "row": 2,
+      "question_number": 33,
+      "number_center_x_mm": 156.45,
+      "number_center_y_mm": 170.2,
+      "options": [
+        {
+          "bubble_id": "R04_02_A",
+          "group_id": "R04",
+          "row": 2,
+          "col": 0,
+          "label": "A",
+          "center_x_mm": 162.95,
+          "center_y_mm": 170.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R04_02_B",
+          "group_id": "R04",
+          "row": 2,
+          "col": 1,
+          "label": "B",
+          "center_x_mm": 170.95,
+          "center_y_mm": 170.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R04_02_C",
+          "group_id": "R04",
+          "row": 2,
+          "col": 2,
+          "label": "C",
+          "center_x_mm": 178.95,
+          "center_y_mm": 170.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R04_02_D",
+          "group_id": "R04",
+          "row": 2,
+          "col": 3,
+          "label": "D",
+          "center_x_mm": 186.95,
+          "center_y_mm": 170.2,
+          "radius_mm": 2.0
+        }
+      ]
+    },
+    {
+      "group_id": "R04",
+      "row": 3,
+      "question_number": 34,
+      "number_center_x_mm": 156.45,
+      "number_center_y_mm": 178.2,
+      "options": [
+        {
+          "bubble_id": "R04_03_A",
+          "group_id": "R04",
+          "row": 3,
+          "col": 0,
+          "label": "A",
+          "center_x_mm": 162.95,
+          "center_y_mm": 178.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R04_03_B",
+          "group_id": "R04",
+          "row": 3,
+          "col": 1,
+          "label": "B",
+          "center_x_mm": 170.95,
+          "center_y_mm": 178.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R04_03_C",
+          "group_id": "R04",
+          "row": 3,
+          "col": 2,
+          "label": "C",
+          "center_x_mm": 178.95,
+          "center_y_mm": 178.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R04_03_D",
+          "group_id": "R04",
+          "row": 3,
+          "col": 3,
+          "label": "D",
+          "center_x_mm": 186.95,
+          "center_y_mm": 178.2,
+          "radius_mm": 2.0
+        }
+      ]
+    },
+    {
+      "group_id": "R04",
+      "row": 4,
+      "question_number": 35,
+      "number_center_x_mm": 156.45,
+      "number_center_y_mm": 186.2,
+      "options": [
+        {
+          "bubble_id": "R04_04_A",
+          "group_id": "R04",
+          "row": 4,
+          "col": 0,
+          "label": "A",
+          "center_x_mm": 162.95,
+          "center_y_mm": 186.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R04_04_B",
+          "group_id": "R04",
+          "row": 4,
+          "col": 1,
+          "label": "B",
+          "center_x_mm": 170.95,
+          "center_y_mm": 186.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R04_04_C",
+          "group_id": "R04",
+          "row": 4,
+          "col": 2,
+          "label": "C",
+          "center_x_mm": 178.95,
+          "center_y_mm": 186.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R04_04_D",
+          "group_id": "R04",
+          "row": 4,
+          "col": 3,
+          "label": "D",
+          "center_x_mm": 186.95,
+          "center_y_mm": 186.2,
+          "radius_mm": 2.0
+        }
+      ]
+    },
+    {
+      "group_id": "R04",
+      "row": 5,
+      "question_number": 36,
+      "number_center_x_mm": 156.45,
+      "number_center_y_mm": 194.2,
+      "options": [
+        {
+          "bubble_id": "R04_05_A",
+          "group_id": "R04",
+          "row": 5,
+          "col": 0,
+          "label": "A",
+          "center_x_mm": 162.95,
+          "center_y_mm": 194.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R04_05_B",
+          "group_id": "R04",
+          "row": 5,
+          "col": 1,
+          "label": "B",
+          "center_x_mm": 170.95,
+          "center_y_mm": 194.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R04_05_C",
+          "group_id": "R04",
+          "row": 5,
+          "col": 2,
+          "label": "C",
+          "center_x_mm": 178.95,
+          "center_y_mm": 194.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R04_05_D",
+          "group_id": "R04",
+          "row": 5,
+          "col": 3,
+          "label": "D",
+          "center_x_mm": 186.95,
+          "center_y_mm": 194.2,
+          "radius_mm": 2.0
+        }
+      ]
+    },
+    {
+      "group_id": "R04",
+      "row": 6,
+      "question_number": 37,
+      "number_center_x_mm": 156.45,
+      "number_center_y_mm": 202.2,
+      "options": [
+        {
+          "bubble_id": "R04_06_A",
+          "group_id": "R04",
+          "row": 6,
+          "col": 0,
+          "label": "A",
+          "center_x_mm": 162.95,
+          "center_y_mm": 202.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R04_06_B",
+          "group_id": "R04",
+          "row": 6,
+          "col": 1,
+          "label": "B",
+          "center_x_mm": 170.95,
+          "center_y_mm": 202.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R04_06_C",
+          "group_id": "R04",
+          "row": 6,
+          "col": 2,
+          "label": "C",
+          "center_x_mm": 178.95,
+          "center_y_mm": 202.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R04_06_D",
+          "group_id": "R04",
+          "row": 6,
+          "col": 3,
+          "label": "D",
+          "center_x_mm": 186.95,
+          "center_y_mm": 202.2,
+          "radius_mm": 2.0
+        }
+      ]
+    },
+    {
+      "group_id": "R04",
+      "row": 7,
+      "question_number": 38,
+      "number_center_x_mm": 156.45,
+      "number_center_y_mm": 210.2,
+      "options": [
+        {
+          "bubble_id": "R04_07_A",
+          "group_id": "R04",
+          "row": 7,
+          "col": 0,
+          "label": "A",
+          "center_x_mm": 162.95,
+          "center_y_mm": 210.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R04_07_B",
+          "group_id": "R04",
+          "row": 7,
+          "col": 1,
+          "label": "B",
+          "center_x_mm": 170.95,
+          "center_y_mm": 210.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R04_07_C",
+          "group_id": "R04",
+          "row": 7,
+          "col": 2,
+          "label": "C",
+          "center_x_mm": 178.95,
+          "center_y_mm": 210.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R04_07_D",
+          "group_id": "R04",
+          "row": 7,
+          "col": 3,
+          "label": "D",
+          "center_x_mm": 186.95,
+          "center_y_mm": 210.2,
+          "radius_mm": 2.0
+        }
+      ]
+    },
+    {
+      "group_id": "R04",
+      "row": 8,
+      "question_number": 39,
+      "number_center_x_mm": 156.45,
+      "number_center_y_mm": 218.2,
+      "options": [
+        {
+          "bubble_id": "R04_08_A",
+          "group_id": "R04",
+          "row": 8,
+          "col": 0,
+          "label": "A",
+          "center_x_mm": 162.95,
+          "center_y_mm": 218.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R04_08_B",
+          "group_id": "R04",
+          "row": 8,
+          "col": 1,
+          "label": "B",
+          "center_x_mm": 170.95,
+          "center_y_mm": 218.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R04_08_C",
+          "group_id": "R04",
+          "row": 8,
+          "col": 2,
+          "label": "C",
+          "center_x_mm": 178.95,
+          "center_y_mm": 218.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R04_08_D",
+          "group_id": "R04",
+          "row": 8,
+          "col": 3,
+          "label": "D",
+          "center_x_mm": 186.95,
+          "center_y_mm": 218.2,
+          "radius_mm": 2.0
+        }
+      ]
+    },
+    {
+      "group_id": "R04",
+      "row": 9,
+      "question_number": 40,
+      "number_center_x_mm": 156.45,
+      "number_center_y_mm": 226.2,
+      "options": [
+        {
+          "bubble_id": "R04_09_A",
+          "group_id": "R04",
+          "row": 9,
+          "col": 0,
+          "label": "A",
+          "center_x_mm": 162.95,
+          "center_y_mm": 226.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R04_09_B",
+          "group_id": "R04",
+          "row": 9,
+          "col": 1,
+          "label": "B",
+          "center_x_mm": 170.95,
+          "center_y_mm": 226.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R04_09_C",
+          "group_id": "R04",
+          "row": 9,
+          "col": 2,
+          "label": "C",
+          "center_x_mm": 178.95,
+          "center_y_mm": 226.2,
+          "radius_mm": 2.0
+        },
+        {
+          "bubble_id": "R04_09_D",
+          "group_id": "R04",
+          "row": 9,
+          "col": 3,
+          "label": "D",
+          "center_x_mm": 186.95,
+          "center_y_mm": 226.2,
+          "radius_mm": 2.0
+        }
+      ]
+    }
+  ],
+  "auxiliary_blocks": [
+    {
+      "block_id": "header",
+      "title": "HEADER",
+      "block_type": "handwrite",
+      "x_mm": 37.0,
+      "y_mm": 15.0,
+      "width_mm": 141.9,
+      "height_mm": 15.0,
+      "omr_config": null
+    },
+    {
+      "block_id": "document_type",
+      "title": "DOCUMENTO",
+      "block_type": "omr",
+      "x_mm": 22.0,
+      "y_mm": 40.0,
+      "width_mm": 24.0,
+      "height_mm": 88.0,
+      "omr_config": {
+        "rows": 7,
+        "cols": 1,
+        "bubble_diameter_mm": 4.0,
+        "spacing_x_mm": 8.0,
+        "spacing_y_mm": 8.0,
+        "selection_mode": "single_choice",
+        "row_labels": [
+          "RC",
+          "TI",
+          "CC",
+          "CE",
+          "PA",
+          "PPT",
+          "OTRO"
+        ],
+        "col_labels": null,
+        "notes": "wireframe-derived",
+        "left_padding_mm": 15.0,
+        "top_padding_mm": 18.0
+      }
+    },
+    {
+      "block_id": "student_identity_number",
+      "title": "NUMERO DE IDENTIDAD",
+      "block_type": "omr",
+      "x_mm": 51.0,
+      "y_mm": 40.0,
+      "width_mm": 102.0,
+      "height_mm": 88.0,
+      "omr_config": {
+        "rows": 10,
+        "cols": 12,
+        "bubble_diameter_mm": 4.0,
+        "spacing_x_mm": 8.0,
+        "spacing_y_mm": 8.0,
+        "selection_mode": "single_per_column",
+        "row_labels": [
+          "0",
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9"
+        ],
+        "col_labels": null,
+        "notes": "wireframe-derived",
+        "left_padding_mm": 5.0,
+        "top_padding_mm": 6.0
+      }
+    },
+    {
+      "block_id": "exam_identifier",
+      "title": "IDENTIFICACION EXAMEN",
+      "block_type": "omr",
+      "x_mm": 158.0,
+      "y_mm": 40.0,
+      "width_mm": 35.9,
+      "height_mm": 88.0,
+      "omr_config": {
+        "rows": 10,
+        "cols": 4,
+        "bubble_diameter_mm": 4.0,
+        "spacing_x_mm": 8.0,
+        "spacing_y_mm": 8.0,
+        "selection_mode": "single_per_column",
+        "row_labels": [
+          "0",
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9"
+        ],
+        "col_labels": null,
+        "notes": "wireframe-derived",
+        "left_padding_mm": 5.0,
+        "top_padding_mm": 6.0
+      }
+    }
+  ]
+}

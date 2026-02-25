@@ -35,7 +35,7 @@ from app.modules.omr_reader.reader_strategy import (
 from app.modules.omr_reader.result_builder import build_omr_read_result
 from app.modules.omr_reader.openai_reader import run_openai_omr_read
 
-DEFAULT_METADATA_PATH = "data/output/template_basica_omr_v1.json"
+DEFAULT_METADATA_PATH = settings.omr_default_metadata_path
 DEFAULT_UPLOADS_DIR = "data/input/mobile_uploads"
 DEFAULT_DEBUG_OUTPUT_DIR = "data/output/debug_preprocess"
 
