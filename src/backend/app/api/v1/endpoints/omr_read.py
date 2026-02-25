@@ -9,6 +9,8 @@ from fastapi import APIRouter, File, Form, HTTPException, UploadFile, status
 from app.core.config import settings
 from app.modules.omr_reader.api_service import (
     DEFAULT_METADATA_PATH,
+    persist_auxiliary_ratios_csv,
+    persist_question_ratios_csv,
     persist_omr_trace_json,
     persist_uploaded_image_bytes,
     resolve_reader_backend,
@@ -25,8 +27,6 @@ async def read_photo_omr(
     photo: UploadFile = File(...),
     metadata_path: str | None = Form(None),
     px_per_mm: float = Form(10.0),
-    marked_threshold: float = Form(0.12),
-    unmarked_threshold: float = Form(0.08),
     robust_mode: bool = Form(False),
     save_debug_artifacts: bool = Form(True),
 ) -> dict:
@@ -56,8 +56,8 @@ async def read_photo_omr(
             image_bytes=image_bytes,
             metadata_path=effective_metadata_path,
             px_per_mm=px_per_mm,
-            marked_threshold=marked_threshold,
-            unmarked_threshold=unmarked_threshold,
+            marked_threshold=settings.omr_marked_threshold,
+            unmarked_threshold=settings.omr_unmarked_threshold,
             robust_mode=robust_mode,
             save_debug_artifacts=save_debug_artifacts,
             debug_base_name=uploaded_path.stem,
@@ -66,9 +66,19 @@ async def read_photo_omr(
             uploaded_image_path=uploaded_path,
             result_payload=result,
         )
+        ratios_csv_path = persist_question_ratios_csv(
+            uploaded_image_path=uploaded_path,
+            result_payload=result,
+        )
+        auxiliary_ratios_csv_path = persist_auxiliary_ratios_csv(
+            uploaded_image_path=uploaded_path,
+            result_payload=result,
+        )
         result.setdefault("diagnostics", {})
         result["diagnostics"]["uploaded_image_path"] = str(uploaded_path)
         result["diagnostics"]["trace_json_path"] = str(trace_json_path)
+        result["diagnostics"]["ratios_csv_path"] = str(ratios_csv_path)
+        result["diagnostics"]["auxiliary_ratios_csv_path"] = str(auxiliary_ratios_csv_path)
         result["diagnostics"]["request_total_ms"] = round((time.perf_counter() - request_start) * 1000.0, 2)
         review_questions = sorted(
             int(item.get("question_number"))
@@ -85,6 +95,8 @@ async def read_photo_omr(
         )
         logger.info("OMR image saved at: %s", uploaded_path)
         logger.info("OMR trace json saved at: %s", trace_json_path)
+        logger.info("OMR ratios csv saved at: %s", ratios_csv_path)
+        logger.info("OMR auxiliary ratios csv saved at: %s", auxiliary_ratios_csv_path)
         diagnostics = result.get("diagnostics", {})
         engine = diagnostics.get("reader_backend", configured_backend)
         usage = diagnostics.get("gemini_usage", {})
@@ -202,8 +214,8 @@ async def read_photo_omr(
                     key=lambda pair: pair[1],
                     reverse=True,
                 )
-                ratio_text = ", ".join(f"row{row}={value:.4f}" for row, value in pairs)
-                aux_ratio_lines.append(f"{block_id}: {ratio_text}")
+                aux_ratio_lines.append(f"{block_id}:")
+                aux_ratio_lines.extend(f"  row{row}={value:.4f}" for row, value in pairs)
                 continue
 
             for col in block.get("columns", []) if isinstance(block.get("columns"), list) else []:
@@ -216,8 +228,8 @@ async def read_photo_omr(
                     key=lambda pair: pair[1],
                     reverse=True,
                 )
-                ratio_text = ", ".join(f"row{row}={value:.4f}" for row, value in pairs)
-                aux_ratio_lines.append(f"{block_id}[col {col_index}]: {ratio_text}")
+                aux_ratio_lines.append(f"{block_id}[col {col_index}]:")
+                aux_ratio_lines.extend(f"  row{row}={value:.4f}" for row, value in pairs)
         if aux_ratio_lines:
             logger.info("OMR ratios auxiliares:\n%s", "\n".join(aux_ratio_lines))
         return result

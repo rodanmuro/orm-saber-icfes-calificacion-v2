@@ -25,7 +25,7 @@ def classify_bubbles(
     aligned_image: np.ndarray,
     metadata: dict[str, Any],
     px_per_mm: float = 10.0,
-    marked_threshold: float = 0.33,
+    marked_threshold: float = 0.4,
     unmarked_threshold: float = 0.18,
     inner_radius_factor: float = 0.58,
     robust_mode: bool = False,

@@ -8,6 +8,8 @@ class Settings(BaseSettings):
     api_v1_prefix: str = "/api/v1"
     omr_reader_backend: str = "classic"
     omr_default_metadata_path: str = "data/output/template_basica_omr_v2_wireframe.json"
+    omr_marked_threshold: float = 0.4
+    omr_unmarked_threshold: float = 0.18
     gemini_api_key: str | None = None
     gemini_model: str = "gemini-3-flash-preview"
     gemini_timeout_seconds: float = 60.0

@@ -2,8 +2,6 @@ export async function sendPhotoToOcr({
   endpointUrl,
   photoUri,
   metadataPath,
-  markedThreshold = 0.12,
-  unmarkedThreshold = 0.08,
   pxPerMm = 10.0,
   robustMode = true,
   saveDebugArtifacts = true,
@@ -15,8 +13,6 @@ export async function sendPhotoToOcr({
     type: 'image/jpeg',
   });
   formData.append('metadata_path', metadataPath);
-  formData.append('marked_threshold', String(markedThreshold));
-  formData.append('unmarked_threshold', String(unmarkedThreshold));
   formData.append('px_per_mm', String(pxPerMm));
   formData.append('robust_mode', String(robustMode));
   formData.append('save_debug_artifacts', String(saveDebugArtifacts));
