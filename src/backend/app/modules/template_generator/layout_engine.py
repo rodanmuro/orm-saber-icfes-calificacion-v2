@@ -3,6 +3,7 @@ from __future__ import annotations
 from app.modules.template_generator.aruco_renderer import build_aruco_layout
 from app.modules.template_generator.bubble_layout import build_bubble_layout
 from app.modules.template_generator.contracts import (
+    AuxiliaryBlockConfig,
     BlockGeometry,
     MarkerPlacement,
     TemplateConfig,
@@ -30,6 +31,7 @@ def build_template_layout(config: TemplateConfig) -> TemplateLayout:
 
     aruco_markers = build_aruco_layout(printable_area, config.aruco_config)
     _validate_aruco_layout(aruco_markers, printable_area, block)
+    _validate_auxiliary_blocks(config.auxiliary_blocks, printable_area)
     bubbles, question_numbers, question_items = build_bubble_layout(block, config.bubble_config)
 
     return TemplateLayout(
@@ -46,6 +48,7 @@ def build_template_layout(config: TemplateConfig) -> TemplateLayout:
         question_numbers=question_numbers,
         question_number_style=config.bubble_config.question_number_style,
         question_items=question_items,
+        auxiliary_blocks=config.auxiliary_blocks,
     )
 
 
@@ -69,3 +72,20 @@ def _validate_aruco_layout(
             raise ValueError(f"aruco marker '{marker.marker_id}' is outside printable area")
         if rectangles_overlap(marker_rect, block):
             raise ValueError(f"aruco marker '{marker.marker_id}' overlaps main block")
+
+
+def _validate_auxiliary_blocks(
+    blocks: list[AuxiliaryBlockConfig],
+    printable_area: BlockGeometry,
+) -> None:
+    for item in blocks:
+        rect = BlockGeometry(
+            x_mm=item.x_mm,
+            y_mm=item.y_mm,
+            width_mm=item.width_mm,
+            height_mm=item.height_mm,
+        )
+        if not is_rect_within_bounds(rect, printable_area):
+            raise ValueError(
+                f"auxiliary block '{item.block_id}' is outside printable area"
+            )

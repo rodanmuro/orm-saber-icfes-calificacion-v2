@@ -135,6 +135,29 @@ class BubbleConfig(BaseModel):
         return self
 
 
+class AuxiliaryOmrConfig(BaseModel):
+    rows: int = Field(gt=0)
+    cols: int = Field(gt=0)
+    bubble_diameter_mm: float = Field(gt=0)
+    spacing_x_mm: float = Field(gt=0)
+    spacing_y_mm: float = Field(gt=0)
+    selection_mode: str = Field(default="single_choice")
+    row_labels: list[str] | None = None
+    col_labels: list[str] | None = None
+    notes: str | None = None
+
+
+class AuxiliaryBlockConfig(BaseModel):
+    block_id: str = Field(min_length=1)
+    title: str = Field(min_length=1)
+    block_type: Literal["handwrite", "omr", "response_area"] = "handwrite"
+    x_mm: float = Field(ge=0)
+    y_mm: float = Field(ge=0)
+    width_mm: float = Field(gt=0)
+    height_mm: float = Field(gt=0)
+    omr_config: AuxiliaryOmrConfig | None = None
+
+
 class OutputConfig(BaseModel):
     template_id: str = Field(min_length=1)
     version: str = Field(min_length=1)
@@ -145,6 +168,7 @@ class TemplateConfig(BaseModel):
     aruco_config: ArucoConfig
     block_config: BlockConfig
     bubble_config: BubbleConfig
+    auxiliary_blocks: list[AuxiliaryBlockConfig] = Field(default_factory=list)
     output_config: OutputConfig
 
     @model_validator(mode="after")
@@ -214,3 +238,4 @@ class TemplateLayout(BaseModel):
     question_numbers: list[QuestionNumberPlacement]
     question_number_style: QuestionNumberStyle
     question_items: list[QuestionItem]
+    auxiliary_blocks: list[AuxiliaryBlockConfig] = Field(default_factory=list)

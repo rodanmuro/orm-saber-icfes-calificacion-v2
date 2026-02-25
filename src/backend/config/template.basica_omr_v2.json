@@ -1,0 +1,165 @@
+{
+  "page_config": {
+    "width_mm": 215.9,
+    "height_mm": 279.4,
+    "margin_top_mm": 10.0,
+    "margin_right_mm": 10.0,
+    "margin_bottom_mm": 10.0,
+    "margin_left_mm": 10.0
+  },
+  "aruco_config": {
+    "dictionary_name": "DICT_4X4_50",
+    "marker_size_mm": 12.0,
+    "corner_inset_mm": 10.0,
+    "ids": [0, 1, 2, 3],
+    "corner_offsets_mm": {
+      "top_left": { "x_mm": 0.0, "y_mm": 0.0 },
+      "top_right": { "x_mm": 0.0, "y_mm": 0.0 },
+      "bottom_left": { "x_mm": 0.0, "y_mm": 0.0 },
+      "bottom_right": { "x_mm": 0.0, "y_mm": 0.0 }
+    }
+  },
+  "block_config": {
+    "x_mm": 22.0,
+    "y_mm": 138.0,
+    "width_mm": 171.9,
+    "height_mm": 104.4
+  },
+  "bubble_config": {
+    "label_style": {
+      "gray_level": 0.62,
+      "font_name": "Helvetica",
+      "font_size_pt": 6.5
+    },
+    "question_number_style": {
+      "enabled": true,
+      "center_gap_mm": 6.5,
+      "gray_level": 0.7,
+      "font_name": "Helvetica",
+      "font_size_pt": 8.0
+    },
+    "groups": [
+      {
+        "group_id": "R01",
+        "rows": 10,
+        "num_questions": 10,
+        "question_start_number": 1,
+        "cols": 4,
+        "radius_mm": 2.0,
+        "spacing_x_mm": 8.0,
+        "spacing_y_mm": 8.0,
+        "offset_x_mm": 27.0,
+        "offset_y_mm": 16.2,
+        "column_labels": ["A", "B", "C", "D"]
+      },
+      {
+        "group_id": "R02",
+        "rows": 10,
+        "num_questions": 10,
+        "question_start_number": 11,
+        "cols": 4,
+        "radius_mm": 2.0,
+        "spacing_x_mm": 8.0,
+        "spacing_y_mm": 8.0,
+        "offset_x_mm": 59.0,
+        "offset_y_mm": 16.2,
+        "column_labels": ["A", "B", "C", "D"]
+      },
+      {
+        "group_id": "R03",
+        "rows": 10,
+        "num_questions": 10,
+        "question_start_number": 21,
+        "cols": 4,
+        "radius_mm": 2.0,
+        "spacing_x_mm": 8.0,
+        "spacing_y_mm": 8.0,
+        "offset_x_mm": 91.0,
+        "offset_y_mm": 16.2,
+        "column_labels": ["A", "B", "C", "D"]
+      },
+      {
+        "group_id": "R04",
+        "rows": 10,
+        "num_questions": 10,
+        "question_start_number": 31,
+        "cols": 4,
+        "radius_mm": 2.0,
+        "spacing_x_mm": 8.0,
+        "spacing_y_mm": 8.0,
+        "offset_x_mm": 123.0,
+        "offset_y_mm": 16.2,
+        "column_labels": ["A", "B", "C", "D"]
+      }
+    ]
+  },
+  "auxiliary_blocks": [
+    {
+      "block_id": "header",
+      "title": "HEADER",
+      "block_type": "handwrite",
+      "x_mm": 37.0,
+      "y_mm": 15.0,
+      "width_mm": 141.9,
+      "height_mm": 15.0
+    },
+    {
+      "block_id": "document_type",
+      "title": "DOCUMENTO",
+      "block_type": "omr",
+      "x_mm": 22.0,
+      "y_mm": 40.0,
+      "width_mm": 24.0,
+      "height_mm": 88.0,
+      "omr_config": {
+        "rows": 7,
+        "cols": 1,
+        "bubble_diameter_mm": 4.0,
+        "spacing_x_mm": 8.0,
+        "spacing_y_mm": 8.0,
+        "selection_mode": "single_choice",
+        "row_labels": ["RC", "TI", "CC", "CE", "PA", "PPT", "OTRO"]
+      }
+    },
+    {
+      "block_id": "student_identity_number",
+      "title": "NUMERO DE IDENTIDAD",
+      "block_type": "omr",
+      "x_mm": 51.0,
+      "y_mm": 40.0,
+      "width_mm": 102.0,
+      "height_mm": 88.0,
+      "omr_config": {
+        "rows": 10,
+        "cols": 12,
+        "bubble_diameter_mm": 4.0,
+        "spacing_x_mm": 8.0,
+        "spacing_y_mm": 8.0,
+        "selection_mode": "single_per_column",
+        "row_labels": ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+      }
+    },
+    {
+      "block_id": "exam_identifier",
+      "title": "IDENTIFICACION EXAMEN",
+      "block_type": "omr",
+      "x_mm": 158.0,
+      "y_mm": 40.0,
+      "width_mm": 35.9,
+      "height_mm": 88.0,
+      "omr_config": {
+        "rows": 10,
+        "cols": 4,
+        "bubble_diameter_mm": 4.0,
+        "spacing_x_mm": 8.0,
+        "spacing_y_mm": 8.0,
+        "selection_mode": "single_per_column",
+        "row_labels": ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+      }
+    }
+  ],
+  "output_config": {
+    "template_id": "template_basica_omr",
+    "version": "v2"
+  }
+}
