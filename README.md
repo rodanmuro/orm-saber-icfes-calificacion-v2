@@ -12,7 +12,7 @@ Proyecto para generar plantillas OMR con ArUco, capturar fotos desde celular y l
 
 ### Backend (FastAPI)
 - API REST en `src/backend/app/api/v1`.
-- Modulo `template_generator`: genera plantilla PDF y metadata JSON (fuente de verdad geométrica).
+- Modulo `template_generator`: pipeline de configuracion y compilacion de plantilla.
 - Modulo `omr_reader`: flujo de lectura:
   1. decodifica imagen,
   2. detecta ArUco y alinea por homografía,
@@ -22,6 +22,16 @@ Proyecto para generar plantillas OMR con ArUco, capturar fotos desde celular y l
 - Salidas de trazabilidad:
   - JSON de lectura por subida (`*.result.json`),
   - artefactos de debug (`aligned` y `binary_inv`) cuando se activan.
+
+### Pipeline de plantilla v2 (actual)
+- `src/backend/config/template.basica_omr_v2.json`: configuracion base editable.
+- `src/backend/app/modules/template_generator/scripts/generate_wireframe_metadata.py`:
+  compila geometria operativa y genera `src/backend/data/output/template_basica_omr_v2_wireframe.json`.
+- `src/backend/app/modules/template_generator/scripts/generate_pdf_from_metadata.py`:
+  renderiza PDF desde el metadata wireframe.
+- Lectura OMR backend:
+  - usa `settings.omr_default_metadata_path` (actual: `data/output/template_basica_omr_v2_wireframe.json`).
+  - mismo metadata para render y para calificar (coherencia runtime).
 
 ### Frontend (Expo Go)
 - App React Native mínima en `src/frontend`.
@@ -37,7 +47,8 @@ Proyecto para generar plantillas OMR con ArUco, capturar fotos desde celular y l
 - Lectura OMR desde foto con alineacion ArUco.
 - Flujo movil (Expo) para tomar foto y enviarla al backend.
 - Regla actual de seleccion por pregunta:
-  - umbral base `marked_threshold=0.12`,
+  - umbral base `marked_threshold=0.4`,
+  - `unmarked_threshold=0.18`,
   - si varias opciones superan umbral, se selecciona la de mayor ratio.
 - Guardado de evidencia:
   - fotos subidas: `src/backend/data/input/mobile_uploads/`
@@ -69,16 +80,19 @@ npm start
 Campos clave de `read-photo` (multipart):
 - `photo`
 - `metadata_path` (ej: `data/output/template_basica_omr_v1.json`)
-- `marked_threshold` (actual calibrado: `0.12`)
-- `unmarked_threshold` (actual: `0.08`)
 - `robust_mode` (recomendado: `true`)
+
+Nota: `marked_threshold` y `unmarked_threshold` ya no se controlan desde frontend; son decision de backend via `settings`.
 
 ## Documentacion detallada
 - Backend: `src/backend/README.md`
 - Frontend: `src/frontend/README.md`
+- Arquitectura de pipeline de plantilla: `bitacoras/026_02_26_2026_arquitecura_pipeline_plantilla_v2_deuda_tecnica.md`
 
 ## Notas de trabajo
-- El umbral `0.12` fue calibrado empiricamente por tanteo visual sobre imagenes reales.
+- Umbrales actuales centralizados en backend:
+  - `omr_marked_threshold=0.4`
+  - `omr_unmarked_threshold=0.18`
 
 ## Estilo de desarrollo (agentes)
 - Se trabaja por epicas/historias/actividades con trazabilidad en `planeacion/`.
