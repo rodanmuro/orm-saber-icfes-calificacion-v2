@@ -323,4 +323,62 @@ Decisión adoptada:
 
 ---
 
+# 13. Módulo de creación de preguntas (Banco de ítems)
+
+## 13.1 Alcance
+
+Se incorpora un módulo para creación y gestión de preguntas tipo ICFES con soporte de:
+
+- enunciado estructurado,
+- opciones A/B/C/D estructuradas,
+- imágenes,
+- ecuaciones,
+- exportación de exámenes a PDF.
+
+Este módulo extiende el sistema para cubrir creación, aplicación y calificación dentro de una misma arquitectura.
+
+## 13.2 Frontend de autoría
+
+Se define un editor estructurado en React basado en **Tiptap** (MIT), con soporte de:
+
+- contenido enriquecido para enunciado,
+- editores independientes por opción,
+- inserción de imágenes,
+- ecuaciones con KaTeX.
+
+## 13.3 Modelo de datos de ítems
+
+La pregunta se almacena como objeto estructurado (no HTML libre), incluyendo al menos:
+
+- `statement`,
+- `options` (A/B/C/D),
+- `correct_answer`,
+- `metadata`.
+
+## 13.4 Política de assets y ecuaciones
+
+- Imágenes: carga a backend y persistencia en S3/MinIO mediante referencia (`url` o `asset_id`), sin base64 embebido en el JSON.
+- Ecuaciones: almacenamiento de LaTeX como fuente primaria; render en cliente y/o servidor durante exportación.
+
+## 13.5 Criterio no funcional mínimo
+
+- Versionado de ítems.
+
+## 13.6 Integración con OMR (pendiente de contrato)
+
+Se debe definir formalmente el contrato entre módulo de preguntas y módulo OMR, incluyendo:
+
+- mapeo de `correct_answer`,
+- mapeo de orden de preguntas hacia `exam_identifier` y plantilla OMR.
+
+## 13.7 Relación con la arquitectura general
+
+Con esta incorporación, la solución queda organizada en tres módulos principales:
+
+1. Generador de plantillas OMR (PDF + JSON geométrico).
+2. Motor de calificación OMR (captura -> alineación -> lectura -> scoring).
+3. Banco de ítems y generador de examen (edición estructurada -> exportación).
+
+---
+
 Este documento constituye la base conceptual, técnica y arquitectónica del sistema y servirá como referencia para futuras decisiones de diseño e implementación.
