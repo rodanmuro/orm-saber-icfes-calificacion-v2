@@ -1661,9 +1661,9 @@
     }
   ],
   "bubble_label_style": {
-    "gray_level": 0.62,
+    "gray_level": 0.5,
     "font_name": "Helvetica",
-    "font_size_pt": 5.5
+    "font_size_pt": 7.2
   },
   "question_numbers": [
     {
@@ -1950,9 +1950,9 @@
   "question_number_style": {
     "enabled": true,
     "center_gap_mm": 6.5,
-    "gray_level": 0.62,
+    "gray_level": 0.5,
     "font_name": "Helvetica",
-    "font_size_pt": 6.0
+    "font_size_pt": 7.2
   },
   "question_items": [
     {

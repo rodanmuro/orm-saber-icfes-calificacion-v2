@@ -124,7 +124,7 @@ def build_wireframe_metadata(
     # Value tuned to reproduce the same bubble lane used in wireframe.
     doc_max_label_width_mm = 6.0
     doc_label_to_bubble_gap_mm = 4.0
-    doc_bubble_shift_right_mm = 8.0
+    doc_bubble_shift_right_mm = 0.0
     doc_block_w = doc_max_label_width_mm + doc_label_to_bubble_gap_mm + doc_diameter
     doc_origin_x = new_left_box_x_mm + (new_left_box_width_mm - doc_block_w) / 2.0
     doc_origin_y = top_boxes_y_mm + (top_boxes_height_mm - doc_block_h) / 2.0
@@ -237,17 +237,17 @@ def build_wireframe_metadata(
         "aruco_markers": [m.model_dump() for m in markers],
         "bubbles": bubbles,
         "bubble_label_style": {
-            "gray_level": 0.62,
+            "gray_level": 0.5,
             "font_name": "Helvetica",
-            "font_size_pt": 5.5,
+            "font_size_pt": 7.2,
         },
         "question_numbers": question_numbers,
         "question_number_style": {
             "enabled": True,
             "center_gap_mm": 6.5,
-            "gray_level": 0.62,
+            "gray_level": 0.5,
             "font_name": "Helvetica",
-            "font_size_pt": 6.0,
+            "font_size_pt": 7.2,
         },
         "question_items": question_items,
         "auxiliary_blocks": [

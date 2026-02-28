@@ -104,9 +104,9 @@ def _draw_document_type_labels_left(
         return
     label = str(row_labels[row])
     font_name = "Helvetica"
-    font_size = 7.0
+    font_size = 8.5
     gap_mm = 4.0
-    pdf.setFillColor(Color(0.62, 0.62, 0.62))
+    pdf.setFillColor(Color(0.5, 0.5, 0.5))
     pdf.setFont(font_name, font_size)
     text_width = pdf.stringWidth(label, font_name, font_size)
     text_x = (bubble_center_x_mm - gap_mm) * mm - text_width
@@ -240,9 +240,9 @@ def render_pdf_from_metadata(metadata: dict[str, Any], output_path: Path) -> Pat
                     continue
                 label = _resolve_aux_label(cfg, row, col)
                 if label:
-                    pdf.setFillColor(Color(0.65, 0.65, 0.65))
-                    pdf.setFont("Helvetica", 6)
-                    text_width = pdf.stringWidth(label, "Helvetica", 6)
+                    pdf.setFillColor(Color(0.55, 0.55, 0.55))
+                    pdf.setFont("Helvetica", 7.6)
+                    text_width = pdf.stringWidth(label, "Helvetica", 7.6)
                     pdf.drawString(
                         (cx * mm) - (text_width / 2.0),
                         _invert_y(page_height_mm, cy) * mm - 2.1,
