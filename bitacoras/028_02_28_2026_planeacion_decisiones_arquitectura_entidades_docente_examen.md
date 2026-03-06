@@ -33,6 +33,9 @@
 - Se definio ownership explicito de examen por docente y clave compuesta de negocio.
 - Se establecio el principio de versionado de examen para congelar orden y clave de calificacion al momento de aplicacion.
 - Se alinearon decisiones con el documento fundacional y con la ruta de trabajo ya registrada en planeacion/bitacoras.
+- Se aprobo estrategia incremental para el componente curricular del banco de preguntas:
+  - **Now-lite**: agregar en `item` referencias opcionales a estándar/competencia y filtros básicos.
+  - **Later-full**: incorporar familias de ítems/variantes parametrizables y cobertura curricular avanzada.
 
 ## Entidades y relaciones acordadas (modelo conceptual)
 - `teacher`
@@ -79,6 +82,7 @@
 - La calificacion OMR se realiza contra una `exam_version` publicada, nunca contra examen editable.
 - El `exam_identifier` leido en hoja se resuelve en contexto de docente (`teacher_id + exam_code`).
 - El mapeo de respuesta correcta depende de `exam_version_item.option_map`.
+- En banco de preguntas, el etiquetado curricular se implementa primero en modo liviano (campos opcionales), dejando variantes/familias para siguiente incremento.
 
 ## Que continua
 - Traducir estas decisiones en epicas, historias de usuario y actividades concretas.

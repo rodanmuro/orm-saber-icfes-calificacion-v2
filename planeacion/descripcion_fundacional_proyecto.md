@@ -337,47 +337,50 @@ Se incorpora un módulo para creación y gestión de preguntas tipo ICFES con so
 
 Este módulo extiende el sistema para cubrir creación, aplicación y calificación dentro de una misma arquitectura.
 
-## 13.2 Frontend de autoría
+## 13.2 Propósito pedagógico del módulo
 
-Se define un editor estructurado en React basado en **Tiptap** (MIT), con soporte de:
+Uno de los propósitos de este módulo es que cada pregunta pueda asociarse a referentes curriculares (estándares y competencias), para que la evaluación no solo mida puntaje total, sino también desempeño por objetivo de aprendizaje.
 
-- contenido enriquecido para enunciado,
-- editores independientes por opción,
-- inserción de imágenes,
-- ecuaciones con KaTeX.
+Esto permitirá:
 
-## 13.3 Modelo de datos de ítems
+- diseñar exámenes con intención pedagógica clara,
+- reutilizar preguntas según competencias a evaluar,
+- analizar resultados por competencia y no solo por respuesta correcta/incorrecta.
 
-La pregunta se almacena como objeto estructurado (no HTML libre), incluyendo al menos:
+## 13.3 Variación de preguntas dentro del mismo objetivo curricular
 
-- `statement`,
-- `options` (A/B/C/D),
-- `correct_answer`,
-- `metadata`.
+Se define como objetivo del sistema poder generar variantes de preguntas que evalúen el mismo estándar/competencia, modificando valores, contexto o redacción sin cambiar el propósito de evaluación.
 
-## 13.4 Política de assets y ecuaciones
+En términos de negocio, esto permite:
 
-- Imágenes: carga a backend y persistencia en S3/MinIO mediante referencia (`url` o `asset_id`), sin base64 embebido en el JSON.
-- Ecuaciones: almacenamiento de LaTeX como fuente primaria; render en cliente y/o servidor durante exportación.
+- evitar exámenes idénticos entre grupos o aplicaciones,
+- reducir copia por repetición literal de ítems,
+- mantener equivalencia curricular entre versiones del examen.
 
-## 13.5 Criterio no funcional mínimo
+## 13.4 Enfoque de entrega incremental
 
-- Versionado de ítems.
+Para mantener velocidad de entrega y minimizar reprocesos, se adopta una estrategia por fases:
 
-## 13.6 Integración con OMR (pendiente de contrato)
+- Fase inicial (alcance liviano): asociar preguntas a estándar/competencia y permitir su gestión básica.
+- Fase posterior (alcance ampliado): incorporar variantes más avanzadas de ítems y cobertura curricular más profunda.
 
-Se debe definir formalmente el contrato entre módulo de preguntas y módulo OMR, incluyendo:
+## 13.5 Relación con el módulo OMR
 
-- mapeo de `correct_answer`,
-- mapeo de orden de preguntas hacia `exam_identifier` y plantilla OMR.
+Se debe mantener coherencia entre:
 
-## 13.7 Relación con la arquitectura general
+- la intención pedagógica del examen creado,
+- la versión aplicada al estudiante,
+- y la calificación obtenida desde la hoja OMR.
 
-Con esta incorporación, la solución queda organizada en tres módulos principales:
+Como criterio de negocio, la calificación debe corresponder exactamente a la versión del examen aplicada, preservando el vínculo entre pregunta, competencia y resultado.
 
-1. Generador de plantillas OMR (PDF + JSON geométrico).
-2. Motor de calificación OMR (captura -> alineación -> lectura -> scoring).
-3. Banco de ítems y generador de examen (edición estructurada -> exportación).
+## 13.6 Relación con la arquitectura general
+
+Con esta incorporación, la solución evoluciona hacia tres capacidades principales:
+
+1. Creación y gestión de evaluaciones.
+2. Aplicación y lectura de hojas OMR.
+3. Calificación y análisis de resultados.
 
 ---
 
