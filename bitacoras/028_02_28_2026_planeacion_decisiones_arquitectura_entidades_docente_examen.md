@@ -46,6 +46,13 @@
   - Regla: unicidad compuesta `document_type + document_number`.
 - `item` (pregunta del banco)
   - Campos base: `id (UUID)`, `statement_json`, `options_json (A/B/C/D)`, `correct_answer`, `metadata_json`, `status`, `version`.
+  - Ajuste curricular lite: `standard_id` y `competency_id` opcionales para etiquetado inicial.
+- `standard` (catalogo curricular)
+  - Campos base: `id`, `codigo`, `nombre`, `area`, `nivel`.
+  - Uso: referencia curricular de alto nivel para clasificar preguntas.
+- `competency` (catalogo de competencias)
+  - Campos base: `id`, `standard_id (FK)`, `codigo`, `nombre`.
+  - Uso: granularidad curricular asociada al estándar.
 - `exam`
   - Campos base: `id (UUID interno)`, `teacher_id (FK)`, `exam_code (OMR)`, `name`, `subject`, `status`, timestamps.
   - Regla de negocio: examen identificado por `teacher_id + exam_code`.
@@ -70,6 +77,8 @@
 
 ### Relaciones principales
 - `teacher 1:N exam`
+- `standard 1:N competency`
+- `competency 1:N item` (modo lite, asociacion opcional en esta fase)
 - `exam N:M item` (via `exam_item`)
 - `exam 1:N exam_version`
 - `exam_version 1:N exam_version_item`
@@ -83,6 +92,21 @@
 - El `exam_identifier` leido en hoja se resuelve en contexto de docente (`teacher_id + exam_code`).
 - El mapeo de respuesta correcta depende de `exam_version_item.option_map`.
 - En banco de preguntas, el etiquetado curricular se implementa primero en modo liviano (campos opcionales), dejando variantes/familias para siguiente incremento.
+- Se incorpora estructura curricular base para clasificacion de items:
+  - `standard -> competency -> item (opcional en fase lite)`.
+
+## Decisiones tecnologicas base (acordadas en planeacion)
+- Base de datos principal:
+  - **PostgreSQL** para persistencia transaccional de entidades academicas, examenes versionados e intentos OMR.
+- Almacenamiento de evidencias y assets:
+  - **S3-compatible / MinIO** para imagenes de intentos, artefactos de trazabilidad y recursos multimedia.
+- Editor de preguntas y opciones (frontend web):
+  - **Tiptap** como editor estructurado para enunciado y opciones A/B/C/D.
+  - Soporte de ecuaciones mediante **KaTeX** (LaTeX como fuente).
+
+### Notas de alcance de estas decisiones
+- Estas decisiones son base para los siguientes incrementos; no implican implementacion completa en esta bitacora.
+- Se mantiene el enfoque incremental: primero capacidad funcional minima, luego ampliaciones de variantes/familias y analitica curricular avanzada.
 
 ## Que continua
 - Traducir estas decisiones en epicas, historias de usuario y actividades concretas.
