@@ -6,6 +6,7 @@ class Settings(BaseSettings):
     app_version: str = "0.1.0"
     debug: bool = False
     api_v1_prefix: str = "/api/v1"
+    database_url: str = "sqlite:///data/omr_app.db"
     omr_reader_backend: str = "classic"
     omr_default_metadata_path: str = "data/output/template_basica_omr_v2_wireframe.json"
     omr_marked_threshold: float = 0.45
