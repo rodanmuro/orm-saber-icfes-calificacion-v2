@@ -1,7 +1,10 @@
+from pathlib import Path
+
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from app.api.v1.router import api_router
 from app.core.config import get_cors_allowed_origins, settings
@@ -30,6 +33,11 @@ app.add_middleware(
 )
 
 app.include_router(api_router, prefix=settings.api_v1_prefix)
+app.mount(
+    "/assets",
+    StaticFiles(directory=str(Path(__file__).resolve().parents[2] / "data" / "input")),
+    name="assets",
+)
 
 
 @app.get("/")

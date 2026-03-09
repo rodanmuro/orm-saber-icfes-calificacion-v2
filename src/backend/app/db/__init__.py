@@ -1,5 +1,5 @@
 from app.db.base import Base
-from app.db.models import Competency, Item, Standard, Student, Teacher
+from app.db.models import Competency, Exam, ExamItem, Item, Standard, Student, Teacher
 from app.db.session import SessionLocal, engine, get_db
 
 __all__ = [
@@ -9,8 +9,9 @@ __all__ = [
     "Standard",
     "Competency",
     "Item",
+    "Exam",
+    "ExamItem",
     "engine",
     "SessionLocal",
     "get_db",
 ]
-

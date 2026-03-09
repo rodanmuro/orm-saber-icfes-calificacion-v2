@@ -1,7 +1,15 @@
+import { docToPlainText, storageToDoc } from '../utils/editorDoc';
+
 function getCurriculumLabel(item) {
   const standard = item.curriculum?.standard_code || '';
   const competency = item.curriculum?.competency_code || '';
   return [standard, competency].filter(Boolean).join(' / ') || '-';
+}
+
+function statementPreview(item) {
+  const text = docToPlainText(storageToDoc(item.statement));
+  if (!text) return '-';
+  return text.length > 90 ? `${text.slice(0, 90)}...` : text;
 }
 
 export default function ItemList({ items, selectedItemId, onSelect }) {
@@ -24,7 +32,7 @@ export default function ItemList({ items, selectedItemId, onSelect }) {
             {items.map((item) => (
               <tr key={item.id} className={selectedItemId === item.id ? 'row-selected' : ''}>
                 <td>{item.id}</td>
-                <td>{item.statement}</td>
+                <td>{statementPreview(item)}</td>
                 <td>{item.subject || '-'}</td>
                 <td>{item.difficulty || '-'}</td>
                 <td>{getCurriculumLabel(item)}</td>

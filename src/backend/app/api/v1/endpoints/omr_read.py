@@ -5,8 +5,11 @@ import logging
 import time
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile, status
+from sqlalchemy import select
 
 from app.core.config import settings
+from app.db.models import Exam, ExamItem
+from app.db.session import SessionLocal
 from app.modules.omr_reader.api_service import (
     DEFAULT_METADATA_PATH,
     persist_auxiliary_ratios_csv,
@@ -17,6 +20,7 @@ from app.modules.omr_reader.api_service import (
     run_omr_read_from_image_bytes,
 )
 from app.modules.omr_reader.errors import OMRReadInputError
+from app.modules.omr_scoring.service import build_answer_key_from_exam_items, grade_omr_questions
 
 router = APIRouter(prefix="/omr", tags=["omr"])
 logger = logging.getLogger("uvicorn.error")
@@ -29,6 +33,7 @@ async def read_photo_omr(
     px_per_mm: float = Form(10.0),
     robust_mode: bool = Form(False),
     save_debug_artifacts: bool = Form(True),
+    teacher_id: int | None = Form(None),
 ) -> dict:
     try:
         request_start = time.perf_counter()
@@ -163,6 +168,58 @@ async def read_photo_omr(
                 "OMR alerta revision tipo_documento | status=%s",
                 doc_status,
             )
+
+        grading_block: dict | None = None
+        if teacher_id is not None and exam_value:
+            exam_code = str(exam_value).strip()
+            with SessionLocal() as db:
+                exam = db.scalar(
+                    select(Exam).where(Exam.teacher_id == teacher_id, Exam.exam_code == exam_code)
+                )
+                if exam is None:
+                    grading_block = {
+                        "status": "resolution_error",
+                        "message": f"exam not found for teacher_id={teacher_id} and exam_code={exam_code}",
+                    }
+                else:
+                    exam_items = db.scalars(
+                        select(ExamItem)
+                        .where(ExamItem.exam_id == exam.id)
+                        .order_by(ExamItem.order_position.asc())
+                    ).all()
+                    answer_key = build_answer_key_from_exam_items(exam_items)
+                    score_payload = grade_omr_questions(
+                        answer_key=answer_key,
+                        omr_questions=result.get("questions", []),
+                    )
+                    grading_block = {
+                        "status": "graded",
+                        "teacher_id": teacher_id,
+                        "exam_id": exam.id,
+                        "exam_code": exam.exam_code,
+                        "summary": score_payload["summary"],
+                        "details": score_payload["details"],
+                    }
+                    logger.info(
+                        "OMR grading summary | teacher_id=%s exam_id=%s exam_code=%s summary=%s",
+                        teacher_id,
+                        exam.id,
+                        exam.exam_code,
+                        json.dumps(score_payload["summary"], ensure_ascii=False),
+                    )
+        elif teacher_id is not None and not exam_value:
+            grading_block = {
+                "status": "resolution_error",
+                "message": "exam_identifier not detected in OMR auxiliary block",
+            }
+
+        if grading_block is not None:
+            result["grading"] = grading_block
+            result.setdefault("diagnostics", {})
+            result["diagnostics"]["grading_enabled"] = True
+        else:
+            result.setdefault("diagnostics", {})
+            result["diagnostics"]["grading_enabled"] = False
 
         if review_questions:
             logger.warning(

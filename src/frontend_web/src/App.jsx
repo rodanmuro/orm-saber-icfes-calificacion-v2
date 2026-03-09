@@ -1,9 +1,18 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { createItem, getItem, listItems, updateItem, API_BASE_URL } from './api/itemsApi';
+import {
+  addItemToExam,
+  createExam,
+  getExam,
+  listExams,
+  removeItemFromExam,
+} from './api/examsApi';
+import ExamBuilder from './components/ExamBuilder';
 import FiltersBar from './components/FiltersBar';
 import ItemForm, { emptyForm, formToPayload, itemToForm } from './components/ItemForm';
 import ItemList from './components/ItemList';
+import { docToPlainText } from './utils/editorDoc';
 
 function filterItems(items, filters) {
   const subject = filters.subject.trim().toLowerCase();
@@ -30,6 +39,9 @@ export default function App() {
   const [filters, setFilters] = useState({ subject: '', difficulty: '', curricularTag: '' });
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [loadingExams, setLoadingExams] = useState(false);
+  const [exams, setExams] = useState([]);
+  const [selectedExam, setSelectedExam] = useState(null);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
@@ -69,12 +81,25 @@ export default function App() {
     setError('');
     setMessage('');
     try {
+      if (!docToPlainText(form.statement_doc)) {
+        throw new Error('El enunciado no puede estar vacio');
+      }
+      if (!docToPlainText(form.optionA_doc)) {
+        throw new Error('La opcion A no puede estar vacia');
+      }
+      if (!docToPlainText(form.optionB_doc)) {
+        throw new Error('La opcion B no puede estar vacia');
+      }
+      if (!docToPlainText(form.optionC_doc)) {
+        throw new Error('La opcion C no puede estar vacia');
+      }
+      if (!docToPlainText(form.optionD_doc)) {
+        throw new Error('La opcion D no puede estar vacia');
+      }
+
       const payload = formToPayload(form);
       if (selectedItemId) {
-        await updateItem(selectedItemId, {
-          ...payload,
-          teacher_id: undefined,
-        });
+        await updateItem(selectedItemId, payload);
         setMessage(`Item #${selectedItemId} actualizado`);
       } else {
         const created = await createItem(payload);
@@ -93,6 +118,67 @@ export default function App() {
     setForm(emptyForm());
     setMessage('Formulario reiniciado');
     setError('');
+  }
+
+  async function refreshExams(teacherId) {
+    setLoadingExams(true);
+    setError('');
+    try {
+      const data = await listExams(teacherId);
+      setExams(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoadingExams(false);
+    }
+  }
+
+  async function handleCreateExam(formData) {
+    setError('');
+    setMessage('');
+    const payload = {
+      teacher_id: Number(formData.teacher_id),
+      exam_code: formData.exam_code,
+      title: formData.title,
+      description: formData.description || null,
+    };
+    const created = await createExam(payload);
+    setMessage(`Examen #${created.id} creado`);
+  }
+
+  async function handleSelectExam(examId) {
+    setError('');
+    setMessage('');
+    try {
+      const detail = await getExam(examId);
+      setSelectedExam(detail);
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
+  async function handleAddItemToExam(examId, itemId) {
+    setError('');
+    setMessage('');
+    try {
+      const detail = await addItemToExam(examId, itemId);
+      setSelectedExam(detail);
+      setMessage(`Item #${itemId} asociado al examen #${examId}`);
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
+  async function handleRemoveItemFromExam(examId, itemId) {
+    setError('');
+    setMessage('');
+    try {
+      const detail = await removeItemFromExam(examId, itemId);
+      setSelectedExam(detail);
+      setMessage(`Item #${itemId} removido del examen #${examId}`);
+    } catch (err) {
+      setError(err.message);
+    }
   }
 
   return (
@@ -126,6 +212,18 @@ export default function App() {
           <ItemList items={filteredItems} selectedItemId={selectedItemId} onSelect={handleSelectItem} />
         </div>
       </section>
+
+      <ExamBuilder
+        items={items}
+        exams={exams}
+        selectedExam={selectedExam}
+        onRefreshExams={refreshExams}
+        onCreateExam={handleCreateExam}
+        onSelectExam={handleSelectExam}
+        onAddItem={handleAddItemToExam}
+        onRemoveItem={handleRemoveItemFromExam}
+        loading={loadingExams}
+      />
     </main>
   );
 }

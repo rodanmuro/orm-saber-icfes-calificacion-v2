@@ -1,13 +1,16 @@
 import { useMemo } from 'react';
 
+import RichTextEditor from './RichTextEditor';
+import { docToStorage, emptyDoc, storageToDoc } from '../utils/editorDoc';
+
 const EMPTY_FORM = {
   id: null,
   teacher_id: 1,
-  statement: '',
-  optionA: '',
-  optionB: '',
-  optionC: '',
-  optionD: '',
+  statement_doc: emptyDoc(),
+  optionA_doc: emptyDoc(),
+  optionB_doc: emptyDoc(),
+  optionC_doc: emptyDoc(),
+  optionD_doc: emptyDoc(),
   correct_answer: 'A',
   subject: '',
   difficulty: '',
@@ -22,11 +25,11 @@ export function itemToForm(item) {
   return {
     id: item.id,
     teacher_id: item.teacher_id,
-    statement: item.statement || '',
-    optionA: item.options?.A || '',
-    optionB: item.options?.B || '',
-    optionC: item.options?.C || '',
-    optionD: item.options?.D || '',
+    statement_doc: storageToDoc(item.statement),
+    optionA_doc: storageToDoc(item.options?.A),
+    optionB_doc: storageToDoc(item.options?.B),
+    optionC_doc: storageToDoc(item.options?.C),
+    optionD_doc: storageToDoc(item.options?.D),
     correct_answer: item.correct_answer || 'A',
     subject: item.subject || '',
     difficulty: item.difficulty || '',
@@ -54,12 +57,12 @@ export function formToPayload(form) {
 
   return {
     teacher_id: Number(form.teacher_id),
-    statement: form.statement,
+    statement: docToStorage(form.statement_doc),
     options: {
-      A: form.optionA,
-      B: form.optionB,
-      C: form.optionC,
-      D: form.optionD,
+      A: docToStorage(form.optionA_doc),
+      B: docToStorage(form.optionB_doc),
+      C: docToStorage(form.optionC_doc),
+      D: docToStorage(form.optionD_doc),
     },
     correct_answer: form.correct_answer,
     subject: form.subject || null,
@@ -108,29 +111,45 @@ export default function ItemForm({ form, onChange, onSubmit, onReset, isSaving, 
 
         <label>
           Enunciado
-          <textarea
-            value={form.statement}
-            onChange={(e) => onChange({ ...form, statement: e.target.value })}
-            required
+          <RichTextEditor
+            value={form.statement_doc}
+            onChange={(value) => onChange({ ...form, statement_doc: value })}
+            placeholder="Escribe el enunciado..."
           />
         </label>
 
         <div className="grid grid-2">
           <label>
             Opcion A
-            <input value={form.optionA} onChange={(e) => onChange({ ...form, optionA: e.target.value })} required />
+            <RichTextEditor
+              value={form.optionA_doc}
+              onChange={(value) => onChange({ ...form, optionA_doc: value })}
+              placeholder="Contenido opcion A"
+            />
           </label>
           <label>
             Opcion B
-            <input value={form.optionB} onChange={(e) => onChange({ ...form, optionB: e.target.value })} required />
+            <RichTextEditor
+              value={form.optionB_doc}
+              onChange={(value) => onChange({ ...form, optionB_doc: value })}
+              placeholder="Contenido opcion B"
+            />
           </label>
           <label>
             Opcion C
-            <input value={form.optionC} onChange={(e) => onChange({ ...form, optionC: e.target.value })} required />
+            <RichTextEditor
+              value={form.optionC_doc}
+              onChange={(value) => onChange({ ...form, optionC_doc: value })}
+              placeholder="Contenido opcion C"
+            />
           </label>
           <label>
             Opcion D
-            <input value={form.optionD} onChange={(e) => onChange({ ...form, optionD: e.target.value })} required />
+            <RichTextEditor
+              value={form.optionD_doc}
+              onChange={(value) => onChange({ ...form, optionD_doc: value })}
+              placeholder="Contenido opcion D"
+            />
           </label>
         </div>
 

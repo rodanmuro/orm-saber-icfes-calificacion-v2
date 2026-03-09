@@ -16,6 +16,8 @@
 3. Puedo registrar metadatos basicos de la pregunta (area, tema, dificultad y etiquetas curriculares basicas).
 4. El banco permite consultar y filtrar preguntas por criterios basicos.
 5. El backend persiste los items de forma versionable sin depender de autenticacion en este incremento.
+6. El editor de preguntas permite incluir ecuaciones en LaTeX en enunciado y opciones.
+7. El editor de preguntas permite insertar imagenes en enunciado y opciones mediante carga de archivos.
 
 ## Evidencia esperada
 - Frontend web base en `src/frontend_web`.

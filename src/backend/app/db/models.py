@@ -23,6 +23,7 @@ class Teacher(Base):
     )
 
     items: Mapped[list[Item]] = relationship(back_populates="teacher")
+    exams: Mapped[list[Exam]] = relationship(back_populates="teacher")
 
 
 class Student(Base):
@@ -99,4 +100,43 @@ class Item(Base):
     teacher: Mapped[Teacher] = relationship(back_populates="items")
     standard: Mapped[Standard | None] = relationship(back_populates="items")
     competency: Mapped[Competency | None] = relationship(back_populates="items")
+    exam_items: Mapped[list[ExamItem]] = relationship(back_populates="item")
 
+
+class Exam(Base):
+    __tablename__ = "exam"
+    __table_args__ = (UniqueConstraint("teacher_id", "exam_code", name="uq_exam_teacher_code"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    teacher_id: Mapped[int] = mapped_column(ForeignKey("teacher.id", ondelete="RESTRICT"), index=True)
+    exam_code: Mapped[str] = mapped_column(String(64), index=True)
+    title: Mapped[str] = mapped_column(String(255))
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+    teacher: Mapped[Teacher] = relationship(back_populates="exams")
+    exam_items: Mapped[list[ExamItem]] = relationship(
+        back_populates="exam",
+        order_by="ExamItem.order_position",
+        cascade="all, delete-orphan",
+    )
+
+
+class ExamItem(Base):
+    __tablename__ = "exam_item"
+    __table_args__ = (
+        UniqueConstraint("exam_id", "item_id", name="uq_exam_item_pair"),
+        UniqueConstraint("exam_id", "order_position", name="uq_exam_item_order"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    exam_id: Mapped[int] = mapped_column(ForeignKey("exam.id", ondelete="CASCADE"), index=True)
+    item_id: Mapped[int] = mapped_column(ForeignKey("item.id", ondelete="RESTRICT"), index=True)
+    order_position: Mapped[int] = mapped_column(index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    exam: Mapped[Exam] = relationship(back_populates="exam_items")
+    item: Mapped[Item] = relationship(back_populates="exam_items")

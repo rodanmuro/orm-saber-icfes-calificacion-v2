@@ -21,6 +21,15 @@ Nota: el entorno virtual oficial vive en `src/backend/.venv`.
 ## Health check
 - `GET /api/v1/health`
 
+## Calificacion OMR (modo integracion)
+- `POST /api/v1/omr/read-photo`
+- Si se envia `teacher_id` y el OMR detecta `exam_identifier`, el backend intenta resolver examen por `teacher_id + exam_code` y agrega bloque `grading` en la respuesta.
+
+## Assets de items (editor web)
+- Upload de imagen: `POST /api/v1/assets/images` (multipart campo `image`)
+- Tipos permitidos: `png`, `jpeg`, `webp`
+- URL de salida servida en: `/assets/item_assets/<filename>`
+
 ## Arquitectura del generador de plantillas
 Modulos base (`src/backend/app/modules/template_generator`):
 - `config_loader`: lectura y validacion de configuracion externa (JSON/YAML).

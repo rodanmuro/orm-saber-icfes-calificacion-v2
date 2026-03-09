@@ -80,6 +80,69 @@ textarea {
   resize: vertical;
 }
 
+.editor-shell {
+  border: 1px solid #bac9d8;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.editor-toolbar {
+  display: flex;
+  gap: 6px;
+  padding: 6px;
+  border-bottom: 1px solid #dce4ec;
+}
+
+.editor-toolbar button {
+  padding: 4px 8px;
+  border: 1px solid #8ea7c1;
+  border-radius: 4px;
+  background: #f0f5fb;
+  color: #163a5f;
+}
+
+.image-upload-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 8px;
+  border: 1px solid #8ea7c1;
+  border-radius: 4px;
+  background: #f0f5fb;
+  color: #163a5f;
+  cursor: pointer;
+}
+
+.image-upload-btn input {
+  display: none;
+}
+
+.tiptap-editor {
+  min-height: 92px;
+  padding: 8px;
+  outline: none;
+}
+
+.tiptap-editor p {
+  margin: 0;
+}
+
+.tiptap-editor img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 6px 0;
+  border-radius: 4px;
+}
+
+.math-inline {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 2px;
+  border-radius: 3px;
+  background: #f7fafc;
+}
+
 button {
   border: 1px solid #234f7f;
   background: #1f5f9d;

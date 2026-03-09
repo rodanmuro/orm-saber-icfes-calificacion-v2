@@ -23,3 +23,14 @@ npm run dev
 - Consultar item (`GET /api/v1/items/{id}`)
 - Editar item (`PUT /api/v1/items/{id}`)
 - Filtros basicos en cliente por area, dificultad y etiqueta curricular.
+- Crear examen (`POST /api/v1/exams`)
+- Listar examenes por docente (`GET /api/v1/exams?teacher_id=...`)
+- Consultar examen con items asociados (`GET /api/v1/exams/{id}`)
+- Asociar item a examen (`POST /api/v1/exams/{id}/items`)
+- Desasociar item de examen (`DELETE /api/v1/exams/{id}/items/{item_id}`)
+
+## Editor de contenido
+- El enunciado y las opciones A/B/C/D usan Tiptap.
+- Soporte de ecuaciones: boton `fx` para insertar LaTeX.
+- Soporte de imagenes: boton `Imagen` con upload al backend (`POST /api/v1/assets/images`).
+- El frontend serializa el contenido del editor en JSON (string) para mantener compatibilidad con el backend actual.
