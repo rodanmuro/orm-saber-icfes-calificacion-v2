@@ -6,6 +6,7 @@ class Settings(BaseSettings):
     app_version: str = "0.1.0"
     debug: bool = False
     api_v1_prefix: str = "/api/v1"
+    cors_allowed_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
     database_url: str = "sqlite:///data/omr_app.db"
     omr_reader_backend: str = "classic"
     omr_default_metadata_path: str = "data/output/template_basica_omr_v2_wireframe.json"
@@ -26,3 +27,8 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+
+def get_cors_allowed_origins() -> list[str]:
+    values = [origin.strip() for origin in settings.cors_allowed_origins.split(",")]
+    return [origin for origin in values if origin]

@@ -75,6 +75,26 @@ def test_create_and_get_item(tmp_path: Path) -> None:
         assert listed.status_code == 200
         assert len(listed.json()) == 1
 
+        update_payload = {
+            "statement": "2 + 2 es igual a (actualizada):",
+            "options": {"A": "1", "B": "2", "C": "3", "D": "4"},
+            "correct_answer": "D",
+            "subject": "matematicas",
+            "difficulty": "media",
+            "curriculum": {
+                "standard_code": "STD-MAT-001",
+                "standard_name": "Operaciones basicas",
+                "competency_code": "COMP-MAT-002",
+                "competency_name": "Calculo",
+            },
+        }
+        updated = client.put(f"/api/v1/items/{body['id']}", json=update_payload)
+        assert updated.status_code == 200
+        updated_body = updated.json()
+        assert updated_body["statement"] == "2 + 2 es igual a (actualizada):"
+        assert updated_body["correct_answer"] == "D"
+        assert updated_body["curriculum"]["competency_code"] == "COMP-MAT-002"
+
     app.dependency_overrides.clear()
 
 

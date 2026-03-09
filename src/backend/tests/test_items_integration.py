@@ -73,6 +73,25 @@ def test_items_end_to_end_http(tmp_path: Path) -> None:
         fetched = get_response.json()
         assert fetched["statement"] == "La capital de Colombia es:"
 
+        update_payload = {
+            "statement": "La capital oficial de Colombia es:",
+            "options": {"A": "Bogota", "B": "Medellin", "C": "Cali", "D": "Bucaramanga"},
+            "correct_answer": "A",
+            "subject": "sociales",
+            "difficulty": "alta",
+            "curriculum": {
+                "standard_code": "STD-SOC-001",
+                "competency_code": "COMP-SOC-002",
+                "competency_name": "Analisis territorial",
+            },
+        }
+        update_response = client.put(f"/api/v1/items/{item_id}", json=update_payload)
+        assert update_response.status_code == 200
+        updated = update_response.json()
+        assert updated["statement"] == "La capital oficial de Colombia es:"
+        assert updated["difficulty"] == "alta"
+        assert updated["curriculum"]["competency_code"] == "COMP-SOC-002"
+
         invalid_payload = {
             "teacher_id": teacher_id,
             "statement": "Pregunta invalida",
@@ -84,4 +103,3 @@ def test_items_end_to_end_http(tmp_path: Path) -> None:
     finally:
         client.close()
         app.dependency_overrides.clear()
-

@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.db.models import Competency, Item, Standard, Teacher
 from app.db.session import get_db
-from app.schemas.item_bank import CurriculumRef, ItemCreate, ItemRead
+from app.schemas.item_bank import CurriculumRef, ItemCreate, ItemRead, ItemUpdate
 
 router = APIRouter(prefix="/items", tags=["items"])
 
@@ -120,3 +120,22 @@ def get_item(item_id: int, db: Session = Depends(get_db)) -> ItemRead:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="item not found")
     return _to_item_read(item)
 
+
+@router.put("/{item_id}", response_model=ItemRead)
+def update_item(item_id: int, payload: ItemUpdate, db: Session = Depends(get_db)) -> ItemRead:
+    item = db.get(Item, item_id)
+    if item is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="item not found")
+
+    standard, competency = _resolve_curriculum(db=db, curriculum=payload.curriculum)
+    item.statement = payload.statement.strip()
+    item.options = payload.options
+    item.correct_answer = payload.correct_answer
+    item.subject = payload.subject
+    item.difficulty = payload.difficulty
+    item.standard_id = standard.id if standard else None
+    item.competency_id = competency.id if competency else None
+    item.metadata_json = payload.metadata
+    db.commit()
+    db.refresh(item)
+    return _to_item_read(item)

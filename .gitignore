@@ -28,10 +28,12 @@ htmlcov/
 # Virtual environments
 venv/
 .venv/
+.venv
 env/
 .envrc
 src/backend/venv/
 src/backend/.venv/
+src/backend/.venv*
 
 # JS / React / Vite (frontend)
 node_modules/

@@ -22,7 +22,7 @@ EXPO_PUBLIC_METADATA_PATH=data/output/template_basica_omr_v1.json
 Desde `src/backend`:
 
 ```bash
-../../.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000 --app-dir .
+./.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000 --app-dir .
 ```
 
 ## 3) Levantar app Expo

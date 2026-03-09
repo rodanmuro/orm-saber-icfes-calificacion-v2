@@ -5,15 +5,18 @@
 
 ## Inicializacion
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
+python3 -m venv src/backend/.venv
+source src/backend/.venv/bin/activate
 pip install -r src/backend/requirements.txt
 ```
 
 ## Ejecutar API
 ```bash
-uvicorn app.main:app --reload --app-dir src/backend
+cd src/backend
+./run-app.sh
 ```
+
+Nota: el entorno virtual oficial vive en `src/backend/.venv`.
 
 ## Health check
 - `GET /api/v1/health`

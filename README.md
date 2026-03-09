@@ -58,11 +58,14 @@ Proyecto para generar plantillas OMR con ArUco, capturar fotos desde celular y l
 
 ### 1) Backend
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
+python3 -m venv src/backend/.venv
+source src/backend/.venv/bin/activate
 pip install -r src/backend/requirements.txt
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000 --app-dir src/backend
+cd src/backend
+./run-app.sh
 ```
+
+Nota: la unica ruta oficial del entorno virtual es `src/backend/.venv`.
 
 ### 2) Frontend
 ```bash
