@@ -8,7 +8,7 @@ from fastapi import APIRouter, File, Form, HTTPException, UploadFile, status
 from sqlalchemy import select
 
 from app.core.config import settings
-from app.db.models import Exam, ExamItem
+from app.db.models import Exam, ExamItem, OmrAttempt, OmrAttemptAnswer
 from app.db.session import SessionLocal
 from app.modules.omr_reader.api_service import (
     DEFAULT_METADATA_PATH,
@@ -20,6 +20,7 @@ from app.modules.omr_reader.api_service import (
     run_omr_read_from_image_bytes,
 )
 from app.modules.omr_reader.errors import OMRReadInputError
+from app.modules.omr_scoring.persistence import persist_omr_attempt
 from app.modules.omr_scoring.service import build_answer_key_from_exam_items, grade_omr_questions
 
 router = APIRouter(prefix="/omr", tags=["omr"])
@@ -170,6 +171,7 @@ async def read_photo_omr(
             )
 
         grading_block: dict | None = None
+        resolved_exam_id: int | None = None
         if teacher_id is not None and exam_value:
             exam_code = str(exam_value).strip()
             with SessionLocal() as db:
@@ -182,6 +184,7 @@ async def read_photo_omr(
                         "message": f"exam not found for teacher_id={teacher_id} and exam_code={exam_code}",
                     }
                 else:
+                    resolved_exam_id = exam.id
                     exam_items = db.scalars(
                         select(ExamItem)
                         .where(ExamItem.exam_id == exam.id)
@@ -220,6 +223,20 @@ async def read_photo_omr(
         else:
             result.setdefault("diagnostics", {})
             result["diagnostics"]["grading_enabled"] = False
+
+        attempt_id: int | None = None
+        with SessionLocal() as db:
+            attempt = persist_omr_attempt(
+                db=db,
+                result_payload=result,
+                teacher_id=teacher_id,
+                exam_id=resolved_exam_id,
+                exam_code_detected=str(exam_value).strip() if exam_value else None,
+                grading_block=grading_block,
+            )
+            attempt_id = attempt.id
+        result.setdefault("diagnostics", {})
+        result["diagnostics"]["attempt_id"] = attempt_id
 
         if review_questions:
             logger.warning(
@@ -300,3 +317,49 @@ async def read_photo_omr(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"unexpected server error: {exc}",
         ) from exc
+
+
+@router.get("/attempts/{attempt_id}")
+def get_omr_attempt(attempt_id: int) -> dict:
+    with SessionLocal() as db:
+        attempt = db.get(OmrAttempt, attempt_id)
+        if attempt is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="attempt not found")
+        answers = db.scalars(
+            select(OmrAttemptAnswer)
+            .where(OmrAttemptAnswer.attempt_id == attempt_id)
+            .order_by(OmrAttemptAnswer.question_number.asc())
+        ).all()
+        return {
+            "attempt_id": attempt.id,
+            "teacher_id": attempt.teacher_id,
+            "exam_id": attempt.exam_id,
+            "exam_code_detected": attempt.exam_code_detected,
+            "status": attempt.status,
+            "summary": {
+                "score_percent": attempt.score_percent,
+                "total_questions": attempt.total_questions,
+                "correct": attempt.correct_count,
+                "incorrect": attempt.incorrect_count,
+                "blank": attempt.blank_count,
+                "ambiguous": attempt.ambiguous_count,
+                "manual_review_required": attempt.manual_review_required,
+            },
+            "artifacts": {
+                "uploaded_image_path": attempt.uploaded_image_path,
+                "trace_json_path": attempt.trace_json_path,
+                "ratios_csv_path": attempt.ratios_csv_path,
+                "auxiliary_ratios_csv_path": attempt.auxiliary_ratios_csv_path,
+            },
+            "answers": [
+                {
+                    "question_number": row.question_number,
+                    "item_id": row.item_id,
+                    "correct_answer": row.correct_answer,
+                    "marked_answer": row.marked_answer,
+                    "status": row.status,
+                    "marked_options": row.marked_options_json or [],
+                }
+                for row in answers
+            ],
+        }

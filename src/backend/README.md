@@ -24,6 +24,8 @@ Nota: el entorno virtual oficial vive en `src/backend/.venv`.
 ## Calificacion OMR (modo integracion)
 - `POST /api/v1/omr/read-photo`
 - Si se envia `teacher_id` y el OMR detecta `exam_identifier`, el backend intenta resolver examen por `teacher_id + exam_code` y agrega bloque `grading` en la respuesta.
+- Cada lectura persiste un intento OMR con detalle por pregunta y devuelve `diagnostics.attempt_id`.
+- Consulta de intento: `GET /api/v1/omr/attempts/{attempt_id}`.
 
 ## Assets de items (editor web)
 - Upload de imagen: `POST /api/v1/assets/images` (multipart campo `image`)
