@@ -1,12 +1,15 @@
 from __future__ import annotations
 
+from datetime import datetime
+
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.db.models import Exam, ExamItem, Item, Teacher
+from app.db.models import Exam, ExamItem, ExamVersion, ExamVersionItem, Item, Teacher
 from app.db.session import get_db
+from app.modules.exam_version.service import publish_exam_version
 from app.modules.omr_scoring.service import build_answer_key_from_exam_items
 from app.schemas.exam_bank import (
     ExamCreate,
@@ -14,6 +17,10 @@ from app.schemas.exam_bank import (
     ExamItemBindRequest,
     ExamItemRead,
     ExamRead,
+    ExamVersionDetailRead,
+    ExamVersionItemRead,
+    ExamVersionPublishRequest,
+    ExamVersionRead,
 )
 
 router = APIRouter(prefix="/exams", tags=["exams"])
@@ -40,6 +47,39 @@ def _exam_to_detail(exam: Exam, exam_items: list[ExamItem]) -> ExamDetailRead:
                 item_statement=row.item.statement,
             )
             for row in exam_items
+        ],
+    )
+
+
+def _exam_version_to_read(version: ExamVersion) -> ExamVersionRead:
+    return ExamVersionRead(
+        id=version.id,
+        exam_id=version.exam_id,
+        version_code=version.version_code,
+        seed_shuffle=version.seed_shuffle,
+        shuffle_questions=version.shuffle_questions,
+        shuffle_options=version.shuffle_options,
+        answer_key=version.answer_key_json,
+        created_at=version.created_at,
+    )
+
+
+def _exam_version_to_detail(
+    version: ExamVersion,
+    version_items: list[ExamVersionItem],
+) -> ExamVersionDetailRead:
+    return ExamVersionDetailRead(
+        **_exam_version_to_read(version).model_dump(),
+        items=[
+            ExamVersionItemRead(
+                question_number=row.question_number,
+                source_exam_item_id=row.source_exam_item_id,
+                item_id=row.item_id,
+                option_map=row.option_map_json,
+                correct_answer_original=row.correct_answer_original,
+                correct_answer_mapped=row.correct_answer_mapped,
+            )
+            for row in version_items
         ],
     )
 
@@ -173,3 +213,114 @@ def unbind_item_from_exam(exam_id: int, item_id: int, db: Session = Depends(get_
     db.delete(row)
     db.commit()
     return get_exam(exam_id=exam_id, db=db)
+
+
+def _resolve_version_code(db: Session, exam_id: int, requested: str | None) -> str:
+    if requested:
+        return requested.strip()
+    count = db.scalar(select(func.count(ExamVersion.id)).where(ExamVersion.exam_id == exam_id)) or 0
+    return f"V{count + 1:03d}"
+
+
+@router.post(
+    "/{exam_id}/versions/publish",
+    response_model=ExamVersionDetailRead,
+    status_code=status.HTTP_201_CREATED,
+)
+def publish_version(
+    exam_id: int,
+    payload: ExamVersionPublishRequest,
+    db: Session = Depends(get_db),
+) -> ExamVersionDetailRead:
+    exam = db.get(Exam, exam_id)
+    if exam is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="exam not found")
+
+    exam_items = db.scalars(
+        select(ExamItem)
+        .where(ExamItem.exam_id == exam_id)
+        .order_by(ExamItem.order_position.asc())
+    ).all()
+    if not exam_items:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="cannot publish a version for an exam without items",
+        )
+
+    version_code = _resolve_version_code(db=db, exam_id=exam_id, requested=payload.version_code)
+    seed_shuffle = payload.seed_shuffle
+    if seed_shuffle is None:
+        seed_shuffle = int(datetime.now().timestamp())
+
+    published = publish_exam_version(
+        exam_items=exam_items,
+        seed_shuffle=seed_shuffle,
+        shuffle_questions=payload.shuffle_questions,
+        shuffle_options=payload.shuffle_options,
+    )
+
+    version = ExamVersion(
+        exam_id=exam_id,
+        version_code=version_code,
+        seed_shuffle=seed_shuffle,
+        shuffle_questions=payload.shuffle_questions,
+        shuffle_options=payload.shuffle_options,
+        answer_key_json=published.answer_key,
+    )
+    db.add(version)
+    db.flush()
+
+    for row in published.rows:
+        db.add(
+            ExamVersionItem(
+                exam_version_id=version.id,
+                source_exam_item_id=row.source_exam_item_id,
+                item_id=row.item_id,
+                question_number=row.question_number,
+                option_map_json=row.option_map,
+                correct_answer_original=row.correct_answer_original,
+                correct_answer_mapped=row.correct_answer_mapped,
+            )
+        )
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="version_code already exists for this exam",
+        ) from None
+    db.refresh(version)
+
+    version_items = db.scalars(
+        select(ExamVersionItem)
+        .where(ExamVersionItem.exam_version_id == version.id)
+        .order_by(ExamVersionItem.question_number.asc())
+    ).all()
+    return _exam_version_to_detail(version=version, version_items=version_items)
+
+
+@router.get("/{exam_id}/versions", response_model=list[ExamVersionRead])
+def list_exam_versions(exam_id: int, db: Session = Depends(get_db)) -> list[ExamVersionRead]:
+    exam = db.get(Exam, exam_id)
+    if exam is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="exam not found")
+    rows = db.scalars(
+        select(ExamVersion)
+        .where(ExamVersion.exam_id == exam_id)
+        .order_by(ExamVersion.id.asc())
+    ).all()
+    return [_exam_version_to_read(row) for row in rows]
+
+
+@router.get("/{exam_id}/versions/{version_id}", response_model=ExamVersionDetailRead)
+def get_exam_version(exam_id: int, version_id: int, db: Session = Depends(get_db)) -> ExamVersionDetailRead:
+    version = db.get(ExamVersion, version_id)
+    if version is None or version.exam_id != exam_id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="exam version not found")
+    version_items = db.scalars(
+        select(ExamVersionItem)
+        .where(ExamVersionItem.exam_version_id == version_id)
+        .order_by(ExamVersionItem.question_number.asc())
+    ).all()
+    return _exam_version_to_detail(version=version, version_items=version_items)

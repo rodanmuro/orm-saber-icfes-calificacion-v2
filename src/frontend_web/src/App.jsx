@@ -6,6 +6,8 @@ import {
   createExam,
   getExam,
   listExams,
+  listExamVersions,
+  publishExamVersion,
   removeItemFromExam,
 } from './api/examsApi';
 import ExamBuilder from './components/ExamBuilder';
@@ -42,6 +44,7 @@ export default function App() {
   const [loadingExams, setLoadingExams] = useState(false);
   const [exams, setExams] = useState([]);
   const [selectedExam, setSelectedExam] = useState(null);
+  const [examVersions, setExamVersions] = useState([]);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
@@ -152,6 +155,8 @@ export default function App() {
     try {
       const detail = await getExam(examId);
       setSelectedExam(detail);
+      const versions = await listExamVersions(examId);
+      setExamVersions(versions);
     } catch (err) {
       setError(err.message);
     }
@@ -176,6 +181,26 @@ export default function App() {
       const detail = await removeItemFromExam(examId, itemId);
       setSelectedExam(detail);
       setMessage(`Item #${itemId} removido del examen #${examId}`);
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
+  async function handlePublishExamVersion(examId) {
+    setError('');
+    setMessage('');
+    try {
+      const versionCode = `V${String(examVersions.length + 1).padStart(3, '0')}`;
+      const seed = Math.floor(Date.now() / 1000);
+      await publishExamVersion(examId, {
+        version_code: versionCode,
+        seed_shuffle: seed,
+        shuffle_questions: true,
+        shuffle_options: true,
+      });
+      const versions = await listExamVersions(examId);
+      setExamVersions(versions);
+      setMessage(`Version ${versionCode} publicada`);
     } catch (err) {
       setError(err.message);
     }
@@ -217,11 +242,13 @@ export default function App() {
         items={items}
         exams={exams}
         selectedExam={selectedExam}
+        versions={examVersions}
         onRefreshExams={refreshExams}
         onCreateExam={handleCreateExam}
         onSelectExam={handleSelectExam}
         onAddItem={handleAddItemToExam}
         onRemoveItem={handleRemoveItemFromExam}
+        onPublishVersion={handlePublishExamVersion}
         loading={loadingExams}
       />
     </main>

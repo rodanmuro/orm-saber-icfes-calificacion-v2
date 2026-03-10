@@ -124,6 +124,11 @@ class Exam(Base):
         order_by="ExamItem.order_position",
         cascade="all, delete-orphan",
     )
+    exam_versions: Mapped[list[ExamVersion]] = relationship(
+        back_populates="exam",
+        order_by="ExamVersion.id",
+        cascade="all, delete-orphan",
+    )
     omr_attempts: Mapped[list[OmrAttempt]] = relationship(back_populates="exam")
 
 
@@ -142,6 +147,51 @@ class ExamItem(Base):
 
     exam: Mapped[Exam] = relationship(back_populates="exam_items")
     item: Mapped[Item] = relationship(back_populates="exam_items")
+
+
+class ExamVersion(Base):
+    __tablename__ = "exam_version"
+    __table_args__ = (UniqueConstraint("exam_id", "version_code", name="uq_exam_version_code"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    exam_id: Mapped[int] = mapped_column(ForeignKey("exam.id", ondelete="CASCADE"), index=True)
+    version_code: Mapped[str] = mapped_column(String(64), index=True)
+    seed_shuffle: Mapped[int] = mapped_column(Integer)
+    shuffle_questions: Mapped[bool] = mapped_column(Boolean, default=True)
+    shuffle_options: Mapped[bool] = mapped_column(Boolean, default=True)
+    answer_key_json: Mapped[dict[str, str]] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    exam: Mapped[Exam] = relationship(back_populates="exam_versions")
+    version_items: Mapped[list[ExamVersionItem]] = relationship(
+        back_populates="exam_version",
+        order_by="ExamVersionItem.question_number",
+        cascade="all, delete-orphan",
+    )
+
+
+class ExamVersionItem(Base):
+    __tablename__ = "exam_version_item"
+    __table_args__ = (
+        UniqueConstraint("exam_version_id", "question_number", name="uq_exam_version_item_qnum"),
+        UniqueConstraint("exam_version_id", "source_exam_item_id", name="uq_exam_version_item_source"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    exam_version_id: Mapped[int] = mapped_column(
+        ForeignKey("exam_version.id", ondelete="CASCADE"), index=True
+    )
+    source_exam_item_id: Mapped[int] = mapped_column(
+        ForeignKey("exam_item.id", ondelete="RESTRICT"), index=True
+    )
+    item_id: Mapped[int] = mapped_column(ForeignKey("item.id", ondelete="RESTRICT"), index=True)
+    question_number: Mapped[int] = mapped_column(Integer, index=True)
+    option_map_json: Mapped[dict[str, str]] = mapped_column(JSON)
+    correct_answer_original: Mapped[str] = mapped_column(String(1))
+    correct_answer_mapped: Mapped[str] = mapped_column(String(1))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    exam_version: Mapped[ExamVersion] = relationship(back_populates="version_items")
 
 
 class OmrAttempt(Base):

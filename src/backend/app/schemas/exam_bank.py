@@ -39,3 +39,35 @@ class ExamItemRead(BaseModel):
 class ExamDetailRead(ExamRead):
     items: list[ExamItemRead]
 
+
+class ExamVersionPublishRequest(BaseModel):
+    version_code: str | None = Field(default=None, min_length=1, max_length=64)
+    seed_shuffle: int | None = Field(default=None)
+    shuffle_questions: bool = True
+    shuffle_options: bool = True
+
+
+class ExamVersionItemRead(BaseModel):
+    question_number: int
+    source_exam_item_id: int
+    item_id: int
+    option_map: dict[str, str]
+    correct_answer_original: str
+    correct_answer_mapped: str
+
+
+class ExamVersionRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    exam_id: int
+    version_code: str
+    seed_shuffle: int
+    shuffle_questions: bool
+    shuffle_options: bool
+    answer_key: dict[str, str]
+    created_at: datetime
+
+
+class ExamVersionDetailRead(ExamVersionRead):
+    items: list[ExamVersionItemRead]

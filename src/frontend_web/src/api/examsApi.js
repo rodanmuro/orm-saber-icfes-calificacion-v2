@@ -42,3 +42,14 @@ export function removeItemFromExam(examId, itemId) {
     method: 'DELETE',
   });
 }
+
+export function publishExamVersion(examId, payload) {
+  return request(`/exams/${examId}/versions/publish`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function listExamVersions(examId) {
+  return request(`/exams/${examId}/versions`);
+}

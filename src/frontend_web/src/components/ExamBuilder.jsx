@@ -13,11 +13,13 @@ export default function ExamBuilder({
   items,
   exams,
   selectedExam,
+  versions,
   onRefreshExams,
   onCreateExam,
   onSelectExam,
   onAddItem,
   onRemoveItem,
+  onPublishVersion,
   loading,
 }) {
   const [form, setForm] = useState(emptyExamForm(exams[0]?.teacher_id || 1));
@@ -116,6 +118,44 @@ export default function ExamBuilder({
           <h4>
             Examen seleccionado: #{selectedExam.id} - {selectedExam.exam_code}
           </h4>
+          <div className="actions">
+            <button
+              type="button"
+              onClick={() => onPublishVersion(selectedExam.id)}
+              disabled={selectedExam.items.length === 0}
+            >
+              Publicar version (barajada)
+            </button>
+          </div>
+
+          <h5>Versiones publicadas</h5>
+          {versions.length === 0 ? <p>No hay versiones publicadas.</p> : null}
+          {versions.length > 0 ? (
+            <div className="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Code</th>
+                    <th>Seed</th>
+                    <th>Preguntas barajadas</th>
+                    <th>Opciones barajadas</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {versions.map((version) => (
+                    <tr key={version.id}>
+                      <td>{version.id}</td>
+                      <td>{version.version_code}</td>
+                      <td>{version.seed_shuffle}</td>
+                      <td>{version.shuffle_questions ? 'Si' : 'No'}</td>
+                      <td>{version.shuffle_options ? 'Si' : 'No'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : null}
 
           <div className="grid grid-2">
             <div>

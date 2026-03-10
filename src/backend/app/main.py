@@ -35,7 +35,7 @@ app.add_middleware(
 app.include_router(api_router, prefix=settings.api_v1_prefix)
 app.mount(
     "/assets",
-    StaticFiles(directory=str(Path(__file__).resolve().parents[2] / "data" / "input")),
+    StaticFiles(directory=str(Path(__file__).resolve().parents[1] / "data" / "input")),
     name="assets",
 )
 
