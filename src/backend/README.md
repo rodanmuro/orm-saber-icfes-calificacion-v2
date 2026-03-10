@@ -1,7 +1,7 @@
 # Backend FastAPI
 
 ## Requisitos
-- Python 3.11+
+- Python 3.10+
 
 ## Inicializacion
 ```bash
@@ -31,7 +31,7 @@ GRANT ALL PRIVILEGES ON DATABASE omr_app TO administrador;
 
 3. Configurar `.env` en `src/backend/.env` (puedes copiar desde `.env.example`):
 ```bash
-DATABASE_URL=\"postgresql+psycopg://administrador:12345678@localhost:5432/omr_app\"
+DATABASE_URL="postgresql+psycopg://administrador:12345678@localhost:5432/omr_app"
 ```
 
 4. Verificar conectividad backend -> DB:
@@ -57,11 +57,41 @@ sudo systemctl stop postgresql
 ## Health check
 - `GET /api/v1/health`
 
+## Estado de persistencia (importante para onboarding)
+- Motor objetivo actual: PostgreSQL local/entorno (`DATABASE_URL`).
+- Esquema actual del proyecto: definido en modelos SQLAlchemy + migraciones SQL en `src/backend/migrations`.
+- Estado de migraciones versionadas:
+  - Alembic: pendiente de integracion formal (ACT_0043).
+  - Mientras tanto, la evolucion de esquema vigente se referencia por scripts SQL `0001..0004`.
+- Comando de verificacion de conexion backend -> DB:
+```bash
+cd src/backend
+source .venv/bin/activate
+DEBUG=false PYTHONPATH=. python3 scripts/check_database_connection.py
+```
+
 ## Calificacion OMR (modo integracion)
 - `POST /api/v1/omr/read-photo`
 - Si se envia `teacher_id` y el OMR detecta `exam_identifier`, el backend intenta resolver examen por `teacher_id + exam_code` y agrega bloque `grading` en la respuesta.
 - Cada lectura persiste un intento OMR con detalle por pregunta y devuelve `diagnostics.attempt_id`.
 - Consulta de intento: `GET /api/v1/omr/attempts/{attempt_id}`.
+
+## Banco de items y examenes (API)
+- Items:
+  - `POST /api/v1/items`
+  - `GET /api/v1/items`
+  - `GET /api/v1/items/{item_id}`
+  - `PUT /api/v1/items/{item_id}`
+- Examenes:
+  - `POST /api/v1/exams`
+  - `GET /api/v1/exams`
+  - `GET /api/v1/exams/{exam_id}`
+  - `POST /api/v1/exams/{exam_id}/items`
+  - `DELETE /api/v1/exams/{exam_id}/items/{item_id}`
+  - `POST /api/v1/exams/{exam_id}/versions/publish`
+  - `GET /api/v1/exams/{exam_id}/versions`
+  - `GET /api/v1/exams/{exam_id}/versions/{version_id}`
+  - `GET /api/v1/exams/{exam_id}/answer-key`
 
 ## Assets de items (editor web)
 - Upload de imagen: `POST /api/v1/assets/images` (multipart campo `image`)
@@ -142,7 +172,7 @@ Valida imagen + metadata antes de correr deteccion/lectura:
 ```bash
 python -m app.modules.omr_reader.scripts.validate_read_input \
   --image /ruta/foto_diligenciada.jpg \
-  --metadata src/backend/data/output/template_basica_omr_v1.json
+  --metadata src/backend/data/output/template_basica_omr_v2_wireframe.json
 ```
 
 ## Alinear foto usando ArUco + homografia
@@ -151,7 +181,7 @@ Genera una imagen corregida al plano de la plantilla:
 ```bash
 python -m app.modules.omr_reader.scripts.align_photo \
   --image src/backend/data/input/foto.jpg \
-  --metadata src/backend/data/output/template_basica_omr_v1.json \
+  --metadata src/backend/data/output/template_basica_omr_v2_wireframe.json \
   --output-image src/backend/data/output/foto_alineada.png
 ```
 
@@ -164,7 +194,7 @@ Corre alineacion + lectura de ROI y exporta:
 ```bash
 python -m app.modules.omr_reader.scripts.classify_bubbles \
   --image src/backend/data/input/foto.jpg \
-  --metadata src/backend/data/output/template_basica_omr_v1.json \
+  --metadata src/backend/data/output/template_basica_omr_v2_wireframe.json \
   --output-json src/backend/data/output/foto_bubbles.json
 ```
 
@@ -174,13 +204,13 @@ Recibe una foto por `multipart/form-data` y retorna JSON OMR por pregunta.
 ```bash
 curl -X POST "http://127.0.0.1:8000/api/v1/omr/read-photo" \
   -F "photo=@src/backend/data/input/diligenciadas/foto_001.jpeg" \
-  -F "metadata_path=data/output/template_basica_omr_v1.json"
+  -F "metadata_path=data/output/template_basica_omr_v2_wireframe.json"
 ```
 
 Parametros opcionales en form-data:
 - `px_per_mm` (default `10.0`)
-- `marked_threshold` (default `0.22`)
-- `unmarked_threshold` (default `0.08`)
+- `marked_threshold` (default `0.45`)
+- `unmarked_threshold` (default `0.35`)
 
 Notas:
 - El backend valida calidad geometrica minima de captura; si la perspectiva es extrema o la hoja ocupa muy poco, devuelve error controlado (HTTP 400).
