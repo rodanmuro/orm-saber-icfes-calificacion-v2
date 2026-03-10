@@ -2,7 +2,7 @@
 
 ## Que fue lo que se hizo
 - Se elaboro una descripcion tecnica detallada del estado actual del modelo de datos SQLite del backend (`src/backend/data/omr_app.db`).
-- Se documentaron las tablas operativas vigentes:
+- Se identificaron y explicaron las tablas operativas vigentes:
   - `teacher`, `student`, `standard`, `competency`
   - `item`, `exam`, `exam_item`
   - `exam_version`, `exam_version_item`
@@ -48,3 +48,54 @@
 - Definir y documentar criterio de seleccion de clave al momento de calificar OMR cuando exista version publicada.
 
 *(Agregar enlaces a archivos clave o referencias adicionales si aplica.)*
+
+## Anexo explicativo (lenguaje no tecnico)
+
+Este sistema guarda la informacion en varios bloques que trabajan juntos, como si fueran carpetas relacionadas:
+
+- **Docentes** (`teacher`): aqui se guarda quien crea los examenes.
+- **Estudiantes** (`student`): aqui se guarda la identificacion base del estudiante.
+- **Preguntas** (`item`): aqui se guarda cada pregunta con sus opciones y su respuesta correcta.
+- **Examenes** (`exam`): un examen no copia preguntas nuevas; mas bien selecciona preguntas ya existentes y las ordena.
+- **Relacion examen-pregunta** (`exam_item`): define que preguntas van en cada examen y en que posicion.
+- **Versiones del examen** (`exam_version`): una version es una presentacion concreta del examen, donde se puede cambiar el orden de preguntas y tambien el orden de opciones para evitar copia.
+- **Detalle por pregunta de una version** (`exam_version_item`): guarda para cada pregunta como quedaron las opciones y cual es la correcta final de esa version.
+- **Intentos de lectura OMR** (`omr_attempt`): cada vez que se toma una foto y se califica, se guarda un registro del intento con el resultado.
+- **Detalle de respuestas leidas en un intento** (`omr_attempt_answer`): guarda el resultado por pregunta dentro del intento.
+- **Estandares curriculares** (`standard`) y **competencias** (`competency`): catalogos para clasificar preguntas por referente pedagogico.
+
+### Como se relacionan entre si
+
+- Un docente (`teacher`) puede crear muchas preguntas (`item`).
+- Un docente (`teacher`) puede crear muchos examenes (`exam`).
+- Un examen (`exam`) se arma uniendo varias preguntas mediante `exam_item` (alli se guarda el orden).
+- Una pregunta (`item`) puede aparecer en muchos examenes distintos.
+- Un examen (`exam`) puede tener varias versiones (`exam_version`), por ejemplo V001, V002.
+- Cada version (`exam_version`) tiene su detalle por pregunta en `exam_version_item`.
+- Cada intento OMR (`omr_attempt`) puede vincularse con un docente y un examen, y tiene sus respuestas por pregunta en `omr_attempt_answer`.
+- Una pregunta (`item`) puede vincularse opcionalmente a un estandar (`standard`) y a una competencia (`competency`).
+
+### Donde vive la respuesta correcta
+
+La respuesta correcta existe en tres niveles, porque cada nivel cumple un objetivo distinto:
+
+1. **Pregunta base** (`item`): la correcta original de la pregunta.
+2. **Examen en orden base** (`exam` + `exam_item`): la correcta de cada pregunta segun el orden en que fue armada.
+3. **Version barajada** (`exam_version` + `exam_version_item`): la correcta final despues de mezclar opciones, que es la que realmente se usa para calificar esa version.
+
+En palabras simples: la pregunta original tiene una correcta, pero si se cambian las opciones para una version, la letra correcta puede cambiar para esa version.
+
+### Como se guardan las opciones de una pregunta
+
+- En `item.options` se guarda un **JSON** con las opciones A, B, C y D.
+- En `item.correct_answer` se guarda la letra correcta original (por ejemplo, `B`).
+- Cuando una version cambia el orden de opciones:
+  - `exam_version_item.option_map_json` guarda el mapeo de letras originales a letras nuevas.
+  - `exam_version_item.correct_answer_original` guarda la letra correcta antes del cambio.
+  - `exam_version_item.correct_answer_mapped` guarda la letra correcta despues del cambio.
+  - `exam_version.answer_key_json` guarda la clave final completa de esa version.
+
+### Identificador del examen
+
+- El codigo que identifica el examen para operar en el flujo (`exam_code`) se guarda en la entidad de examenes.
+- Ese codigo se interpreta junto con el docente, para evitar choques entre examenes de docentes diferentes.
