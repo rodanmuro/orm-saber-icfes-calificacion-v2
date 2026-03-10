@@ -11,3 +11,4 @@ python-multipart==0.0.20
 google-genai==1.33.0
 openai>=1.0.0,<2.0.0
 SQLAlchemy==2.0.43
+psycopg[binary]==3.2.9

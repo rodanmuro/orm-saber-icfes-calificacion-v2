@@ -10,6 +10,37 @@ source src/backend/.venv/bin/activate
 pip install -r src/backend/requirements.txt
 ```
 
+## PostgreSQL local (sin Docker)
+1. Iniciar servicio PostgreSQL local:
+```bash
+sudo systemctl start postgresql
+sudo systemctl status postgresql
+```
+
+2. Crear usuario/base para el proyecto (una sola vez):
+```bash
+sudo -u postgres psql
+```
+Luego en `psql`:
+```sql
+CREATE ROLE administrador WITH LOGIN PASSWORD '12345678';
+ALTER ROLE administrador CREATEDB;
+CREATE DATABASE omr_app OWNER administrador;
+GRANT ALL PRIVILEGES ON DATABASE omr_app TO administrador;
+```
+
+3. Configurar `.env` en `src/backend/.env` (puedes copiar desde `.env.example`):
+```bash
+DATABASE_URL=\"postgresql+psycopg://administrador:12345678@localhost:5432/omr_app\"
+```
+
+4. Verificar conectividad backend -> DB:
+```bash
+cd src/backend
+source .venv/bin/activate
+DEBUG=false PYTHONPATH=. python3 scripts/check_database_connection.py
+```
+
 ## Ejecutar API
 ```bash
 cd src/backend
@@ -17,6 +48,11 @@ cd src/backend
 ```
 
 Nota: el entorno virtual oficial vive en `src/backend/.venv`.
+
+## Detener PostgreSQL local
+```bash
+sudo systemctl stop postgresql
+```
 
 ## Health check
 - `GET /api/v1/health`
