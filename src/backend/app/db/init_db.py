@@ -1,8 +1,5 @@
-from app.db.base import Base
-from app.db import models  # noqa: F401
-from app.db.session import engine
+from app.db.migrations import run_migrations
 
 
 def init_db() -> None:
-    Base.metadata.create_all(bind=engine)
-
+    run_migrations()

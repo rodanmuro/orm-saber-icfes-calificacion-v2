@@ -61,13 +61,68 @@ sudo systemctl stop postgresql
 - Motor objetivo actual: PostgreSQL local/entorno (`DATABASE_URL`).
 - Esquema actual del proyecto: definido en modelos SQLAlchemy + migraciones SQL en `src/backend/migrations`.
 - Estado de migraciones versionadas:
-  - Alembic: pendiente de integracion formal (ACT_0043).
-  - Mientras tanto, la evolucion de esquema vigente se referencia por scripts SQL `0001..0004`.
+  - Alembic: integrado como mecanismo operativo de arranque (`upgrade head`).
+  - Migracion base inicial: `src/backend/alembic/versions/20260310_0001_initial_schema.py`.
+- En cada arranque de API, el backend ejecuta migraciones pendientes antes de atender requests.
 - Comando de verificacion de conexion backend -> DB:
 ```bash
 cd src/backend
 source .venv/bin/activate
 DEBUG=false PYTHONPATH=. python3 scripts/check_database_connection.py
+```
+
+## Comandos Alembic (backend)
+Aplicar migraciones pendientes:
+```bash
+cd src/backend
+source .venv/bin/activate
+alembic upgrade head
+```
+
+Crear una nueva migracion:
+```bash
+cd src/backend
+source .venv/bin/activate
+alembic revision -m "descripcion_cambio"
+```
+
+Revertir una migracion:
+```bash
+cd src/backend
+source .venv/bin/activate
+alembic downgrade -1
+```
+
+Validar esquema de PostgreSQL (tablas, unique, FKs basicas):
+```bash
+cd src/backend
+source .venv/bin/activate
+DATABASE_URL="postgresql+psycopg://administrador:12345678@localhost:5432/omr_app" \
+DEBUG=false PYTHONPATH=. python3 scripts/validate_postgres_schema.py
+```
+
+Seed dummy de examen (40 preguntas):
+```bash
+cd src/backend
+source .venv/bin/activate
+DATABASE_URL="postgresql+psycopg://administrador:12345678@localhost:5432/omr_app" \
+DEBUG=false PYTHONPATH=. python3 scripts/seed_dummy_exam_40.py
+```
+
+Reseed oficial de dataset base (docente + 40 preguntas + examen + version V001):
+```bash
+cd src/backend
+source .venv/bin/activate
+DATABASE_URL="postgresql+psycopg://administrador:12345678@localhost:5432/omr_app" \
+DEBUG=false PYTHONPATH=. python3 scripts/reseed_dummy_dataset.py
+```
+
+Verificar dataset dummy cargado:
+```bash
+cd src/backend
+source .venv/bin/activate
+DATABASE_URL="postgresql+psycopg://administrador:12345678@localhost:5432/omr_app" \
+DEBUG=false PYTHONPATH=. python3 scripts/verify_dummy_dataset.py
 ```
 
 ## Calificacion OMR (modo integracion)
