@@ -1,3 +1,4 @@
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -18,6 +19,17 @@ class Settings(BaseSettings):
     openai_api_key: str | None = None
     openai_model: str = "gpt-4.1"
     openai_timeout_seconds: float = 60.0
+
+    @field_validator("debug", mode="before")
+    @classmethod
+    def normalize_debug_value(cls, value: object) -> object:
+        if isinstance(value, str):
+            normalized = value.strip().lower()
+            if normalized in {"release", "prod", "production"}:
+                return False
+            if normalized in {"dev", "development"}:
+                return True
+        return value
 
     model_config = SettingsConfigDict(
         env_file=".env",
