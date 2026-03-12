@@ -57,3 +57,26 @@ export function docToPlainText(doc) {
   walk(doc);
   return chunks.join('').replace(/\s+/g, ' ').trim();
 }
+
+export function docHasMeaningfulContent(doc) {
+  if (!doc || typeof doc !== 'object') return false;
+
+  function walk(node) {
+    if (!node || typeof node !== 'object') return false;
+
+    if (node.type === 'text' && typeof node.text === 'string' && node.text.trim().length > 0) {
+      return true;
+    }
+
+    // Contenido no textual valido para banco de items.
+    if (node.type === 'image') return true;
+    if (node.type === 'math_inline') return true;
+
+    if (Array.isArray(node.content)) {
+      return node.content.some(walk);
+    }
+    return false;
+  }
+
+  return walk(doc);
+}

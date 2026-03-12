@@ -40,6 +40,28 @@ header p {
   align-items: start;
 }
 
+.single-pane {
+  margin-bottom: 14px;
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  padding: 10px;
+}
+
+.tab-btn {
+  background: #eef4fb;
+  border: 1px solid #b8cce2;
+  color: #1b3958;
+}
+
+.tab-btn.active {
+  background: #1f5f9d;
+  border-color: #234f7f;
+  color: #fff;
+}
+
 .grid {
   display: grid;
   gap: 10px;
@@ -93,6 +115,14 @@ textarea {
   border-bottom: 1px solid #dce4ec;
 }
 
+.editor-hint {
+  padding: 6px 8px;
+  font-size: 12px;
+  color: #4a5f76;
+  border-bottom: 1px solid #e6edf4;
+  background: #f8fbff;
+}
+
 .editor-toolbar button {
   padding: 4px 8px;
   border: 1px solid #8ea7c1;
@@ -118,9 +148,14 @@ textarea {
 }
 
 .tiptap-editor {
-  min-height: 92px;
+  min-height: var(--editor-min-height, 92px);
   padding: 8px;
   outline: none;
+}
+
+.editor-shell.is-resizable .tiptap-editor {
+  resize: vertical;
+  overflow: auto;
 }
 
 .tiptap-editor p {

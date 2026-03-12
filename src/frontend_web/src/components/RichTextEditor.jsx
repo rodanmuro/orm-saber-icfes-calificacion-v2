@@ -6,7 +6,42 @@ import StarterKit from '@tiptap/starter-kit';
 import MathInline from '../editor/MathInline';
 import { uploadEditorImage } from '../api/assetsApi';
 
-export default function RichTextEditor({ value, onChange, placeholder = '' }) {
+const ALLOWED_IMAGE_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp']);
+
+function getImageFilesFromDataTransfer(dataTransfer) {
+  if (!dataTransfer) return [];
+
+  const fromItems = Array.from(dataTransfer.items || [])
+    .filter((item) => item.kind === 'file')
+    .map((item) => item.getAsFile())
+    .filter((file) => file && ALLOWED_IMAGE_TYPES.has(file.type));
+
+  if (fromItems.length > 0) {
+    return fromItems;
+  }
+
+  return Array.from(dataTransfer.files || []).filter((file) => ALLOWED_IMAGE_TYPES.has(file.type));
+}
+
+export default function RichTextEditor({
+  value,
+  onChange,
+  placeholder = '',
+  minHeight = '92px',
+  resizable = true,
+}) {
+  const insertUploadedImages = async (files, currentEditor) => {
+    for (const file of files) {
+      try {
+        const upload = await uploadEditorImage(file);
+        currentEditor.chain().focus().setImage({ src: upload.absoluteUrl, alt: file.name }).run();
+      } catch (error) {
+        // eslint-disable-next-line no-alert
+        window.alert(`Error subiendo imagen: ${error.message}`);
+      }
+    }
+  };
+
   const editor = useEditor({
     extensions: [StarterKit, Image, MathInline],
     content: value,
@@ -14,6 +49,28 @@ export default function RichTextEditor({ value, onChange, placeholder = '' }) {
       attributes: {
         class: 'tiptap-editor',
         'data-placeholder': placeholder,
+      },
+      handlePaste: (view, event) => {
+        const files = getImageFilesFromDataTransfer(event?.clipboardData);
+        if (files.length === 0) {
+          return false;
+        }
+        event.preventDefault();
+        if (editor) {
+          insertUploadedImages(files, editor);
+        }
+        return true;
+      },
+      handleDrop: (view, event) => {
+        const files = getImageFilesFromDataTransfer(event?.dataTransfer);
+        if (files.length === 0) {
+          return false;
+        }
+        event.preventDefault();
+        if (editor) {
+          insertUploadedImages(files, editor);
+        }
+        return true;
       },
     },
     onUpdate({ editor: currentEditor }) {
@@ -34,7 +91,10 @@ export default function RichTextEditor({ value, onChange, placeholder = '' }) {
   if (!editor) return null;
 
   return (
-    <div className="editor-shell">
+    <div
+      className={`editor-shell ${resizable ? 'is-resizable' : ''}`}
+      style={{ '--editor-min-height': minHeight }}
+    >
       <div className="editor-toolbar">
         <button type="button" onClick={() => editor.chain().focus().toggleBold().run()}>
           B
@@ -78,6 +138,7 @@ export default function RichTextEditor({ value, onChange, placeholder = '' }) {
           />
         </label>
       </div>
+      <div className="editor-hint">Tip: pega imagen con Ctrl+V o arrastra archivos al editor.</div>
       <EditorContent editor={editor} />
     </div>
   );

@@ -1,4 +1,4 @@
-import { docToPlainText, storageToDoc } from '../utils/editorDoc';
+import { docHasMeaningfulContent, docToPlainText, storageToDoc } from '../utils/editorDoc';
 
 function getCurriculumLabel(item) {
   const standard = item.curriculum?.standard_code || '';
@@ -7,7 +7,9 @@ function getCurriculumLabel(item) {
 }
 
 function statementPreview(item) {
-  const text = docToPlainText(storageToDoc(item.statement));
+  const doc = storageToDoc(item.statement);
+  const text = docToPlainText(doc);
+  if (!text && docHasMeaningfulContent(doc)) return '[contenido no textual]';
   if (!text) return '-';
   return text.length > 90 ? `${text.slice(0, 90)}...` : text;
 }

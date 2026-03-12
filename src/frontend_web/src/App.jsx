@@ -14,7 +14,7 @@ import ExamBuilder from './components/ExamBuilder';
 import FiltersBar from './components/FiltersBar';
 import ItemForm, { emptyForm, formToPayload, itemToForm } from './components/ItemForm';
 import ItemList from './components/ItemList';
-import { docToPlainText } from './utils/editorDoc';
+import { docHasMeaningfulContent } from './utils/editorDoc';
 
 function filterItems(items, filters) {
   const subject = filters.subject.trim().toLowerCase();
@@ -35,6 +35,7 @@ function filterItems(items, filters) {
 }
 
 export default function App() {
+  const [activeTab, setActiveTab] = useState('edit');
   const [items, setItems] = useState([]);
   const [selectedItemId, setSelectedItemId] = useState(null);
   const [form, setForm] = useState(emptyForm());
@@ -74,6 +75,7 @@ export default function App() {
       const item = await getItem(itemId);
       setSelectedItemId(item.id);
       setForm(itemToForm(item));
+      setActiveTab('edit');
     } catch (err) {
       setError(err.message);
     }
@@ -84,19 +86,19 @@ export default function App() {
     setError('');
     setMessage('');
     try {
-      if (!docToPlainText(form.statement_doc)) {
+      if (!docHasMeaningfulContent(form.statement_doc)) {
         throw new Error('El enunciado no puede estar vacio');
       }
-      if (!docToPlainText(form.optionA_doc)) {
+      if (!docHasMeaningfulContent(form.optionA_doc)) {
         throw new Error('La opcion A no puede estar vacia');
       }
-      if (!docToPlainText(form.optionB_doc)) {
+      if (!docHasMeaningfulContent(form.optionB_doc)) {
         throw new Error('La opcion B no puede estar vacia');
       }
-      if (!docToPlainText(form.optionC_doc)) {
+      if (!docHasMeaningfulContent(form.optionC_doc)) {
         throw new Error('La opcion C no puede estar vacia');
       }
-      if (!docToPlainText(form.optionD_doc)) {
+      if (!docHasMeaningfulContent(form.optionD_doc)) {
         throw new Error('La opcion D no puede estar vacia');
       }
 
@@ -119,6 +121,7 @@ export default function App() {
   function handleReset() {
     setSelectedItemId(null);
     setForm(emptyForm());
+    setActiveTab('edit');
     setMessage('Formulario reiniciado');
     setError('');
   }
@@ -216,27 +219,45 @@ export default function App() {
       {error ? <p className="alert error">{error}</p> : null}
       {message ? <p className="alert success">{message}</p> : null}
 
-      <FiltersBar
-        filters={filters}
-        onChange={setFilters}
-        onClear={() => setFilters({ subject: '', difficulty: '', curricularTag: '' })}
-      />
+      <section className="tabs card">
+        <button
+          type="button"
+          className={activeTab === 'edit' ? 'tab-btn active' : 'tab-btn'}
+          onClick={() => setActiveTab('edit')}
+        >
+          Editar item
+        </button>
+        <button
+          type="button"
+          className={activeTab === 'list' ? 'tab-btn active' : 'tab-btn'}
+          onClick={() => setActiveTab('list')}
+        >
+          Listado de items ({items.length})
+        </button>
+      </section>
 
-      <section className="layout">
-        <ItemForm
-          form={form}
-          onChange={setForm}
-          onSubmit={handleSubmit}
-          onReset={handleReset}
-          isSaving={saving}
-          mode={selectedItemId ? 'edit' : 'create'}
-        />
-
-        <div>
+      {activeTab === 'edit' ? (
+        <section className="single-pane">
+          <ItemForm
+            form={form}
+            onChange={setForm}
+            onSubmit={handleSubmit}
+            onReset={handleReset}
+            isSaving={saving}
+            mode={selectedItemId ? 'edit' : 'create'}
+          />
+        </section>
+      ) : (
+        <section className="single-pane">
+          <FiltersBar
+            filters={filters}
+            onChange={setFilters}
+            onClear={() => setFilters({ subject: '', difficulty: '', curricularTag: '' })}
+          />
           {loading ? <p>Cargando items...</p> : null}
           <ItemList items={filteredItems} selectedItemId={selectedItemId} onSelect={handleSelectItem} />
-        </div>
-      </section>
+        </section>
+      )}
 
       <ExamBuilder
         items={items}

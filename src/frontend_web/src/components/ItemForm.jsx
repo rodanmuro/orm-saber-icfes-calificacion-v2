@@ -115,6 +115,7 @@ export default function ItemForm({ form, onChange, onSubmit, onReset, isSaving, 
             value={form.statement_doc}
             onChange={(value) => onChange({ ...form, statement_doc: value })}
             placeholder="Escribe el enunciado..."
+            minHeight="180px"
           />
         </label>
 
@@ -125,6 +126,7 @@ export default function ItemForm({ form, onChange, onSubmit, onReset, isSaving, 
               value={form.optionA_doc}
               onChange={(value) => onChange({ ...form, optionA_doc: value })}
               placeholder="Contenido opcion A"
+              minHeight="110px"
             />
           </label>
           <label>
@@ -133,6 +135,7 @@ export default function ItemForm({ form, onChange, onSubmit, onReset, isSaving, 
               value={form.optionB_doc}
               onChange={(value) => onChange({ ...form, optionB_doc: value })}
               placeholder="Contenido opcion B"
+              minHeight="110px"
             />
           </label>
           <label>
@@ -141,6 +144,7 @@ export default function ItemForm({ form, onChange, onSubmit, onReset, isSaving, 
               value={form.optionC_doc}
               onChange={(value) => onChange({ ...form, optionC_doc: value })}
               placeholder="Contenido opcion C"
+              minHeight="110px"
             />
           </label>
           <label>
@@ -149,6 +153,7 @@ export default function ItemForm({ form, onChange, onSubmit, onReset, isSaving, 
               value={form.optionD_doc}
               onChange={(value) => onChange({ ...form, optionD_doc: value })}
               placeholder="Contenido opcion D"
+              minHeight="110px"
             />
           </label>
         </div>
