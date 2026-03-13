@@ -9,8 +9,10 @@ ChoiceKey = Literal["A", "B", "C", "D"]
 
 
 class CurriculumRef(BaseModel):
+    standard_id: int | None = None
     standard_code: str | None = None
     standard_name: str | None = None
+    competency_id: int | None = None
     competency_code: str | None = None
     competency_name: str | None = None
 
