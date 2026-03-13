@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import { createItem, getItem, listItems, updateItem, API_BASE_URL } from './api/itemsApi';
+import { createItem, deleteItem, getItem, listItems, updateItem, API_BASE_URL } from './api/itemsApi';
 import {
   addItemToExam,
   createExam,
@@ -126,6 +126,33 @@ export default function App() {
     setError('');
   }
 
+  async function handleDeleteItem() {
+    if (!selectedItemId) return;
+    if (!window.confirm(`¿Borrar item #${selectedItemId}? Esta acción no se puede deshacer.`)) return;
+    setSaving(true);
+    setError('');
+    setMessage('');
+    try {
+      await deleteItem(selectedItemId);
+      setMessage(`Item #${selectedItemId} eliminado`);
+      setSelectedItemId(null);
+      setForm(emptyForm());
+      await refreshItems();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  function handleNavigate(direction) {
+    const idx = items.findIndex((it) => it.id === selectedItemId);
+    const nextIdx = idx + direction;
+    if (nextIdx >= 0 && nextIdx < items.length) {
+      handleSelectItem(items[nextIdx].id);
+    }
+  }
+
   async function refreshExams(teacherId) {
     setLoadingExams(true);
     setError('');
@@ -243,6 +270,11 @@ export default function App() {
             onChange={setForm}
             onSubmit={handleSubmit}
             onReset={handleReset}
+            onDelete={handleDeleteItem}
+            onNavigatePrev={() => handleNavigate(-1)}
+            onNavigateNext={() => handleNavigate(1)}
+            hasPrev={items.findIndex((it) => it.id === selectedItemId) > 0}
+            hasNext={items.findIndex((it) => it.id === selectedItemId) < items.length - 1}
             isSaving={saving}
             mode={selectedItemId ? 'edit' : 'create'}
           />

@@ -49,6 +49,11 @@ src/frontend/node_modules/
 src/frontend/dist/
 src/frontend/.vite/
 
+# Local SQLite databases and SQL dumps (test/dev only)
+src/backend/data/*.db
+src/backend/data/*.sql
+"src/backend/data/-- SQLite.sql"
+
 # Generated template artifacts
 src/backend/data/output/*.pdf
 src/backend/data/output/debug_preprocess/*.jpg

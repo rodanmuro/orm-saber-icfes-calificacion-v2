@@ -1,6 +1,7 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import RichTextEditor from './RichTextEditor';
+import { listCurriculumCompetencies, listCurriculumStandards } from '../api/itemsApi';
 import { docToStorage, emptyDoc, storageToDoc } from '../utils/editorDoc';
 
 const EMPTY_FORM = {
@@ -14,8 +15,10 @@ const EMPTY_FORM = {
   correct_answer: 'A',
   subject: '',
   difficulty: '',
+  standard_id: null,
   standard_code: '',
   standard_name: '',
+  competency_id: null,
   competency_code: '',
   competency_name: '',
 };
@@ -33,8 +36,10 @@ export function itemToForm(item) {
     correct_answer: item.correct_answer || 'A',
     subject: item.subject || '',
     difficulty: item.difficulty || '',
+    standard_id: item.curriculum?.standard_id || null,
     standard_code: item.curriculum?.standard_code || '',
     standard_name: item.curriculum?.standard_name || '',
+    competency_id: item.curriculum?.competency_id || null,
     competency_code: item.curriculum?.competency_code || '',
     competency_name: item.curriculum?.competency_name || '',
   };
@@ -48,8 +53,10 @@ export function formToPayload(form) {
   const curriculum =
     form.standard_code || form.standard_name || form.competency_code || form.competency_name
       ? {
+          standard_id: form.standard_id || null,
           standard_code: form.standard_code || null,
           standard_name: form.standard_name || null,
+          competency_id: form.competency_id || null,
           competency_code: form.competency_code || null,
           competency_name: form.competency_name || null,
         }
@@ -71,12 +78,89 @@ export function formToPayload(form) {
   };
 }
 
-export default function ItemForm({ form, onChange, onSubmit, onReset, isSaving, mode }) {
-  const title = useMemo(() => (mode === 'edit' ? `Editar item #${form.id}` : 'Crear item'), [mode, form.id]);
+export default function ItemForm({ form, onChange, onSubmit, onReset, onDelete, onNavigatePrev, onNavigateNext, hasPrev, hasNext, isSaving, mode }) {
+  const title = useMemo(() => (mode === 'edit' ? `Editar item #${form.id}` : 'Nuevo item'), [mode, form.id]);
+  const [standardOptions, setStandardOptions] = useState([]);
+  const [competencyOptions, setCompetencyOptions] = useState([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const query = [form.standard_code, form.standard_name].filter(Boolean).join(' ').trim();
+    listCurriculumStandards(query)
+      .then((rows) => {
+        if (!cancelled) setStandardOptions(rows);
+      })
+      .catch(() => {
+        if (!cancelled) setStandardOptions([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [form.standard_code, form.standard_name]);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!form.standard_id && !form.standard_code) {
+      setCompetencyOptions([]);
+      return () => {
+        cancelled = true;
+      };
+    }
+    const query = [form.competency_code, form.competency_name].filter(Boolean).join(' ').trim();
+    listCurriculumCompetencies({
+      standardId: form.standard_id,
+      standardCode: form.standard_code,
+      query,
+    })
+      .then((rows) => {
+        if (!cancelled) setCompetencyOptions(rows);
+      })
+      .catch(() => {
+        if (!cancelled) setCompetencyOptions([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [form.standard_id, form.standard_code, form.competency_code, form.competency_name]);
+
+  function handleStandardCodeChange(value) {
+    const match = standardOptions.find((row) => row.code === value);
+    onChange({
+      ...form,
+      standard_id: match?.id || null,
+      standard_code: value,
+      standard_name: match?.name || form.standard_name,
+      competency_id: null,
+      competency_code: '',
+      competency_name: '',
+    });
+  }
+
+  function handleCompetencyCodeChange(value) {
+    const match = competencyOptions.find((row) => row.code === value);
+    onChange({
+      ...form,
+      competency_id: match?.id || null,
+      competency_code: value,
+      competency_name: match?.name || form.competency_name,
+    });
+  }
 
   return (
     <section className="card">
-      <h3>{title}</h3>
+      <div className="item-form-header">
+        {mode === 'edit' && (
+          <button type="button" className="nav-btn" onClick={onNavigatePrev} disabled={!hasPrev} title="Item anterior">
+            &#8592;
+          </button>
+        )}
+        <h3 style={{ margin: 0 }}>{title}</h3>
+        {mode === 'edit' && (
+          <button type="button" className="nav-btn" onClick={onNavigateNext} disabled={!hasNext} title="Item siguiente">
+            &#8594;
+          </button>
+        )}
+      </div>
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -174,10 +258,18 @@ export default function ItemForm({ form, onChange, onSubmit, onReset, isSaving, 
           <label>
             Standard code
             <input
+              list="standard-code-options"
               value={form.standard_code}
-              onChange={(e) => onChange({ ...form, standard_code: e.target.value })}
+              onChange={(e) => handleStandardCodeChange(e.target.value)}
             />
           </label>
+          <datalist id="standard-code-options">
+            {standardOptions.map((row) => (
+              <option key={row.id} value={row.code}>
+                {row.name}
+              </option>
+            ))}
+          </datalist>
           <label>
             Standard name
             <input
@@ -188,10 +280,18 @@ export default function ItemForm({ form, onChange, onSubmit, onReset, isSaving, 
           <label>
             Competency code
             <input
+              list="competency-code-options"
               value={form.competency_code}
-              onChange={(e) => onChange({ ...form, competency_code: e.target.value })}
+              onChange={(e) => handleCompetencyCodeChange(e.target.value)}
             />
           </label>
+          <datalist id="competency-code-options">
+            {competencyOptions.map((row) => (
+              <option key={row.id} value={row.code}>
+                {row.name}
+              </option>
+            ))}
+          </datalist>
           <label>
             Competency name
             <input
@@ -203,11 +303,16 @@ export default function ItemForm({ form, onChange, onSubmit, onReset, isSaving, 
 
         <div className="actions">
           <button type="submit" disabled={isSaving}>
-            {isSaving ? 'Guardando...' : mode === 'edit' ? 'Actualizar item' : 'Crear item'}
+            {isSaving ? 'Guardando...' : 'Guardar item'}
           </button>
           <button type="button" onClick={onReset}>
             Nuevo
           </button>
+          {mode === 'edit' && (
+            <button type="button" className="btn-danger" onClick={onDelete} disabled={isSaving}>
+              Borrar item
+            </button>
+          )}
         </div>
       </form>
     </section>

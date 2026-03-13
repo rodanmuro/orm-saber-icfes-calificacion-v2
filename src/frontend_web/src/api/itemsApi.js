@@ -36,4 +36,31 @@ export function updateItem(itemId, payload) {
   });
 }
 
+export async function deleteItem(itemId) {
+  const response = await fetch(`${API_BASE_URL}/items/${itemId}`, {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error(`HTTP ${response.status}: ${body}`);
+  }
+}
+
+export function listCurriculumStandards(query = '') {
+  const params = new URLSearchParams();
+  if (query?.trim()) params.set('q', query.trim());
+  params.set('limit', '20');
+  return request(`/curriculum/standards?${params.toString()}`);
+}
+
+export function listCurriculumCompetencies({ standardId = null, standardCode = '', query = '' } = {}) {
+  const params = new URLSearchParams();
+  if (standardId) params.set('standard_id', String(standardId));
+  else if (standardCode?.trim()) params.set('standard_code', standardCode.trim());
+  if (query?.trim()) params.set('q', query.trim());
+  params.set('limit', '20');
+  return request(`/curriculum/competencies?${params.toString()}`);
+}
+
 export { API_BASE_URL };

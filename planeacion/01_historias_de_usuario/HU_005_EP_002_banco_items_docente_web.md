@@ -18,6 +18,8 @@
 5. El backend persiste los items de forma versionable sin depender de autenticacion en este incremento.
 6. El editor de preguntas permite incluir ecuaciones en LaTeX en enunciado y opciones.
 7. El editor de preguntas permite insertar imagenes en enunciado y opciones mediante carga de archivos.
+8. El docente puede eliminar un item existente desde el formulario de edicion, con confirmacion previa.
+9. El formulario permite navegar al item anterior o siguiente sin regresar al listado.
 
 ## Evidencia esperada
 - Frontend web base en `src/frontend_web`.

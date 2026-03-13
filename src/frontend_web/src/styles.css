@@ -198,6 +198,47 @@ button:disabled {
   margin-top: 12px;
 }
 
+.item-form-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.nav-btn {
+  background: #4a6fa5;
+  border: 1px solid #3a5a8a;
+  border-radius: 6px;
+  padding: 4px 12px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #ffffff;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.nav-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.nav-btn:not(:disabled):hover {
+  background: #3a5a8a;
+}
+
+.btn-danger {
+  background: #ffe6e6;
+  border: 1px solid #f4b8b8;
+  color: #7d1111;
+  border-radius: 6px;
+  padding: 6px 14px;
+  cursor: pointer;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: #f4b8b8;
+}
+
 .alert {
   border-radius: 8px;
   padding: 10px;
