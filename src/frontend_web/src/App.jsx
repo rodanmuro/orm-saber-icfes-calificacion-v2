@@ -26,7 +26,7 @@ function filterItems(items, filters) {
     if (difficulty && !(item.difficulty || '').toLowerCase().includes(difficulty)) return false;
 
     if (curricularTag) {
-      const label = `${item.curriculum?.standard_code || ''} ${item.curriculum?.competency_code || ''}`.toLowerCase();
+      const label = `${item.curriculum?.standard_name || ''} ${item.curriculum?.competency_name || ''}`.toLowerCase();
       if (!label.includes(curricularTag)) return false;
     }
 

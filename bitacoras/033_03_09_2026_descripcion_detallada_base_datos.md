@@ -99,3 +99,30 @@ En palabras simples: la pregunta original tiene una correcta, pero si se cambian
 
 - El codigo que identifica el examen para operar en el flujo (`exam_code`) se guarda en la entidad de examenes.
 - Ese codigo se interpreta junto con el docente, para evitar choques entre examenes de docentes diferentes.
+
+---
+
+## Enmienda — 2026-03-15 (ver bitacora 041)
+
+Los campos `code` en las tablas `standard` y `competency` fueron **eliminados** en la sesion del 15 de marzo de 2026. Lo descrito arriba refleja el estado original; el estado vigente es el siguiente:
+
+### Cambios en el modelo de datos
+
+| Tabla | Campo eliminado | Nueva unicidad |
+|---|---|---|
+| `standard` | `code VARCHAR(64) UNIQUE` | `UNIQUE(name)` |
+| `competency` | `code VARCHAR(64)`, constraint `uq_competency_standard_code` | `UNIQUE(standard_id, name)` |
+
+- El campo `code` era redundante frente al `id` (PK autoincrement) y no aportaba semantica adicional en este proyecto.
+- La migracion `20260315_0002_drop_code_use_name_as_identifier.py` aplica estos cambios en Postgres.
+
+### Cambios en el schema de API
+
+- `CurriculumRef` ya no tiene `standard_id`, `standard_code`, `competency_id`, `competency_code`.
+- El cliente solo envia `{ standard_name, competency_name }`.
+- El backend hace `get_or_create` por `name` (standard) y por `(standard_id, name)` (competency).
+
+### Cambios en el frontend
+
+- El formulario de item muestra solo los campos **Estandar** (nombre) y **Competencia** (nombre).
+- El listado de items muestra columnas **Estandar** y **Competencia** en lugar de "Curricular".

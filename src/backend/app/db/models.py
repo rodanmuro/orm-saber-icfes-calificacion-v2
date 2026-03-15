@@ -48,8 +48,7 @@ class Standard(Base):
     __tablename__ = "standard"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    code: Mapped[str] = mapped_column(String(64), unique=True, index=True)
-    name: Mapped[str] = mapped_column(String(255))
+    name: Mapped[str] = mapped_column(String(255), unique=True, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
@@ -61,11 +60,10 @@ class Standard(Base):
 
 class Competency(Base):
     __tablename__ = "competency"
-    __table_args__ = (UniqueConstraint("standard_id", "code", name="uq_competency_standard_code"),)
+    __table_args__ = (UniqueConstraint("standard_id", "name", name="uq_competency_standard_name"),)
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     standard_id: Mapped[int] = mapped_column(ForeignKey("standard.id", ondelete="CASCADE"), index=True)
-    code: Mapped[str] = mapped_column(String(64), index=True)
     name: Mapped[str] = mapped_column(String(255))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(

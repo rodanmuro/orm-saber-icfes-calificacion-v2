@@ -1,11 +1,5 @@
 import { docHasMeaningfulContent, docToPlainText, storageToDoc } from '../utils/editorDoc';
 
-function getCurriculumLabel(item) {
-  const standard = item.curriculum?.standard_code || '';
-  const competency = item.curriculum?.competency_code || '';
-  return [standard, competency].filter(Boolean).join(' / ') || '-';
-}
-
 function statementPreview(item) {
   const doc = storageToDoc(item.statement);
   const text = docToPlainText(doc);
@@ -26,7 +20,8 @@ export default function ItemList({ items, selectedItemId, onSelect }) {
               <th>Enunciado</th>
               <th>Area</th>
               <th>Dificultad</th>
-              <th>Curricular</th>
+              <th>Estandar</th>
+              <th>Competencia</th>
               <th>Accion</th>
             </tr>
           </thead>
@@ -37,7 +32,8 @@ export default function ItemList({ items, selectedItemId, onSelect }) {
                 <td>{statementPreview(item)}</td>
                 <td>{item.subject || '-'}</td>
                 <td>{item.difficulty || '-'}</td>
-                <td>{getCurriculumLabel(item)}</td>
+                <td>{item.curriculum?.standard_name || '-'}</td>
+                <td>{item.curriculum?.competency_name || '-'}</td>
                 <td>
                   <button type="button" onClick={() => onSelect(item.id)}>
                     Consultar / Editar

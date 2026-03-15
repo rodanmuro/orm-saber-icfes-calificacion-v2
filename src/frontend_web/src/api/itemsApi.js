@@ -54,10 +54,9 @@ export function listCurriculumStandards(query = '') {
   return request(`/curriculum/standards?${params.toString()}`);
 }
 
-export function listCurriculumCompetencies({ standardId = null, standardCode = '', query = '' } = {}) {
+export function listCurriculumCompetencies({ standardId = null, query = '' } = {}) {
   const params = new URLSearchParams();
   if (standardId) params.set('standard_id', String(standardId));
-  else if (standardCode?.trim()) params.set('standard_code', standardCode.trim());
   if (query?.trim()) params.set('q', query.trim());
   params.set('limit', '20');
   return request(`/curriculum/competencies?${params.toString()}`);

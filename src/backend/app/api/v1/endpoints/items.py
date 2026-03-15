@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
-from sqlalchemy import Select, select
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.db.models import Competency, Item, Standard, Teacher
@@ -21,72 +21,29 @@ def _resolve_curriculum(
     standard: Standard | None = None
     competency: Competency | None = None
 
-    if curriculum.standard_id:
-        standard = db.get(Standard, curriculum.standard_id)
+    if curriculum.standard_name:
+        standard = db.scalar(select(Standard).where(Standard.name == curriculum.standard_name))
         if standard is None:
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=f"standard_id={curriculum.standard_id} not found",
-            )
-
-    if curriculum.standard_code:
-        if standard is not None and standard.code != curriculum.standard_code:
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="standard_id and standard_code mismatch",
-            )
-        standard = db.scalar(select(Standard).where(Standard.code == curriculum.standard_code))
-        if standard is None:
-            standard = Standard(
-                code=curriculum.standard_code,
-                name=curriculum.standard_name or curriculum.standard_code,
-            )
+            standard = Standard(name=curriculum.standard_name)
             db.add(standard)
             db.flush()
-    elif standard is not None and curriculum.standard_name:
-        standard.name = curriculum.standard_name
 
-    if curriculum.competency_id:
-        competency = db.get(Competency, curriculum.competency_id)
-        if competency is None:
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=f"competency_id={curriculum.competency_id} not found",
-            )
-        if standard is None:
-            standard = competency.standard
-        elif competency.standard_id != standard.id:
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="competency_id does not belong to selected standard",
-            )
-
-    if curriculum.competency_code:
+    if curriculum.competency_name:
         if standard is None:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="competency_code requires standard_code",
+                detail="competency_name requires standard_name",
             )
-        if competency is not None and competency.code != curriculum.competency_code:
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="competency_id and competency_code mismatch",
+        competency = db.scalar(
+            select(Competency).where(
+                Competency.standard_id == standard.id,
+                Competency.name == curriculum.competency_name,
             )
-        statement: Select[tuple[Competency]] = select(Competency).where(
-            Competency.standard_id == standard.id,
-            Competency.code == curriculum.competency_code,
         )
-        competency = db.scalar(statement)
         if competency is None:
-            competency = Competency(
-                standard_id=standard.id,
-                code=curriculum.competency_code,
-                name=curriculum.competency_name or curriculum.competency_code,
-            )
+            competency = Competency(standard_id=standard.id, name=curriculum.competency_name)
             db.add(competency)
             db.flush()
-    elif competency is not None and curriculum.competency_name:
-        competency.name = curriculum.competency_name
 
     return standard, competency
 
@@ -95,11 +52,7 @@ def _to_item_read(item: Item) -> ItemRead:
     curriculum = None
     if item.standard or item.competency:
         curriculum = CurriculumRef(
-            standard_id=item.standard.id if item.standard else None,
-            standard_code=item.standard.code if item.standard else None,
             standard_name=item.standard.name if item.standard else None,
-            competency_id=item.competency.id if item.competency else None,
-            competency_code=item.competency.code if item.competency else None,
             competency_name=item.competency.name if item.competency else None,
         )
 

@@ -15,11 +15,8 @@ const EMPTY_FORM = {
   correct_answer: 'A',
   subject: '',
   difficulty: '',
-  standard_id: null,
-  standard_code: '',
   standard_name: '',
-  competency_id: null,
-  competency_code: '',
+  _standard_id: null,
   competency_name: '',
 };
 
@@ -36,28 +33,21 @@ export function itemToForm(item) {
     correct_answer: item.correct_answer || 'A',
     subject: item.subject || '',
     difficulty: item.difficulty || '',
-    standard_id: item.curriculum?.standard_id || null,
-    standard_code: item.curriculum?.standard_code || '',
     standard_name: item.curriculum?.standard_name || '',
-    competency_id: item.curriculum?.competency_id || null,
-    competency_code: item.curriculum?.competency_code || '',
+    _standard_id: null,
     competency_name: item.curriculum?.competency_name || '',
   };
 }
 
 export function emptyForm() {
-  return { ...EMPTY_FORM };
+  return { ...EMPTY_FORM, statement_doc: emptyDoc(), optionA_doc: emptyDoc(), optionB_doc: emptyDoc(), optionC_doc: emptyDoc(), optionD_doc: emptyDoc() };
 }
 
 export function formToPayload(form) {
   const curriculum =
-    form.standard_code || form.standard_name || form.competency_code || form.competency_name
+    form.standard_name || form.competency_name
       ? {
-          standard_id: form.standard_id || null,
-          standard_code: form.standard_code || null,
           standard_name: form.standard_name || null,
-          competency_id: form.competency_id || null,
-          competency_code: form.competency_code || null,
           competency_name: form.competency_name || null,
         }
       : null;
@@ -85,81 +75,48 @@ export default function ItemForm({ form, onChange, onSubmit, onReset, onDelete, 
 
   useEffect(() => {
     let cancelled = false;
-    const query = [form.standard_code, form.standard_name].filter(Boolean).join(' ').trim();
-    listCurriculumStandards(query)
-      .then((rows) => {
-        if (!cancelled) setStandardOptions(rows);
-      })
-      .catch(() => {
-        if (!cancelled) setStandardOptions([]);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [form.standard_code, form.standard_name]);
+    listCurriculumStandards(form.standard_name)
+      .then((rows) => { if (!cancelled) setStandardOptions(rows); })
+      .catch(() => { if (!cancelled) setStandardOptions([]); });
+    return () => { cancelled = true; };
+  }, [form.standard_name]);
 
   useEffect(() => {
     let cancelled = false;
-    if (!form.standard_id && !form.standard_code) {
+    if (!form._standard_id && !form.standard_name) {
       setCompetencyOptions([]);
-      return () => {
-        cancelled = true;
-      };
+      return () => { cancelled = true; };
     }
-    const query = [form.competency_code, form.competency_name].filter(Boolean).join(' ').trim();
-    listCurriculumCompetencies({
-      standardId: form.standard_id,
-      standardCode: form.standard_code,
-      query,
-    })
-      .then((rows) => {
-        if (!cancelled) setCompetencyOptions(rows);
-      })
-      .catch(() => {
-        if (!cancelled) setCompetencyOptions([]);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [form.standard_id, form.standard_code, form.competency_code, form.competency_name]);
+    listCurriculumCompetencies({ standardId: form._standard_id, query: form.competency_name })
+      .then((rows) => { if (!cancelled) setCompetencyOptions(rows); })
+      .catch(() => { if (!cancelled) setCompetencyOptions([]); });
+    return () => { cancelled = true; };
+  }, [form._standard_id, form.standard_name, form.competency_name]);
 
-  function handleStandardCodeChange(value) {
-    const match = standardOptions.find((row) => row.code === value);
+  function handleStandardChange(value) {
+    const match = standardOptions.find((row) => row.name === value);
     onChange({
       ...form,
-      standard_id: match?.id || null,
-      standard_code: value,
-      standard_name: match?.name || form.standard_name,
-      competency_id: null,
-      competency_code: '',
+      standard_name: value,
+      _standard_id: match?.id || null,
       competency_name: '',
     });
   }
 
-  function handleCompetencyCodeChange(value) {
-    const match = competencyOptions.find((row) => row.code === value);
-    onChange({
-      ...form,
-      competency_id: match?.id || null,
-      competency_code: value,
-      competency_name: match?.name || form.competency_name,
-    });
+  function handleCompetencyChange(value) {
+    onChange({ ...form, competency_name: value });
   }
 
   return (
     <section className="card">
       <div className="item-form-header">
-        {mode === 'edit' && (
-          <button type="button" className="nav-btn" onClick={onNavigatePrev} disabled={!hasPrev} title="Item anterior">
-            &#8592;
-          </button>
-        )}
+        <button type="button" className="nav-btn" onClick={onNavigatePrev} disabled={!hasPrev} title="Item anterior">
+          &#8592;
+        </button>
         <h3 style={{ margin: 0 }}>{title}</h3>
-        {mode === 'edit' && (
-          <button type="button" className="nav-btn" onClick={onNavigateNext} disabled={!hasNext} title="Item siguiente">
-            &#8594;
-          </button>
-        )}
+        <button type="button" className="nav-btn" onClick={onNavigateNext} disabled={!hasNext} title="Item siguiente">
+          &#8594;
+        </button>
       </div>
       <form
         onSubmit={(e) => {
@@ -253,51 +210,36 @@ export default function ItemForm({ form, onChange, onSubmit, onReset, onDelete, 
           </label>
         </div>
 
-        <h4>Curricular (lite)</h4>
+        <h4>Curricular</h4>
         <div className="grid grid-2">
           <label>
-            Standard code
+            Estandar
             <input
-              list="standard-code-options"
-              value={form.standard_code}
-              onChange={(e) => handleStandardCodeChange(e.target.value)}
-            />
-          </label>
-          <datalist id="standard-code-options">
-            {standardOptions.map((row) => (
-              <option key={row.id} value={row.code}>
-                {row.name}
-              </option>
-            ))}
-          </datalist>
-          <label>
-            Standard name
-            <input
+              list="standard-name-options"
               value={form.standard_name}
-              onChange={(e) => onChange({ ...form, standard_name: e.target.value })}
+              onChange={(e) => handleStandardChange(e.target.value)}
+              placeholder="Nombre del estandar..."
             />
+            <datalist id="standard-name-options">
+              {standardOptions.map((row) => (
+                <option key={row.id} value={row.name} />
+              ))}
+            </datalist>
           </label>
           <label>
-            Competency code
+            Competencia
             <input
-              list="competency-code-options"
-              value={form.competency_code}
-              onChange={(e) => handleCompetencyCodeChange(e.target.value)}
-            />
-          </label>
-          <datalist id="competency-code-options">
-            {competencyOptions.map((row) => (
-              <option key={row.id} value={row.code}>
-                {row.name}
-              </option>
-            ))}
-          </datalist>
-          <label>
-            Competency name
-            <input
+              list="competency-name-options"
               value={form.competency_name}
-              onChange={(e) => onChange({ ...form, competency_name: e.target.value })}
+              onChange={(e) => handleCompetencyChange(e.target.value)}
+              placeholder="Nombre de la competencia..."
+              disabled={!form.standard_name}
             />
+            <datalist id="competency-name-options">
+              {competencyOptions.map((row) => (
+                <option key={row.id} value={row.name} />
+              ))}
+            </datalist>
           </label>
         </div>
 
