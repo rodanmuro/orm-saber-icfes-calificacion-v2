@@ -62,4 +62,11 @@ export function listCurriculumCompetencies({ standardId = null, query = '' } = {
   return request(`/curriculum/competencies?${params.toString()}`);
 }
 
+export function generateItemAIDraft(payload) {
+  return request('/ai/generate-item', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
 export { API_BASE_URL };

@@ -1,8 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import RichTextEditor from './RichTextEditor';
-import { listCurriculumCompetencies, listCurriculumStandards } from '../api/itemsApi';
-import { docToStorage, emptyDoc, storageToDoc } from '../utils/editorDoc';
+import {
+  generateItemAIDraft,
+  listCurriculumCompetencies,
+  listCurriculumStandards,
+} from '../api/itemsApi';
+import { docToStorage, emptyDoc, storageToDoc, textToDoc } from '../utils/editorDoc';
 
 const EMPTY_FORM = {
   id: null,
@@ -18,6 +22,7 @@ const EMPTY_FORM = {
   standard_name: '',
   _standard_id: null,
   competency_name: '',
+  metadata: {},
 };
 
 export function itemToForm(item) {
@@ -36,11 +41,20 @@ export function itemToForm(item) {
     standard_name: item.curriculum?.standard_name || '',
     _standard_id: null,
     competency_name: item.curriculum?.competency_name || '',
+    metadata: item.metadata || {},
   };
 }
 
 export function emptyForm() {
-  return { ...EMPTY_FORM, statement_doc: emptyDoc(), optionA_doc: emptyDoc(), optionB_doc: emptyDoc(), optionC_doc: emptyDoc(), optionD_doc: emptyDoc() };
+  return {
+    ...EMPTY_FORM,
+    statement_doc: emptyDoc(),
+    optionA_doc: emptyDoc(),
+    optionB_doc: emptyDoc(),
+    optionC_doc: emptyDoc(),
+    optionD_doc: emptyDoc(),
+    metadata: {},
+  };
 }
 
 export function formToPayload(form) {
@@ -65,32 +79,72 @@ export function formToPayload(form) {
     subject: form.subject || null,
     difficulty: form.difficulty || null,
     curriculum,
+    metadata:
+      form.metadata && Object.keys(form.metadata).length > 0
+        ? form.metadata
+        : null,
   };
 }
 
-export default function ItemForm({ form, onChange, onSubmit, onReset, onDelete, onNavigatePrev, onNavigateNext, hasPrev, hasNext, isSaving, mode }) {
-  const title = useMemo(() => (mode === 'edit' ? `Editar item #${form.id}` : 'Nuevo item'), [mode, form.id]);
+export default function ItemForm({
+  form,
+  onChange,
+  onSubmit,
+  onReset,
+  onDelete,
+  onNavigatePrev,
+  onNavigateNext,
+  hasPrev,
+  hasNext,
+  isSaving,
+  mode,
+}) {
+  const title = useMemo(
+    () => (mode === 'edit' ? `Editar item #${form.id}` : 'Nuevo item'),
+    [mode, form.id]
+  );
   const [standardOptions, setStandardOptions] = useState([]);
   const [competencyOptions, setCompetencyOptions] = useState([]);
+
+  const [aiPrompt, setAiPrompt] = useState('');
+  const [aiDraft, setAiDraft] = useState(null);
+  const [aiUsage, setAiUsage] = useState(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState('');
+  const [aiMessages, setAiMessages] = useState([]);
 
   useEffect(() => {
     let cancelled = false;
     listCurriculumStandards(form.standard_name)
-      .then((rows) => { if (!cancelled) setStandardOptions(rows); })
-      .catch(() => { if (!cancelled) setStandardOptions([]); });
-    return () => { cancelled = true; };
+      .then((rows) => {
+        if (!cancelled) setStandardOptions(rows);
+      })
+      .catch(() => {
+        if (!cancelled) setStandardOptions([]);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [form.standard_name]);
 
   useEffect(() => {
     let cancelled = false;
     if (!form._standard_id && !form.standard_name) {
       setCompetencyOptions([]);
-      return () => { cancelled = true; };
+      return () => {
+        cancelled = true;
+      };
     }
     listCurriculumCompetencies({ standardId: form._standard_id, query: form.competency_name })
-      .then((rows) => { if (!cancelled) setCompetencyOptions(rows); })
-      .catch(() => { if (!cancelled) setCompetencyOptions([]); });
-    return () => { cancelled = true; };
+      .then((rows) => {
+        if (!cancelled) setCompetencyOptions(rows);
+      })
+      .catch(() => {
+        if (!cancelled) setCompetencyOptions([]);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [form._standard_id, form.standard_name, form.competency_name]);
 
   function handleStandardChange(value) {
@@ -107,14 +161,111 @@ export default function ItemForm({ form, onChange, onSubmit, onReset, onDelete, 
     onChange({ ...form, competency_name: value });
   }
 
+  function pushAiMessage(role, text) {
+    setAiMessages((prev) => [
+      ...prev,
+      { id: `${Date.now()}-${Math.random()}`, role, text },
+    ]);
+  }
+
+  async function handleGenerateWithAI() {
+    const standardName = (form.standard_name || '').trim();
+    const competencyName = (form.competency_name || '').trim();
+    const userPrompt = aiPrompt.trim();
+
+    setAiError('');
+    setAiUsage(null);
+
+    if (!standardName || !competencyName) {
+      setAiError('Define Estandar y Competencia antes de generar con IA.');
+      return;
+    }
+    if (!userPrompt) {
+      setAiError('Escribe una instruccion para la IA.');
+      return;
+    }
+
+    setAiLoading(true);
+    pushAiMessage('user', userPrompt);
+
+    try {
+      const response = await generateItemAIDraft({
+        user_prompt: userPrompt,
+        standard_name: standardName,
+        competency_name: competencyName,
+        subject: form.subject || null,
+        difficulty: form.difficulty || null,
+      });
+      setAiDraft(response);
+      setAiUsage(response.usage || null);
+      onChange({
+        ...form,
+        statement_doc: textToDoc(response.statement),
+        optionA_doc: textToDoc(response.options?.A || ""),
+        optionB_doc: textToDoc(response.options?.B || ""),
+        optionC_doc: textToDoc(response.options?.C || ""),
+        optionD_doc: textToDoc(response.options?.D || ""),
+        correct_answer: response.correct_answer || form.correct_answer,
+        metadata: {
+          ...(form.metadata || {}),
+          ...(response.metadata || {}),
+        },
+      });
+      pushAiMessage(
+        'assistant',
+        'Borrador generado y aplicado al formulario. Correcta sugerida: ' +
+          response.correct_answer +
+          '. Revisa y luego guarda manualmente.'
+      );
+    } catch (err) {
+      const message = err?.message || 'Error generando borrador con IA';
+      setAiError(message);
+      pushAiMessage('system', `Error: ${message}`);
+    } finally {
+      setAiLoading(false);
+    }
+  }
+
+  function handleApplyAIDraft() {
+    if (!aiDraft) return;
+
+    onChange({
+      ...form,
+      statement_doc: textToDoc(aiDraft.statement),
+      optionA_doc: textToDoc(aiDraft.options?.A || ''),
+      optionB_doc: textToDoc(aiDraft.options?.B || ''),
+      optionC_doc: textToDoc(aiDraft.options?.C || ''),
+      optionD_doc: textToDoc(aiDraft.options?.D || ''),
+      correct_answer: aiDraft.correct_answer || form.correct_answer,
+      metadata: {
+        ...(form.metadata || {}),
+        ...(aiDraft.metadata || {}),
+      },
+    });
+
+    pushAiMessage('system', 'Borrador IA aplicado al formulario. Revisa y guarda manualmente.');
+  }
+
   return (
     <section className="card">
       <div className="item-form-header">
-        <button type="button" className="nav-btn" onClick={onNavigatePrev} disabled={!hasPrev} title="Item anterior">
+        <button
+          type="button"
+          className="nav-btn"
+          onClick={onNavigatePrev}
+          disabled={!hasPrev}
+          title="Item anterior"
+        >
           &#8592;
         </button>
         <h3 style={{ margin: 0 }}>{title}</h3>
-        <button type="button" className="nav-btn" onClick={onNavigateNext} disabled={!hasNext} title="Item siguiente">
+        <button
+          type="button"
+          className="nav-btn"
+          onClick={onNavigateNext}
+          disabled={!hasNext}
+          title="Item siguiente"
+        >
           &#8594;
         </button>
       </div>
@@ -124,6 +275,57 @@ export default function ItemForm({ form, onChange, onSubmit, onReset, onDelete, 
           onSubmit();
         }}
       >
+
+
+        <h4>Asistente IA (borrador)</h4>
+        <div className="ai-panel">
+          <label>
+            Instruccion para IA
+            <textarea
+              value={aiPrompt}
+              onChange={(e) => setAiPrompt(e.target.value)}
+              placeholder="Ej: Crea una pregunta de porcentajes para grado 7, con distractores comunes."
+            />
+          </label>
+
+          <div className="actions">
+            <button type="button" onClick={handleGenerateWithAI} disabled={aiLoading}>
+              {aiLoading ? 'Generando borrador...' : 'Generar borrador IA'}
+            </button>
+            <button type="button" onClick={handleApplyAIDraft} disabled={!aiDraft || aiLoading}>
+              Aplicar borrador IA
+            </button>
+          </div>
+
+          {aiError ? <p className="alert error">{aiError}</p> : null}
+
+          {aiUsage ? (
+            <div className="ai-usage">
+              <p><strong>Tokens entrada:</strong> {aiUsage.input_tokens} (cached: {aiUsage.cached_input_tokens})</p>
+              <p><strong>Tokens salida:</strong> {aiUsage.output_tokens}</p>
+              <p><strong>Total tokens:</strong> {aiUsage.total_tokens}</p>
+              <p><strong>Costo entrada USD:</strong> {Number(aiUsage.input_cost_usd || 0).toFixed(8)}</p>
+              <p><strong>Costo cached USD:</strong> {Number(aiUsage.cached_input_cost_usd || 0).toFixed(8)}</p>
+              <p><strong>Costo salida USD:</strong> {Number(aiUsage.output_cost_usd || 0).toFixed(8)}</p>
+              <p><strong>Costo total USD:</strong> {Number(aiUsage.total_cost_usd || 0).toFixed(8)}</p>
+            </div>
+          ) : null}
+
+          <div className="ai-chat-log">
+            {aiMessages.length === 0 ? (
+              <p className="ai-chat-empty">
+                Sin mensajes aun. La IA requiere Estandar y Competencia para generar.
+              </p>
+            ) : (
+              aiMessages.map((msg) => (
+                <div key={msg.id} className={`ai-chat-msg ${msg.role}`}>
+                  <strong>{msg.role === 'user' ? 'Tu' : msg.role === 'assistant' ? 'IA' : 'Sistema'}:</strong>{' '}
+                  {msg.text}
+                </div>
+              ))
+            )}
+          </div>
+        </div>
         <div className="grid grid-2">
           <label>
             Teacher ID
@@ -202,11 +404,17 @@ export default function ItemForm({ form, onChange, onSubmit, onReset, onDelete, 
         <div className="grid grid-2">
           <label>
             Area
-            <input value={form.subject} onChange={(e) => onChange({ ...form, subject: e.target.value })} />
+            <input
+              value={form.subject}
+              onChange={(e) => onChange({ ...form, subject: e.target.value })}
+            />
           </label>
           <label>
             Dificultad
-            <input value={form.difficulty} onChange={(e) => onChange({ ...form, difficulty: e.target.value })} />
+            <input
+              value={form.difficulty}
+              onChange={(e) => onChange({ ...form, difficulty: e.target.value })}
+            />
           </label>
         </div>
 

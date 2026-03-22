@@ -12,16 +12,18 @@
 ## Criterios de aceptacion
 1. El asistente se muestra en la vista `Editar item` con un cuadro de entrada y salida tipo chat corto.
 2. Antes de generar, deben estar definidos al menos `standard_name` y `competency_name` en el formulario.
-3. El backend consume OpenAI via endpoint interno y retorna salida estructurada: `statement`, `options(A-D)`, `correct_answer`.
-4. El docente puede aplicar el resultado al formulario sin guardado automatico en base de datos.
-5. El sistema valida que la salida de IA cumpla formato esperado (4 opciones y 1 correcta A/B/C/D).
+3. El backend consume OpenAI via endpoint interno y retorna salida estructurada: `statement`, `options(A-D)`, `correct_answer`, `metadata`, `usage`.
+4. Al generar, el borrador se aplica al formulario (`enunciado`, `opciones`, `respuesta correcta`) sin guardado automatico en base de datos.
+5. El sistema valida que la salida de IA cumpla formato esperado (4 opciones A/B/C/D y una sola correcta), y normaliza la correcta en `A`.
 6. El item guardado conserva trazabilidad en metadata (`ai_generated`, `ai_model`, `ai_prompt_version`).
-7. Ante errores de IA o formato invalido, se informa mensaje claro sin romper la edicion manual.
+7. La interfaz muestra consumo por peticion: tokens de entrada/salida/cached y costo USD calculado.
+8. Ante errores de IA o formato invalido, se informa mensaje claro sin romper la edicion manual.
 
 ## Evidencia esperada
 - Flujo funcional en frontend: conversar -> generar -> aplicar al formulario.
 - Endpoint backend de generacion IA validado con pruebas.
 - Evidencia de item guardado con metadata de origen IA.
+- Evidencia visual de costos/tokens por peticion IA.
 
 ## Notas
 - El alcance inicial es asistencia de borrador; la revision docente sigue siendo obligatoria.
