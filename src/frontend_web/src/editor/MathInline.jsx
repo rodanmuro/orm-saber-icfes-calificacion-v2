@@ -2,8 +2,24 @@ import { Node, mergeAttributes } from '@tiptap/core';
 import { NodeViewWrapper, ReactNodeViewRenderer } from '@tiptap/react';
 import katex from 'katex';
 
+function normalizeLatex(input) {
+  let value = (input || '').trim();
+  if (!value) return '';
+
+  // Remove common math delimiters accidentally included by LLM output.
+  if (value.startsWith('$$') && value.endsWith('$$') && value.length > 4) {
+    value = value.slice(2, -2).trim();
+  } else if (value.startsWith('$') && value.endsWith('$') && value.length > 2) {
+    value = value.slice(1, -1).trim();
+  }
+
+  // Escape currency dollars not already escaped.
+  value = value.replace(/(^|[^\\])\$/g, '$1\\$');
+  return value;
+}
+
 function MathInlineNodeView({ node }) {
-  const latex = node.attrs.latex || '';
+  const latex = normalizeLatex(node.attrs.latex || '');
   const rendered = katex.renderToString(latex || '\\text{?}', {
     throwOnError: false,
     strict: 'ignore',

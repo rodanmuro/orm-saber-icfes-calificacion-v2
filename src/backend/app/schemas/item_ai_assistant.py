@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any, Literal
+
 from pydantic import BaseModel, Field
 
 
@@ -27,9 +29,29 @@ class AIUsageCost(BaseModel):
     pricing_output_per_1m_usd: float
 
 
+class ItemAIMediaSpec(BaseModel):
+    mode: Literal["chart_deterministic"]
+    target: Literal["statement", "option_a", "option_b", "option_c", "option_d"]
+    spec: dict[str, Any]
+
+
 class GenerateItemAIResponse(BaseModel):
-    statement: str
-    options: dict[str, str]
+    statement_doc: dict[str, Any]
+    options_doc: dict[str, dict[str, Any]]
     correct_answer: str
     metadata: dict[str, str | bool]
     usage: AIUsageCost | None = None
+    media_spec: ItemAIMediaSpec | None = None
+
+
+class GenerateMediaPayload(BaseModel):
+    teacher_id: int = Field(ge=1)
+    mode: Literal["chart_deterministic"]
+    target: Literal["statement", "option_a", "option_b", "option_c", "option_d"]
+    spec: dict[str, Any]
+
+
+class GenerateMediaResponse(BaseModel):
+    asset: dict[str, Any]
+    insert_doc: dict[str, Any]
+    meta: dict[str, Any]

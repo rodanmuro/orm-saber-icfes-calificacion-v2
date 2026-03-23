@@ -69,4 +69,11 @@ export function generateItemAIDraft(payload) {
   });
 }
 
+export function generateItemAIMedia(payload) {
+  return request('/ai/generate-media', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
 export { API_BASE_URL };

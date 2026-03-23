@@ -13,3 +13,4 @@ openai>=1.0.0,<2.0.0
 SQLAlchemy==2.0.43
 psycopg[binary]==3.2.9
 alembic==1.14.1
+matplotlib==3.8.4

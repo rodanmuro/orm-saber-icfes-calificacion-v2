@@ -2,6 +2,11 @@ import { API_BASE_URL } from './itemsApi';
 
 const API_ORIGIN = API_BASE_URL.replace(/\/api\/v1$/, '');
 
+export function resolveAssetUrl(url) {
+  if (!url) return '';
+  return url.startsWith('http') ? url : `${API_ORIGIN}${url}`;
+}
+
 export async function uploadEditorImage(file) {
   const formData = new FormData();
   formData.append('image', file);
@@ -17,8 +22,7 @@ export async function uploadEditorImage(file) {
   }
 
   const payload = await response.json();
-  const relative = payload.url || '';
-  const absolute = relative.startsWith('http') ? relative : `${API_ORIGIN}${relative}`;
+  const absolute = resolveAssetUrl(payload.url || '');
 
   return {
     ...payload,

@@ -3,10 +3,12 @@ import { useEffect, useMemo, useState } from 'react';
 import RichTextEditor from './RichTextEditor';
 import {
   generateItemAIDraft,
+  generateItemAIMedia,
   listCurriculumCompetencies,
   listCurriculumStandards,
 } from '../api/itemsApi';
-import { docToStorage, emptyDoc, storageToDoc, textToDoc } from '../utils/editorDoc';
+import { resolveAssetUrl } from '../api/assetsApi';
+import { docToStorage, emptyDoc, storageToDoc } from '../utils/editorDoc';
 
 const EMPTY_FORM = {
   id: null,
@@ -84,6 +86,48 @@ export function formToPayload(form) {
         ? form.metadata
         : null,
   };
+}
+
+function _mergeDocWithInsert(baseDoc, insertDoc) {
+  const safeBase = baseDoc && baseDoc.type === 'doc' ? baseDoc : emptyDoc();
+  const safeInsert = insertDoc && insertDoc.type === 'doc' ? insertDoc : emptyDoc();
+  return {
+    ...safeBase,
+    content: [...(safeBase.content || []), ...(safeInsert.content || [])],
+  };
+}
+
+function _normalizeInsertDocSources(insertDoc) {
+  if (!insertDoc || insertDoc.type !== 'doc' || !Array.isArray(insertDoc.content)) return insertDoc;
+  const content = insertDoc.content.map((node) => {
+    if (node?.type !== 'image') return node;
+    const src = node.attrs?.src || '';
+    return {
+      ...node,
+      attrs: {
+        ...(node.attrs || {}),
+        src: resolveAssetUrl(src),
+      },
+    };
+  });
+  return { ...insertDoc, content };
+}
+
+function _applyInsertDocToForm(baseForm, target, insertDoc) {
+  if (!insertDoc) return baseForm;
+  switch (target) {
+    case 'option_a':
+      return { ...baseForm, optionA_doc: _mergeDocWithInsert(baseForm.optionA_doc, insertDoc) };
+    case 'option_b':
+      return { ...baseForm, optionB_doc: _mergeDocWithInsert(baseForm.optionB_doc, insertDoc) };
+    case 'option_c':
+      return { ...baseForm, optionC_doc: _mergeDocWithInsert(baseForm.optionC_doc, insertDoc) };
+    case 'option_d':
+      return { ...baseForm, optionD_doc: _mergeDocWithInsert(baseForm.optionD_doc, insertDoc) };
+    case 'statement':
+    default:
+      return { ...baseForm, statement_doc: _mergeDocWithInsert(baseForm.statement_doc, insertDoc) };
+  }
 }
 
 export default function ItemForm({
@@ -196,27 +240,57 @@ export default function ItemForm({
         subject: form.subject || null,
         difficulty: form.difficulty || null,
       });
-      setAiDraft(response);
-      setAiUsage(response.usage || null);
-      onChange({
+
+      let nextForm = {
         ...form,
-        statement_doc: textToDoc(response.statement),
-        optionA_doc: textToDoc(response.options?.A || ""),
-        optionB_doc: textToDoc(response.options?.B || ""),
-        optionC_doc: textToDoc(response.options?.C || ""),
-        optionD_doc: textToDoc(response.options?.D || ""),
+        statement_doc: storageToDoc(response.statement_doc),
+        optionA_doc: storageToDoc(response.options_doc?.A),
+        optionB_doc: storageToDoc(response.options_doc?.B),
+        optionC_doc: storageToDoc(response.options_doc?.C),
+        optionD_doc: storageToDoc(response.options_doc?.D),
         correct_answer: response.correct_answer || form.correct_answer,
         metadata: {
           ...(form.metadata || {}),
           ...(response.metadata || {}),
         },
-      });
-      pushAiMessage(
-        'assistant',
-        'Borrador generado y aplicado al formulario. Correcta sugerida: ' +
-          response.correct_answer +
-          '. Revisa y luego guarda manualmente.'
-      );
+      };
+
+      let draftWithMedia = response;
+
+      if (response.media_spec) {
+        try {
+          const mediaPayload = {
+            teacher_id: Number(form.teacher_id || 1),
+            mode: response.media_spec.mode,
+            target: response.media_spec.target,
+            spec: response.media_spec.spec,
+          };
+          const mediaResult = await generateItemAIMedia(mediaPayload);
+          const normalizedInsertDoc = _normalizeInsertDocSources(mediaResult.insert_doc);
+          nextForm = _applyInsertDocToForm(nextForm, response.media_spec.target, normalizedInsertDoc);
+          draftWithMedia = {
+            ...response,
+            media_insert_doc: normalizedInsertDoc,
+          };
+          pushAiMessage('assistant', 'Borrador con grafico generado y aplicado al formulario.');
+        } catch (mediaErr) {
+          const mediaMessage = mediaErr?.message || 'No fue posible generar el grafico del borrador';
+          pushAiMessage('system', `Advertencia media_spec: ${mediaMessage}`);
+        }
+      }
+
+      setAiDraft(draftWithMedia);
+      setAiUsage(response.usage || null);
+      onChange(nextForm);
+
+      if (!response.media_spec) {
+        pushAiMessage(
+          'assistant',
+          'Borrador generado y aplicado al formulario. Correcta sugerida: ' +
+            response.correct_answer +
+            '. Revisa y luego guarda manualmente.'
+        );
+      }
     } catch (err) {
       const message = err?.message || 'Error generando borrador con IA';
       setAiError(message);
@@ -229,23 +303,28 @@ export default function ItemForm({
   function handleApplyAIDraft() {
     if (!aiDraft) return;
 
-    onChange({
+    let nextForm = {
       ...form,
-      statement_doc: textToDoc(aiDraft.statement),
-      optionA_doc: textToDoc(aiDraft.options?.A || ''),
-      optionB_doc: textToDoc(aiDraft.options?.B || ''),
-      optionC_doc: textToDoc(aiDraft.options?.C || ''),
-      optionD_doc: textToDoc(aiDraft.options?.D || ''),
+      statement_doc: storageToDoc(aiDraft.statement_doc),
+      optionA_doc: storageToDoc(aiDraft.options_doc?.A),
+      optionB_doc: storageToDoc(aiDraft.options_doc?.B),
+      optionC_doc: storageToDoc(aiDraft.options_doc?.C),
+      optionD_doc: storageToDoc(aiDraft.options_doc?.D),
       correct_answer: aiDraft.correct_answer || form.correct_answer,
       metadata: {
         ...(form.metadata || {}),
         ...(aiDraft.metadata || {}),
       },
-    });
+    };
+
+    if (aiDraft.media_spec && aiDraft.media_insert_doc) {
+      nextForm = _applyInsertDocToForm(nextForm, aiDraft.media_spec.target, aiDraft.media_insert_doc);
+    }
+
+    onChange(nextForm);
 
     pushAiMessage('system', 'Borrador IA aplicado al formulario. Revisa y guarda manualmente.');
   }
-
   return (
     <section className="card">
       <div className="item-form-header">

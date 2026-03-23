@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Protocol
+from typing import Any, Protocol
 
 
 @dataclass(frozen=True)
@@ -15,11 +15,12 @@ class GenerateItemDraftInput:
 
 @dataclass(frozen=True)
 class GenerateItemDraftOutput:
-    statement: str
-    options: dict[str, str]
+    statement_doc: dict[str, Any]
+    options_doc: dict[str, dict[str, Any]]
     correct_answer: str
     metadata: dict[str, str | bool]
     usage: dict[str, int | float | str] | None = None
+    media_spec: dict[str, Any] | None = None
 
 
 class LLMProvider(Protocol):
