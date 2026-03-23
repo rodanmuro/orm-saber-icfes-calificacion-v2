@@ -18,16 +18,46 @@ function normalizeLatex(input) {
   return value;
 }
 
-function MathInlineNodeView({ node }) {
+function MathInlineNodeView({ node, updateAttributes, selected }) {
   const latex = normalizeLatex(node.attrs.latex || '');
   const rendered = katex.renderToString(latex || '\\text{?}', {
     throwOnError: false,
     strict: 'ignore',
   });
 
+  const openLatexEditor = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const next = window.prompt('Editar LaTeX', latex || '');
+    if (next === null) return;
+
+    const normalized = normalizeLatex(next);
+    if (!normalized) return;
+
+    updateAttributes({ latex: normalized });
+  };
+
+  const handleMouseDown = (event) => {
+    if (event.detail === 2) {
+      openLatexEditor(event);
+    }
+  };
+
   return (
-    <NodeViewWrapper as="span" className="math-inline" contentEditable={false}>
-      <span dangerouslySetInnerHTML={{ __html: rendered }} />
+    <NodeViewWrapper
+      as="span"
+      className={`math-inline ${selected ? 'is-selected' : ''}`}
+      contentEditable={false}
+      title="Doble clic para editar ecuacion"
+      onDoubleClick={openLatexEditor}
+      onMouseDown={handleMouseDown}
+    >
+      <span
+        onDoubleClick={openLatexEditor}
+        onMouseDown={handleMouseDown}
+        dangerouslySetInnerHTML={{ __html: rendered }}
+      />
     </NodeViewWrapper>
   );
 }

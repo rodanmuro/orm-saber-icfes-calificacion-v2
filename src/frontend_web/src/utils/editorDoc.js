@@ -70,7 +70,7 @@ export function docHasMeaningfulContent(doc) {
 
     // Contenido no textual valido para banco de items.
     if (node.type === 'image') return true;
-    if (node.type === 'math_inline') return true;
+    if (node.type === 'math_inline' || node.type === 'mathInline' || node.type === 'math_block' || node.type === 'mathBlock') return true;
 
     if (Array.isArray(node.content)) {
       return node.content.some(walk);
