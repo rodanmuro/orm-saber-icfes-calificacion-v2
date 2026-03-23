@@ -351,3 +351,83 @@ th {
 .ai-usage p {
   margin: 4px 0;
 }
+
+.resizable-image {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  margin: 6px 0;
+  border: 1px solid transparent;
+  border-radius: 4px;
+}
+
+.resizable-image img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+
+.resizable-image-handle {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border: 1px solid #1f5f9d;
+  background: #ffffff;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px rgba(31, 95, 157, 0.15);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.resizable-image-handle-ne {
+  top: -6px;
+  right: -6px;
+  cursor: nesw-resize;
+}
+
+.resizable-image-handle-nw {
+  top: -6px;
+  left: -6px;
+  cursor: nwse-resize;
+}
+
+.resizable-image-handle-se {
+  right: -6px;
+  bottom: -6px;
+  cursor: nwse-resize;
+}
+
+.resizable-image-handle-sw {
+  left: -6px;
+  bottom: -6px;
+  cursor: nesw-resize;
+}
+
+.resizable-image[data-align='left'] {
+  display: block;
+  margin-left: 0;
+  margin-right: auto;
+}
+
+.resizable-image[data-align='center'] {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.resizable-image[data-align='right'] {
+  display: block;
+  margin-left: auto;
+  margin-right: 0;
+}
+
+.resizable-image.is-selected {
+  border-color: #4a90e2;
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+}
+
+.resizable-image.is-selected .resizable-image-handle {
+  opacity: 1;
+  pointer-events: auto;
+}

@@ -52,6 +52,31 @@ def _coerce_numeric_list(value: Any) -> list[float]:
     return numbers
 
 
+def _normalize_data_pairs_to_labels_and_values(data_field: Any) -> tuple[list[str], list[float]]:
+    if not isinstance(data_field, list):
+        return [], []
+
+    labels: list[str] = []
+    values: list[float] = []
+
+    for item in data_field:
+        if not isinstance(item, dict):
+            continue
+        label_raw = item.get("label", "")
+        value_raw = item.get("value", None)
+        label = str(label_raw).strip()
+        if not label:
+            continue
+        try:
+            value = float(value_raw)
+        except Exception as exc:  # noqa: BLE001
+            raise ItemAIAssistantValidationError("media_spec.spec.data contiene valores no numericos") from exc
+        labels.append(label)
+        values.append(value)
+
+    return labels, values
+
+
 def _validate_chart_media_spec(media_spec: dict[str, Any]) -> dict[str, Any]:
     mode = media_spec.get("mode")
     target = media_spec.get("target")
@@ -73,8 +98,19 @@ def _validate_chart_media_spec(media_spec: dict[str, Any]) -> dict[str, Any]:
     normalized_spec: dict[str, Any] = dict(spec)
     normalized_spec["chart_type"] = chart_type
 
+    # Compatibilidad: algunos modelos devuelven spec.data=[{label,value}] en lugar de labels/values|sizes.
+    if isinstance(spec.get("data"), list):
+        data_labels, data_values = _normalize_data_pairs_to_labels_and_values(spec.get("data"))
+        if data_labels and data_values:
+            if not labels:
+                labels = data_labels
+            if chart_type == "bar" and not spec.get("values"):
+                normalized_spec["values"] = data_values
+            if chart_type == "pie" and not spec.get("sizes"):
+                normalized_spec["sizes"] = data_values
+
     if chart_type == "bar":
-        values = _coerce_numeric_list(spec.get("values"))
+        values = _coerce_numeric_list(normalized_spec.get("values"))
         if not values:
             raise ItemAIAssistantValidationError("media_spec.spec.values invalido para bar")
         if not labels:
@@ -84,7 +120,9 @@ def _validate_chart_media_spec(media_spec: dict[str, Any]) -> dict[str, Any]:
         normalized_spec["labels"] = labels
         normalized_spec["values"] = values
     else:
-        sizes = _coerce_numeric_list(spec.get("sizes"))
+        sizes = _coerce_numeric_list(normalized_spec.get("sizes"))
+        if not sizes:
+            sizes = _coerce_numeric_list(normalized_spec.get("values"))
         if not sizes:
             raise ItemAIAssistantValidationError("media_spec.spec.sizes invalido para pie")
         if not labels:

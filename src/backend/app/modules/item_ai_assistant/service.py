@@ -7,7 +7,10 @@ from app.modules.item_ai_assistant.domain import (
     GenerateItemDraftOutput,
     LLMProvider,
 )
-from app.modules.item_ai_assistant.errors import ItemAIAssistantValidationError
+from app.modules.item_ai_assistant.errors import (
+    ItemAIAssistantProviderError,
+    ItemAIAssistantValidationError,
+)
 from app.modules.item_ai_assistant.prompt_builder import (
     PROMPT_VERSION,
     build_system_prompt,
@@ -19,6 +22,7 @@ from app.modules.item_ai_assistant.validators import validate_context, validate_
 INPUT_PRICE_PER_1M_USD = 1.25
 CACHED_INPUT_PRICE_PER_1M_USD = 0.125
 OUTPUT_PRICE_PER_1M_USD = 10.00
+MAX_SERVICE_REPAIR_ATTEMPTS = 3
 
 
 def _normalize_correct_answer_to_a(validated: dict) -> dict:
@@ -104,6 +108,24 @@ def _build_repair_prompt(original_user_prompt: str, validation_error: str) -> st
     )
 
 
+def _is_retryable_provider_output_error(exc: ItemAIAssistantProviderError) -> bool:
+    text = str(exc).lower()
+    return (
+        "output is empty" in text
+        or "output is not valid json" in text
+    )
+
+
+def _build_provider_repair_prompt(original_user_prompt: str, provider_error: str) -> str:
+    return (
+        f"{original_user_prompt}\n\n"
+        "Tu salida anterior no fue util para procesar la respuesta. "
+        f"Error detectado: {provider_error}. "
+        "Responde SOLO con un JSON valido (sin markdown, sin texto adicional), "
+        "cumpliendo exactamente el contrato requerido."
+    )
+
+
 def generate_item_draft(
     payload: GenerateItemDraftInput,
     provider: LLMProvider | None = None,
@@ -118,24 +140,44 @@ def generate_item_draft(
     base_user_prompt = build_user_prompt(payload)
 
     attempts: list[dict[str, Any]] = []
+    repaired = False
+    current_prompt = base_user_prompt
+    validated: dict[str, Any] | None = None
+    last_validation_exc: ItemAIAssistantValidationError | None = None
+    last_provider_exc: ItemAIAssistantProviderError | None = None
 
-    first_payload = llm_provider.generate_item_draft(
-        system_prompt=system_prompt,
-        user_prompt=base_user_prompt,
-    )
-    attempts.append(first_payload)
+    for attempt_number in range(1, MAX_SERVICE_REPAIR_ATTEMPTS + 1):
+        try:
+            raw_payload = llm_provider.generate_item_draft(
+                system_prompt=system_prompt,
+                user_prompt=current_prompt,
+            )
+        except ItemAIAssistantProviderError as exc:
+            last_provider_exc = exc
+            if attempt_number >= MAX_SERVICE_REPAIR_ATTEMPTS or not _is_retryable_provider_output_error(exc):
+                raise
+            repaired = True
+            current_prompt = _build_provider_repair_prompt(base_user_prompt, str(exc))
+            continue
 
-    try:
-        validated = validate_model_output(first_payload)
-        repaired = False
-    except ItemAIAssistantValidationError as first_exc:
-        second_payload = llm_provider.generate_item_draft(
-            system_prompt=system_prompt,
-            user_prompt=_build_repair_prompt(base_user_prompt, str(first_exc)),
-        )
-        attempts.append(second_payload)
-        validated = validate_model_output(second_payload)
-        repaired = True
+        attempts.append(raw_payload)
+        try:
+            validated = validate_model_output(raw_payload)
+            break
+        except ItemAIAssistantValidationError as exc:
+            last_validation_exc = exc
+            if attempt_number >= MAX_SERVICE_REPAIR_ATTEMPTS:
+                raise
+            repaired = True
+            current_prompt = _build_repair_prompt(base_user_prompt, str(exc))
+            continue
+
+    if validated is None:
+        if last_validation_exc is not None:
+            raise last_validation_exc
+        if last_provider_exc is not None:
+            raise last_provider_exc
+        raise ItemAIAssistantValidationError("No fue posible validar la respuesta del proveedor IA")
 
     normalized = _normalize_correct_answer_to_a(validated)
 

@@ -19,6 +19,8 @@ class Settings(BaseSettings):
     openai_api_key: str | None = None
     openai_model: str = "gpt-4.1"
     openai_timeout_seconds: float = 60.0
+    openai_max_retries: int = 4
+    openai_retry_backoff_seconds: float = 1.0
 
     @field_validator("debug", mode="before")
     @classmethod

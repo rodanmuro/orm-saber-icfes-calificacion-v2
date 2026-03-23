@@ -233,3 +233,129 @@ def test_generate_item_draft_repair_attempt_when_first_output_is_invalid() -> No
     assert result.metadata["ai_repaired"] is True
     assert result.media_spec is not None
     assert result.usage["total_tokens"] == 700
+
+
+def test_generate_item_draft_retries_when_provider_returns_non_json_then_recovers() -> None:
+    from app.modules.item_ai_assistant.errors import ItemAIAssistantProviderError
+
+    class _ProviderWithProviderFailureThenSuccess:
+        model_name = "fake-model"
+
+        def __init__(self) -> None:
+            self.calls = 0
+
+        def generate_item_draft(self, *, system_prompt: str, user_prompt: str) -> dict:
+            self.calls += 1
+            if self.calls == 1:
+                raise ItemAIAssistantProviderError("openai output is not valid JSON")
+            return {
+                "statement_doc": _doc_text("Pregunta recuperada"),
+                "options_doc": {
+                    "A": _doc_text("Correcta"),
+                    "B": _doc_text("Distractor 1"),
+                    "C": _doc_text("Distractor 2"),
+                    "D": _doc_text("Distractor 3"),
+                },
+                "correct_answer": "A",
+                "__usage": {
+                    "input_tokens": 50,
+                    "cached_input_tokens": 0,
+                    "output_tokens": 80,
+                    "total_tokens": 130,
+                },
+            }
+
+    provider = _ProviderWithProviderFailureThenSuccess()
+
+    result = generate_item_draft(
+        GenerateItemDraftInput(
+            user_prompt="Crea una pregunta de prueba",
+            standard_name="S",
+            competency_name="C",
+        ),
+        provider=provider,
+    )
+
+    assert provider.calls == 2
+    assert result.correct_answer == "A"
+    assert result.metadata["ai_repaired"] is True
+    assert result.usage is not None
+    assert result.usage["total_tokens"] == 130
+
+
+def test_generate_item_draft_accepts_media_spec_data_pairs_for_pie() -> None:
+    provider = _FakeProvider(
+        {
+            "statement_doc": _doc_text("Interpreta la grafica"),
+            "options_doc": {
+                "A": _doc_text("Respuesta correcta"),
+                "B": _doc_text("Distractor 1"),
+                "C": _doc_text("Distractor 2"),
+                "D": _doc_text("Distractor 3"),
+            },
+            "correct_answer": "A",
+            "media_spec": {
+                "mode": "chart_deterministic",
+                "target": "statement",
+                "spec": {
+                    "chart_type": "pie",
+                    "title": "Distribucion",
+                    "data": [
+                        {"label": "A", "value": 30},
+                        {"label": "B", "value": 20},
+                        {"label": "C", "value": 50},
+                    ],
+                },
+            },
+        }
+    )
+
+    result = generate_item_draft(
+        GenerateItemDraftInput(
+            user_prompt="Crea pregunta con grafico circular",
+            standard_name="Datos",
+            competency_name="Interpreta",
+        ),
+        provider=provider,
+    )
+
+    assert result.media_spec is not None
+    assert result.media_spec["spec"]["chart_type"] == "pie"
+    assert result.media_spec["spec"]["labels"] == ["A", "B", "C"]
+    assert result.media_spec["spec"]["sizes"] == [30.0, 20.0, 50.0]
+
+
+def test_generate_item_draft_accepts_pie_with_values_field() -> None:
+    provider = _FakeProvider(
+        {
+            "statement_doc": _doc_text("Interpreta la grafica"),
+            "options_doc": {
+                "A": _doc_text("Respuesta correcta"),
+                "B": _doc_text("Distractor 1"),
+                "C": _doc_text("Distractor 2"),
+                "D": _doc_text("Distractor 3"),
+            },
+            "correct_answer": "A",
+            "media_spec": {
+                "mode": "chart_deterministic",
+                "target": "statement",
+                "spec": {
+                    "chart_type": "pie",
+                    "labels": ["X", "Y", "Z"],
+                    "values": [10, 20, 70],
+                },
+            },
+        }
+    )
+
+    result = generate_item_draft(
+        GenerateItemDraftInput(
+            user_prompt="Crea pregunta con pie",
+            standard_name="Datos",
+            competency_name="Interpreta",
+        ),
+        provider=provider,
+    )
+
+    assert result.media_spec is not None
+    assert result.media_spec["spec"]["sizes"] == [10.0, 20.0, 70.0]

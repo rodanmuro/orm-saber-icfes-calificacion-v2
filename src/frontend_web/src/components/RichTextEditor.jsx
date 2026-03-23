@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 
 import { EditorContent, useEditor } from '@tiptap/react';
-import Image from '@tiptap/extension-image';
+import ResizableImage from '../editor/ResizableImage';
 import StarterKit from '@tiptap/starter-kit';
 import MathInline from '../editor/MathInline';
 import { uploadEditorImage } from '../api/assetsApi';
@@ -43,7 +43,7 @@ export default function RichTextEditor({
   };
 
   const editor = useEditor({
-    extensions: [StarterKit, Image, MathInline],
+    extensions: [StarterKit, ResizableImage, MathInline],
     content: value,
     editorProps: {
       attributes: {
@@ -78,6 +78,15 @@ export default function RichTextEditor({
     },
   });
 
+  const applyImageAlign = (align) => {
+    if (!editor) return;
+    const ok = editor.chain().focus().setImageAlign(align).run();
+    if (!ok) {
+      // eslint-disable-next-line no-alert
+      window.alert('Selecciona primero una imagen para alinear.');
+    }
+  };
+
   useEffect(() => {
     if (!editor) return;
     const current = editor.getJSON();
@@ -111,7 +120,7 @@ export default function RichTextEditor({
         <button
           type="button"
           onClick={() => {
-            const latex = window.prompt('LaTeX (ej: \\\\frac{a+b}{c})');
+            const latex = window.prompt('LaTeX (ej: \\frac{a+b}{c})');
             if (!latex) return;
             editor.chain().focus().setMathInline(latex).run();
           }}
@@ -137,6 +146,9 @@ export default function RichTextEditor({
             }}
           />
         </label>
+        <button type="button" onClick={() => applyImageAlign('left')}>Img Izq</button>
+        <button type="button" onClick={() => applyImageAlign('center')}>Img Centro</button>
+        <button type="button" onClick={() => applyImageAlign('right')}>Img Der</button>
       </div>
       <div className="editor-hint">Tip: pega imagen con Ctrl+V o arrastra archivos al editor.</div>
       <EditorContent editor={editor} />

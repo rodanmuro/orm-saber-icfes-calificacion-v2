@@ -38,7 +38,7 @@ def generate_item_with_ai(payload: GenerateItemAIPayload) -> GenerateItemAIRespo
             raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)) from exc
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
-            detail="AI provider failed to generate item",
+            detail=f"AI provider failed to generate item: {str(exc)}",
         ) from exc
 
     return GenerateItemAIResponse(

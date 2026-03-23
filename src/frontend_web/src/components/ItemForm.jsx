@@ -356,6 +356,41 @@ export default function ItemForm({
       >
 
 
+
+        <h4>Curricular</h4>
+        <div className="grid grid-2">
+          <label>
+            Estandar
+            <input
+              list="standard-name-options"
+              value={form.standard_name}
+              onChange={(e) => handleStandardChange(e.target.value)}
+              placeholder="Nombre del estandar..."
+            />
+            <datalist id="standard-name-options">
+              {standardOptions.map((row) => (
+                <option key={row.id} value={row.name} />
+              ))}
+            </datalist>
+          </label>
+          <label>
+            Competencia
+            <input
+              list="competency-name-options"
+              value={form.competency_name}
+              onChange={(e) => handleCompetencyChange(e.target.value)}
+              placeholder="Nombre de la competencia..."
+              disabled={!form.standard_name}
+            />
+            <datalist id="competency-name-options">
+              {competencyOptions.map((row) => (
+                <option key={row.id} value={row.name} />
+              ))}
+            </datalist>
+          </label>
+        </div>
+
+
         <h4>Asistente IA (borrador)</h4>
         <div className="ai-panel">
           <label>
@@ -496,40 +531,6 @@ export default function ItemForm({
             />
           </label>
         </div>
-
-        <h4>Curricular</h4>
-        <div className="grid grid-2">
-          <label>
-            Estandar
-            <input
-              list="standard-name-options"
-              value={form.standard_name}
-              onChange={(e) => handleStandardChange(e.target.value)}
-              placeholder="Nombre del estandar..."
-            />
-            <datalist id="standard-name-options">
-              {standardOptions.map((row) => (
-                <option key={row.id} value={row.name} />
-              ))}
-            </datalist>
-          </label>
-          <label>
-            Competencia
-            <input
-              list="competency-name-options"
-              value={form.competency_name}
-              onChange={(e) => handleCompetencyChange(e.target.value)}
-              placeholder="Nombre de la competencia..."
-              disabled={!form.standard_name}
-            />
-            <datalist id="competency-name-options">
-              {competencyOptions.map((row) => (
-                <option key={row.id} value={row.name} />
-              ))}
-            </datalist>
-          </label>
-        </div>
-
         <div className="actions">
           <button type="submit" disabled={isSaving}>
             {isSaving ? 'Guardando...' : 'Guardar item'}
