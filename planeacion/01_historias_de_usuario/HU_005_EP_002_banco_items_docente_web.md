@@ -20,6 +20,8 @@
 7. El editor de preguntas permite insertar imagenes en enunciado y opciones mediante carga de archivos.
 8. El docente puede eliminar un item existente desde el formulario de edicion, con confirmacion previa.
 9. El formulario permite navegar al item anterior o siguiente sin regresar al listado.
+10. Las imagenes insertadas en enunciado/opciones se pueden redimensionar desde las cuatro esquinas y mantener alineacion izquierda/centro/derecha.
+11. Las ecuaciones insertadas en enunciado/opciones se pueden editar con doble clic sobre la ecuacion.
 
 ## Evidencia esperada
 - Frontend web base en `src/frontend_web`.

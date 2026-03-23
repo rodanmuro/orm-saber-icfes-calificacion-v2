@@ -18,6 +18,8 @@
 6. El item guardado conserva trazabilidad en metadata (`ai_generated`, `ai_model`, `ai_prompt_version`).
 7. La interfaz muestra consumo por peticion: tokens de entrada/salida/cached y costo USD calculado.
 8. Ante errores de IA o formato invalido, se informa mensaje claro sin romper la edicion manual.
+9. La generacion de IA tolera variantes de `media_spec` (`data`, `values`, `sizes`) y normaliza al contrato interno esperado.
+10. El parseo de salida IA es robusto a ruido de texto y mantiene salida JSON estructurada para el frontend.
 
 ## Evidencia esperada
 - Flujo funcional en frontend: conversar -> generar -> aplicar al formulario.

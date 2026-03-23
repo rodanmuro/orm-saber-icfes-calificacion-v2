@@ -14,6 +14,8 @@ Asegurar auditabilidad del flujo IA, cobertura de pruebas por capa y documentaci
 - [x] Implementar pruebas por capa:
   - unit tests del modulo `item_ai_assistant` (service/validators/prompt_builder)
   - integration test del endpoint `POST /ai/generate-item`
+- [x] Robustecer parseo de salida IA para tolerar ruido de texto antes/despues del JSON.
+- [x] Normalizar variantes de `media_spec` (`data`, `values`, `sizes`) al contrato interno esperado.
 - [ ] Agregar test de contrato especifico del proveedor OpenAI (mock detallado de usage/output).
 - [ ] Implementar E2E generar->aplicar->guardar item.
 - [ ] Documentar limites y responsabilidad de revision docente (no guardado automatico).
