@@ -38,6 +38,23 @@ def _require_list(spec: dict, key: str) -> list:
     return value
 
 
+def _coerce_numeric_values(values: list) -> list[float]:
+    coerced: list[float] = []
+    for value in values:
+        try:
+            coerced.append(float(value))
+        except Exception as exc:  # noqa: BLE001
+            raise ItemAIAssistantValidationError("spec.values debe contener solo numeros") from exc
+    return coerced
+
+
+def _format_value_label(value: float) -> str:
+    if float(value).is_integer():
+        return str(int(value))
+    text = f"{value:.2f}".rstrip("0").rstrip(".")
+    return text
+
+
 def _validate_common(input_data: GenerateMediaInput) -> None:
     if input_data.mode != "chart_deterministic":
         raise ItemAIAssistantValidationError("mode soportado actualmente: chart_deterministic")
@@ -47,14 +64,34 @@ def _validate_common(input_data: GenerateMediaInput) -> None:
 
 def _render_bar_chart(spec: dict) -> None:
     labels = _require_list(spec, "labels")
-    values = _require_list(spec, "values")
+    values_raw = _require_list(spec, "values")
+    values = _coerce_numeric_values(values_raw)
+
     if len(labels) != len(values):
         raise ItemAIAssistantValidationError("spec.labels y spec.values deben tener la misma longitud")
 
-    plt.bar(labels, values, color="#4E79A7", edgecolor="black")
+    bars = plt.bar(labels, values, color="#4E79A7", edgecolor="black")
     plt.title(str(spec.get("title", "")))
     plt.xlabel(str(spec.get("x_label", "")))
     plt.ylabel(str(spec.get("y_label", "")))
+
+    max_value = max(values) if values else 0.0
+    if max_value > 0:
+        plt.ylim(top=max_value * 1.18)
+
+    # Mostrar el valor exacto sobre cada barra para evitar inferencia "a ojo".
+    for bar, value in zip(bars, values):
+        x = bar.get_x() + bar.get_width() / 2
+        y = bar.get_height()
+        plt.text(
+            x,
+            y,
+            _format_value_label(value),
+            ha="center",
+            va="bottom",
+            fontsize=9,
+            fontweight="bold",
+        )
 
 
 def _render_pie_chart(spec: dict) -> None:

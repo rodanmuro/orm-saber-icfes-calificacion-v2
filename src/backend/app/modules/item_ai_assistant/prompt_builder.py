@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from app.modules.item_ai_assistant.domain import GenerateItemDraftInput
 
-PROMPT_VERSION = "v4_0_media_spec_structured_output"
+PROMPT_VERSION = "v5_0_media_specs_multi_target"
 
 
 def build_system_prompt() -> str:
@@ -14,7 +14,7 @@ def build_system_prompt() -> str:
         "\"statement_doc\": TipTapDoc, "
         "\"options_doc\": {\"A\": TipTapDoc, \"B\": TipTapDoc, \"C\": TipTapDoc, \"D\": TipTapDoc}, "
         "\"correct_answer\": \"A\"|\"B\"|\"C\"|\"D\", "
-        "\"media_spec\": null|{\"mode\":\"chart_deterministic\",\"target\":\"statement\"|\"option_a\"|\"option_b\"|\"option_c\"|\"option_d\",\"spec\":{...}}"
+        "\"media_specs\": []|[{\"mode\":\"chart_deterministic\",\"target\":\"statement\"|\"option_a\"|\"option_b\"|\"option_c\"|\"option_d\",\"spec\":{...}}]"
         "}. "
         "No agregues campos adicionales. "
         "TipTapDoc debe usar estructura {type:\"doc\", content:[...]} con parrafos y nodos inline. "
@@ -22,9 +22,11 @@ def build_system_prompt() -> str:
         "No uses delimitadores $...$ ni $$...$$ dentro de latex. "
         "Para simbolo de moneda dolar usa \\$ en latex. "
         "Regla obligatoria: la respuesta correcta debe ubicarse en la opcion A. "
-        "Si la instruccion requiere grafico o figura cuantitativa, entrega media_spec con mode=chart_deterministic "
-        "y chart_type permitido ('bar' o 'pie') con datos completos. "
-        "Si no se necesita grafico, media_spec debe ser null."
+        "Si la instruccion requiere grafico o figura cuantitativa, entrega media_specs con uno o mas graficos (maximo 5) "
+        "y chart_type permitido ('bar' o 'pie') con datos completos y targets unicos. "
+        "Si no se necesita grafico, media_specs debe ser lista vacia. "
+        "Si entregas media_specs para graficos, no repitas en statement_doc los valores numericos exactos por categoria; "
+        "el enunciado debe referirse a la grafica para que el estudiante lea los datos desde ella."
     )
 
 
@@ -42,5 +44,9 @@ def build_user_prompt(data: GenerateItemDraftInput) -> str:
         "Genera un item de opcion multiple con 4 opciones (A-D) y una sola correcta. "
         "Ubica siempre la respuesta correcta en la opcion A. "
         "Preferir contenido matematico con nodos mathInline cuando aplique. "
-        "Si el docente solicita grafico, incluye media_spec detallado para bar o pie."
+        "Si el docente solicita graficos, usa media_specs con uno o varios targets. "
+        "En cada spec con chart_type=bar, labels es obligatorio y debe describir cada barra; "
+        "values debe ser lista numerica pura (sin % ni texto) y tener misma longitud que labels. "
+        "En chart_type=pie, usa sizes numerico (o values numerico) con la misma longitud que labels. "
+        "Si generas grafico, redacta el enunciado sin listar explicitamente los valores por categoria."
     )

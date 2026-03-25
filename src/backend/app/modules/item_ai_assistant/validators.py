@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+import re
 from typing import Any
 
 from app.modules.item_ai_assistant.errors import ItemAIAssistantValidationError
 
 VALID_OPTION_KEYS = ("A", "B", "C", "D")
 VALID_MEDIA_TARGETS = ("statement", "option_a", "option_b", "option_c", "option_d")
+MAX_MEDIA_SPECS = 5
 
 
 def validate_context(*, standard_name: str, competency_name: str) -> None:
@@ -34,6 +36,45 @@ def _coerce_labels(value: Any) -> list[str]:
     return []
 
 
+def _coerce_number(raw: Any) -> float:
+    if isinstance(raw, (int, float)):
+        return float(raw)
+
+    text = str(raw).strip()
+    if not text:
+        raise ValueError("empty numeric value")
+
+    # Tolerar texto natural: "40%", "$1.800", "12,5", "valor=30".
+    match = re.search(r"[-+]?\d[\d\.,]*", text)
+    if not match:
+        raise ValueError(f"no numeric token in {text!r}")
+
+    token = match.group(0).replace(" ", "")
+
+    # Caso 1: miles con punto y decimal con coma -> 1.234.567,89
+    if re.fullmatch(r"[-+]?\d{1,3}(?:\.\d{3})+(?:,\d+)?", token):
+        token = token.replace(".", "").replace(",", ".")
+        return float(token)
+
+    # Caso 2: miles con coma y decimal con punto -> 1,234,567.89
+    if re.fullmatch(r"[-+]?\d{1,3}(?:,\d{3})+(?:\.\d+)?", token):
+        token = token.replace(",", "")
+        return float(token)
+
+    # Caso 3: solo coma (asumir decimal si hay 1-2 decimales, si no miles)
+    if "," in token and "." not in token:
+        left, right = token.split(",", 1)
+        if right.isdigit() and len(right) <= 2:
+            token = f"{left}.{right}"
+        else:
+            token = f"{left}{right}"
+        return float(token)
+
+    # Fallback: eliminar comas sueltas y parsear.
+    token = token.replace(",", "")
+    return float(token)
+
+
 def _coerce_numeric_list(value: Any) -> list[float]:
     raw_values: list[Any]
     if isinstance(value, list):
@@ -46,7 +87,7 @@ def _coerce_numeric_list(value: Any) -> list[float]:
     numbers: list[float] = []
     for raw in raw_values:
         try:
-            numbers.append(float(raw))
+            numbers.append(_coerce_number(raw))
         except Exception as exc:  # noqa: BLE001
             raise ItemAIAssistantValidationError("media_spec contiene valores no numericos") from exc
     return numbers
@@ -114,7 +155,7 @@ def _validate_chart_media_spec(media_spec: dict[str, Any]) -> dict[str, Any]:
         if not values:
             raise ItemAIAssistantValidationError("media_spec.spec.values invalido para bar")
         if not labels:
-            labels = [f"C{i + 1}" for i in range(len(values))]
+            raise ItemAIAssistantValidationError("media_spec.spec.labels requerido para bar")
         if len(values) != len(labels):
             raise ItemAIAssistantValidationError("media_spec.spec.labels y values deben coincidir en longitud")
         normalized_spec["labels"] = labels
@@ -137,6 +178,49 @@ def _validate_chart_media_spec(media_spec: dict[str, Any]) -> dict[str, Any]:
         "target": target,
         "spec": normalized_spec,
     }
+
+
+def _validate_media_specs(payload: dict[str, Any]) -> list[dict[str, Any]]:
+    raw_media_specs = payload.get("media_specs")
+    raw_media_spec = payload.get("media_spec")
+
+    if raw_media_specs is None and raw_media_spec is None:
+        return []
+
+    items: list[dict[str, Any]] = []
+
+    if raw_media_specs is not None:
+        if not isinstance(raw_media_specs, list):
+            raise ItemAIAssistantValidationError("media_specs must be a list")
+        for raw in raw_media_specs:
+            if not isinstance(raw, dict):
+                raise ItemAIAssistantValidationError("media_specs contiene elementos invalidos")
+            items.append(raw)
+
+    # Compatibilidad con contrato antiguo.
+    if raw_media_spec is not None:
+        if not isinstance(raw_media_spec, dict):
+            raise ItemAIAssistantValidationError("media_spec must be null or an object")
+        items.append(raw_media_spec)
+
+    if not items:
+        return []
+
+    if len(items) > MAX_MEDIA_SPECS:
+        raise ItemAIAssistantValidationError(f"media_specs supera el maximo permitido ({MAX_MEDIA_SPECS})")
+
+    normalized: list[dict[str, Any]] = []
+    used_targets: set[str] = set()
+
+    for raw in items:
+        normalized_item = _validate_chart_media_spec(raw)
+        target = normalized_item["target"]
+        if target in used_targets:
+            raise ItemAIAssistantValidationError("media_specs contiene targets duplicados")
+        used_targets.add(target)
+        normalized.append(normalized_item)
+
+    return normalized
 
 
 def validate_model_output(payload: dict) -> dict:
@@ -172,18 +256,12 @@ def validate_model_output(payload: dict) -> dict:
     if normalized_correct not in VALID_OPTION_KEYS:
         raise ItemAIAssistantValidationError("correct_answer must be one of A, B, C or D")
 
-    media_spec_raw = payload.get("media_spec")
-    media_spec: dict[str, Any] | None
-    if media_spec_raw is None:
-        media_spec = None
-    elif isinstance(media_spec_raw, dict):
-        media_spec = _validate_chart_media_spec(media_spec_raw)
-    else:
-        raise ItemAIAssistantValidationError("media_spec must be null or an object")
+    media_specs = _validate_media_specs(payload)
 
     return {
         "statement_doc": statement_doc,
         "options_doc": normalized_options_doc,
         "correct_answer": normalized_correct,
-        "media_spec": media_spec,
+        "media_specs": media_specs,
+        "media_spec": media_specs[0] if media_specs else None,
     }

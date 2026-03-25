@@ -255,35 +255,46 @@ export default function ItemForm({
         },
       };
 
-      let draftWithMedia = response;
+      const responseMediaSpecs = Array.isArray(response.media_specs)
+        ? response.media_specs
+        : response.media_spec
+          ? [response.media_spec]
+          : [];
 
-      if (response.media_spec) {
-        try {
-          const mediaPayload = {
-            teacher_id: Number(form.teacher_id || 1),
-            mode: response.media_spec.mode,
-            target: response.media_spec.target,
-            spec: response.media_spec.spec,
-          };
-          const mediaResult = await generateItemAIMedia(mediaPayload);
-          const normalizedInsertDoc = _normalizeInsertDocSources(mediaResult.insert_doc);
-          nextForm = _applyInsertDocToForm(nextForm, response.media_spec.target, normalizedInsertDoc);
-          draftWithMedia = {
-            ...response,
-            media_insert_doc: normalizedInsertDoc,
-          };
-          pushAiMessage('assistant', 'Borrador con grafico generado y aplicado al formulario.');
-        } catch (mediaErr) {
-          const mediaMessage = mediaErr?.message || 'No fue posible generar el grafico del borrador';
-          pushAiMessage('system', `Advertencia media_spec: ${mediaMessage}`);
+      const mediaInserts = [];
+      if (responseMediaSpecs.length > 0) {
+        for (const mediaSpec of responseMediaSpecs) {
+          try {
+            const mediaPayload = {
+              teacher_id: Number(form.teacher_id || 1),
+              mode: mediaSpec.mode,
+              target: mediaSpec.target,
+              spec: mediaSpec.spec,
+            };
+            const mediaResult = await generateItemAIMedia(mediaPayload);
+            const normalizedInsertDoc = _normalizeInsertDocSources(mediaResult.insert_doc);
+            nextForm = _applyInsertDocToForm(nextForm, mediaSpec.target, normalizedInsertDoc);
+            mediaInserts.push({ target: mediaSpec.target, insert_doc: normalizedInsertDoc });
+          } catch (mediaErr) {
+            const mediaMessage = mediaErr?.message || 'No fue posible generar uno de los graficos del borrador';
+            pushAiMessage('system', `Advertencia media_spec (${mediaSpec.target}): ${mediaMessage}`);
+          }
         }
       }
+
+      const draftWithMedia = {
+        ...response,
+        media_specs: responseMediaSpecs,
+        media_inserts: mediaInserts,
+      };
 
       setAiDraft(draftWithMedia);
       setAiUsage(response.usage || null);
       onChange(nextForm);
 
-      if (!response.media_spec) {
+      if (mediaInserts.length > 0) {
+        pushAiMessage('assistant', `Borrador con ${mediaInserts.length} grafico(s) generado y aplicado al formulario.`);
+      } else {
         pushAiMessage(
           'assistant',
           'Borrador generado y aplicado al formulario. Correcta sugerida: ' +
@@ -317,7 +328,12 @@ export default function ItemForm({
       },
     };
 
-    if (aiDraft.media_spec && aiDraft.media_insert_doc) {
+    if (Array.isArray(aiDraft.media_inserts)) {
+      for (const mediaInsert of aiDraft.media_inserts) {
+        nextForm = _applyInsertDocToForm(nextForm, mediaInsert.target, mediaInsert.insert_doc);
+      }
+    } else if (aiDraft.media_spec && aiDraft.media_insert_doc) {
+      // Compatibilidad con borradores antiguos de una sola grafica.
       nextForm = _applyInsertDocToForm(nextForm, aiDraft.media_spec.target, aiDraft.media_insert_doc);
     }
 

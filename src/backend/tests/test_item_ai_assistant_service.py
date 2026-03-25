@@ -359,3 +359,196 @@ def test_generate_item_draft_accepts_pie_with_values_field() -> None:
 
     assert result.media_spec is not None
     assert result.media_spec["spec"]["sizes"] == [10.0, 20.0, 70.0]
+
+
+def test_generate_item_draft_accepts_bar_values_with_percent_strings() -> None:
+    provider = _FakeProvider(
+        {
+            "statement_doc": _doc_text("Interpreta la grafica"),
+            "options_doc": {
+                "A": _doc_text("Respuesta correcta"),
+                "B": _doc_text("Distractor 1"),
+                "C": _doc_text("Distractor 2"),
+                "D": _doc_text("Distractor 3"),
+            },
+            "correct_answer": "A",
+            "media_spec": {
+                "mode": "chart_deterministic",
+                "target": "statement",
+                "spec": {
+                    "chart_type": "bar",
+                    "labels": ["Vivienda", "Alimentacion", "Transporte", "Educacion"],
+                    "values": ["40%", "30 %", "20%", "10%"],
+                },
+            },
+        }
+    )
+
+    result = generate_item_draft(
+        GenerateItemDraftInput(
+            user_prompt="Crea pregunta con barras y porcentajes",
+            standard_name="Datos",
+            competency_name="Interpreta",
+        ),
+        provider=provider,
+    )
+
+    assert result.media_spec is not None
+    assert result.media_spec["spec"]["chart_type"] == "bar"
+    assert result.media_spec["spec"]["values"] == [40.0, 30.0, 20.0, 10.0]
+
+
+def test_generate_item_draft_accepts_bar_values_with_localized_numbers() -> None:
+    provider = _FakeProvider(
+        {
+            "statement_doc": _doc_text("Interpreta la grafica"),
+            "options_doc": {
+                "A": _doc_text("Respuesta correcta"),
+                "B": _doc_text("Distractor 1"),
+                "C": _doc_text("Distractor 2"),
+                "D": _doc_text("Distractor 3"),
+            },
+            "correct_answer": "A",
+            "media_spec": {
+                "mode": "chart_deterministic",
+                "target": "statement",
+                "spec": {
+                    "chart_type": "bar",
+                    "labels": ["Enero", "Febrero", "Marzo"],
+                    "values": ["1.200", "1,5", "$2.000"],
+                },
+            },
+        }
+    )
+
+    result = generate_item_draft(
+        GenerateItemDraftInput(
+            user_prompt="Crea pregunta con barras",
+            standard_name="Datos",
+            competency_name="Interpreta",
+        ),
+        provider=provider,
+    )
+
+    assert result.media_spec is not None
+    assert result.media_spec["spec"]["chart_type"] == "bar"
+    assert result.media_spec["spec"]["values"] == [1200.0, 1.5, 2000.0]
+
+
+def test_generate_item_draft_rejects_bar_without_labels() -> None:
+    provider = _FakeProvider(
+        {
+            "statement_doc": _doc_text("Interpreta la grafica"),
+            "options_doc": {
+                "A": _doc_text("Respuesta correcta"),
+                "B": _doc_text("Distractor 1"),
+                "C": _doc_text("Distractor 2"),
+                "D": _doc_text("Distractor 3"),
+            },
+            "correct_answer": "A",
+            "media_spec": {
+                "mode": "chart_deterministic",
+                "target": "statement",
+                "spec": {
+                    "chart_type": "bar",
+                    "values": [10, 20, 30],
+                },
+            },
+        }
+    )
+
+    with pytest.raises(ItemAIAssistantValidationError, match="labels requerido para bar"):
+        generate_item_draft(
+            GenerateItemDraftInput(
+                user_prompt="Crea pregunta con barras",
+                standard_name="Datos",
+                competency_name="Interpreta",
+            ),
+            provider=provider,
+        )
+
+
+def test_generate_item_draft_accepts_multiple_media_specs_distinct_targets() -> None:
+    provider = _FakeProvider(
+        {
+            "statement_doc": _doc_text("Observa las graficas"),
+            "options_doc": {
+                "A": _doc_text("Correcta"),
+                "B": _doc_text("Distractor 1"),
+                "C": _doc_text("Distractor 2"),
+                "D": _doc_text("Distractor 3"),
+            },
+            "correct_answer": "A",
+            "media_specs": [
+                {
+                    "mode": "chart_deterministic",
+                    "target": "statement",
+                    "spec": {
+                        "chart_type": "bar",
+                        "labels": ["Bus", "Bici"],
+                        "values": [12, 8],
+                    },
+                },
+                {
+                    "mode": "chart_deterministic",
+                    "target": "option_b",
+                    "spec": {
+                        "chart_type": "pie",
+                        "labels": ["A", "B"],
+                        "sizes": [60, 40],
+                    },
+                },
+            ],
+        }
+    )
+
+    result = generate_item_draft(
+        GenerateItemDraftInput(
+            user_prompt="Crea pregunta con dos graficos",
+            standard_name="Datos",
+            competency_name="Interpreta",
+        ),
+        provider=provider,
+    )
+
+    assert result.media_specs is not None
+    assert len(result.media_specs) == 2
+    assert result.media_specs[0]["target"] == "statement"
+    assert result.media_specs[1]["target"] == "option_b"
+
+
+def test_generate_item_draft_rejects_media_specs_with_duplicate_targets() -> None:
+    provider = _FakeProvider(
+        {
+            "statement_doc": _doc_text("Observa las graficas"),
+            "options_doc": {
+                "A": _doc_text("Correcta"),
+                "B": _doc_text("Distractor 1"),
+                "C": _doc_text("Distractor 2"),
+                "D": _doc_text("Distractor 3"),
+            },
+            "correct_answer": "A",
+            "media_specs": [
+                {
+                    "mode": "chart_deterministic",
+                    "target": "statement",
+                    "spec": {"chart_type": "bar", "labels": ["A"], "values": [1]},
+                },
+                {
+                    "mode": "chart_deterministic",
+                    "target": "statement",
+                    "spec": {"chart_type": "pie", "labels": ["A"], "sizes": [100]},
+                },
+            ],
+        }
+    )
+
+    with pytest.raises(ItemAIAssistantValidationError, match="targets duplicados"):
+        generate_item_draft(
+            GenerateItemDraftInput(
+                user_prompt="Crea pregunta con dos graficos",
+                standard_name="Datos",
+                competency_name="Interpreta",
+            ),
+            provider=provider,
+        )

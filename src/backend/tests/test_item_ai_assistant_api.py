@@ -44,6 +44,13 @@ def test_generate_item_endpoint_ok(monkeypatch) -> None:
                 "target": "statement",
                 "spec": {"chart_type": "bar", "labels": ["A", "B"], "values": [1, 2]},
             },
+            media_specs=[
+                {
+                    "mode": "chart_deterministic",
+                    "target": "statement",
+                    "spec": {"chart_type": "bar", "labels": ["A", "B"], "values": [1, 2]},
+                }
+            ],
         )
 
     monkeypatch.setattr(
@@ -70,6 +77,7 @@ def test_generate_item_endpoint_ok(monkeypatch) -> None:
     assert body["metadata"]["ai_generated"] is True
     assert body["usage"]["input_tokens"] == 10
     assert body["media_spec"]["mode"] == "chart_deterministic"
+    assert len(body["media_specs"]) == 1
 
 
 def test_generate_item_endpoint_blocks_missing_curriculum_context() -> None:

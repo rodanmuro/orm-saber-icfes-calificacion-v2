@@ -21,6 +21,7 @@ class GenerateItemDraftOutput:
     metadata: dict[str, str | bool]
     usage: dict[str, int | float | str] | None = None
     media_spec: dict[str, Any] | None = None
+    media_specs: list[dict[str, Any]] | None = None
 
 
 class LLMProvider(Protocol):

@@ -55,3 +55,27 @@ def test_generate_media_rejects_unknown_chart_type() -> None:
 
     assert response.status_code == 422
     assert "chart_type" in response.json()["detail"]
+
+
+def test_generate_media_bar_chart_accepts_numeric_strings(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setattr(media_service, "ASSETS_DIR", tmp_path)
+
+    client = TestClient(app)
+    response = client.post(
+        "/api/v1/ai/generate-media",
+        json={
+            "teacher_id": 1,
+            "mode": "chart_deterministic",
+            "target": "statement",
+            "spec": {
+                "chart_type": "bar",
+                "title": "Transporte",
+                "labels": ["Bus", "Bicicleta", "Caminando", "Carro"],
+                "values": ["12", "8", "10", "10"],
+            },
+        },
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert (tmp_path / payload["asset"]["filename"]).exists()

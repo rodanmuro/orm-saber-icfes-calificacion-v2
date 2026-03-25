@@ -48,6 +48,7 @@ def generate_item_with_ai(payload: GenerateItemAIPayload) -> GenerateItemAIRespo
         metadata=result.metadata,
         usage=result.usage,
         media_spec=result.media_spec,
+        media_specs=result.media_specs or [],
     )
 
 

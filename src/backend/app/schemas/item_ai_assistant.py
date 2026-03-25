@@ -42,6 +42,7 @@ class GenerateItemAIResponse(BaseModel):
     metadata: dict[str, str | bool]
     usage: AIUsageCost | None = None
     media_spec: ItemAIMediaSpec | None = None
+    media_specs: list[ItemAIMediaSpec] = Field(default_factory=list)
 
 
 class GenerateMediaPayload(BaseModel):

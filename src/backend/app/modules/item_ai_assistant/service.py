@@ -35,6 +35,7 @@ def _normalize_correct_answer_to_a(validated: dict) -> dict:
         "options_doc": options_doc,
         "correct_answer": "A",
         "media_spec": validated.get("media_spec"),
+        "media_specs": validated.get("media_specs", []),
     }
 
 
@@ -196,4 +197,5 @@ def generate_item_draft(
         metadata=metadata,
         usage=usage,
         media_spec=normalized.get("media_spec"),
+        media_specs=normalized.get("media_specs", []),
     )
