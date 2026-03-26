@@ -517,30 +517,6 @@ th {
   pointer-events: auto;
 }
 
-.tiptap-editor table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 8px 0;
-  table-layout: fixed;
-}
-
-.tiptap-editor th,
-.tiptap-editor td {
-  border: 1px solid #b8c9da;
-  padding: 6px 8px;
-  vertical-align: top;
-  background: #ffffff;
-}
-
-.tiptap-editor th {
-  background: #eef4fb;
-  font-weight: 600;
-}
-
-.tiptap-editor .selectedCell {
-  background: #dfefff;
-}
-
 /* Table editing UX */
 .tiptap-editor .tableWrapper {
   overflow-x: auto;
@@ -550,17 +526,22 @@ th {
 .tiptap-editor table {
   border-collapse: collapse;
   table-layout: fixed;
-  width: 100%;
+  width: max-content;
   min-width: 320px;
+  margin: 0;
+  box-sizing: border-box;
 }
 
 .tiptap-editor th,
 .tiptap-editor td {
   border: 1px solid #8ea7c1;
+  box-sizing: border-box;
   padding: 6px 8px;
   vertical-align: top;
   background: #fff;
   position: relative;
+  min-width: 40px;
+  word-break: break-word;
 }
 
 .tiptap-editor th {
@@ -572,17 +553,28 @@ th {
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(31, 95, 157, 0.15);
+  background: rgba(31, 95, 157, 0.12);
   pointer-events: none;
 }
 
+/* Column resize handle — Tiptap lo inyecta como decoración en cada celda.
+   pointer-events: none: el plugin detecta resize por posición del mouse, no por clic en el handle.
+   El handle solo está en el DOM cuando el plugin lo pone (mouse cerca del borde). */
 .tiptap-editor .column-resize-handle {
   background-color: #1f5f9d;
-  width: 2px;
+  bottom: -2px;
+  pointer-events: none;
+  position: absolute;
+  right: -2px;
+  top: 0;
+  width: 4px;
 }
 
-.tiptap-editor .resize-cursor {
+/* Cursor y bloqueo de selección de texto durante resize activo.
+   El plugin agrega 'resize-cursor' al view.dom que ya tiene clase tiptap-editor. */
+.tiptap-editor.resize-cursor {
   cursor: col-resize;
+  user-select: none;
 }
 
 .tiptap-editor .ProseMirror-selectednode {
