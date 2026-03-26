@@ -95,6 +95,115 @@ def _table_cell_node(cell_text: str, *, header: bool) -> dict[str, Any]:
     }
 
 
+def _is_empty_table_cell(cell: Any) -> bool:
+    if not isinstance(cell, dict):
+        return False
+    if cell.get("type") not in {"tableCell", "tableHeader"}:
+        return False
+
+    content = cell.get("content")
+    if not isinstance(content, list) or not content:
+        return True
+
+    for paragraph in content:
+        if not isinstance(paragraph, dict):
+            return False
+        if paragraph.get("type") != "paragraph":
+            return False
+        para_content = paragraph.get("content")
+        if not isinstance(para_content, list):
+            continue
+        for part in para_content:
+            if not isinstance(part, dict):
+                return False
+            if part.get("type") != "text":
+                return False
+            text = part.get("text")
+            if isinstance(text, str) and text.strip():
+                return False
+    return True
+
+
+def _trim_edge_empty_cells(cells: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    trimmed = list(cells)
+    while len(trimmed) > 1 and _is_empty_table_cell(trimmed[0]):
+        trimmed.pop(0)
+    while len(trimmed) > 1 and _is_empty_table_cell(trimmed[-1]):
+        trimmed.pop()
+    return trimmed
+
+
+def _pad_table_row_cells(cells: list[dict[str, Any]], target_len: int) -> list[dict[str, Any]]:
+    if len(cells) >= target_len:
+        return cells[:target_len]
+
+    base_type = "tableCell"
+    if cells and cells[0].get("type") == "tableHeader":
+        base_type = "tableHeader"
+
+    padded = list(cells)
+    while len(padded) < target_len:
+        padded.append(
+            {
+                "type": base_type,
+                "content": [_build_text_paragraph("")],
+            }
+        )
+    return padded
+
+
+def _normalize_table_node(table_node: dict[str, Any]) -> dict[str, Any]:
+    rows = table_node.get("content")
+    if not isinstance(rows, list):
+        return table_node
+
+    normalized_rows: list[dict[str, Any]] = []
+    max_cols = 0
+
+    for row in rows:
+        if not isinstance(row, dict) or row.get("type") != "tableRow":
+            normalized_rows.append(row)
+            continue
+        raw_cells = row.get("content")
+        if not isinstance(raw_cells, list):
+            normalized_rows.append(row)
+            continue
+        trimmed_cells = _trim_edge_empty_cells([c for c in raw_cells if isinstance(c, dict)])
+        max_cols = max(max_cols, len(trimmed_cells))
+        normalized_rows.append({**row, "content": trimmed_cells})
+
+    if max_cols <= 0:
+        return table_node
+
+    balanced_rows: list[dict[str, Any]] = []
+    for row in normalized_rows:
+        if not isinstance(row, dict) or row.get("type") != "tableRow":
+            balanced_rows.append(row)
+            continue
+        cells = row.get("content")
+        if not isinstance(cells, list):
+            balanced_rows.append(row)
+            continue
+        balanced_rows.append({**row, "content": _pad_table_row_cells(cells, max_cols)})
+
+    return {**table_node, "content": balanced_rows}
+
+
+def _normalize_tables_in_doc(node: Any) -> Any:
+    if isinstance(node, list):
+        return [_normalize_tables_in_doc(child) for child in node]
+    if not isinstance(node, dict):
+        return node
+
+    out = dict(node)
+    if "content" in out and isinstance(out.get("content"), list):
+        out["content"] = [_normalize_tables_in_doc(child) for child in out["content"]]
+
+    if out.get("type") == "table":
+        out = _normalize_table_node(out)
+    return out
+
+
 def _try_extract_table_rows_from_plain_text(statement_doc: dict[str, Any]) -> tuple[list[str], list[tuple[str, str]]]:
     content = statement_doc.get("content")
     if not isinstance(content, list):
@@ -152,6 +261,63 @@ def _coerce_table_if_requested(*, user_prompt: str, statement_doc: dict[str, Any
     return {
         "type": "doc",
         "content": new_content,
+    }
+
+
+_ACUTE_ESCAPE_MAP = {
+    "a": "á",
+    "e": "é",
+    "i": "í",
+    "o": "ó",
+    "u": "ú",
+    "A": "Á",
+    "E": "É",
+    "I": "Í",
+    "O": "Ó",
+    "U": "Ú",
+    "n": "ń",
+    "N": "Ń",
+}
+
+
+def _normalize_text_escapes(text: str) -> str:
+    def repl(match: re.Match[str]) -> str:
+        char = match.group(1)
+        return _ACUTE_ESCAPE_MAP.get(char, char)
+
+    return re.sub(r"\\'([aAeEiIoOuUnN])", repl, text)
+
+
+def _normalize_text_escapes_in_doc(node: Any) -> Any:
+    if isinstance(node, list):
+        return [_normalize_text_escapes_in_doc(child) for child in node]
+    if not isinstance(node, dict):
+        return node
+
+    node_type = node.get("type")
+    out = dict(node)
+
+    if node_type == "text" and isinstance(node.get("text"), str):
+        out["text"] = _normalize_text_escapes(node["text"])
+
+    if "content" in node and isinstance(node.get("content"), list):
+        out["content"] = [_normalize_text_escapes_in_doc(child) for child in node["content"]]
+
+    return out
+
+
+def _normalize_text_escapes_in_payload(validated: dict[str, Any]) -> dict[str, Any]:
+    statement_doc = _normalize_tables_in_doc(
+        _normalize_text_escapes_in_doc(validated["statement_doc"])
+    )
+    options_doc = {
+        key: _normalize_tables_in_doc(_normalize_text_escapes_in_doc(doc))
+        for key, doc in validated["options_doc"].items()
+    }
+    return {
+        **validated,
+        "statement_doc": statement_doc,
+        "options_doc": options_doc,
     }
 
 
@@ -350,6 +516,7 @@ def generate_item_draft(
         attempts.append(raw_payload)
         try:
             validated_candidate = validate_model_output(raw_payload)
+            validated_candidate = _normalize_text_escapes_in_payload(validated_candidate)
             validated_candidate["statement_doc"] = _coerce_table_if_requested(
                 user_prompt=payload.user_prompt,
                 statement_doc=validated_candidate["statement_doc"],

@@ -328,16 +328,9 @@ export default function App() {
   }
 
   return (
-    <main className="container">
-      <header>
-        <h1>Banco de Items - Frontend Web Base</h1>
-        <p>API: {API_BASE_URL}</p>
-      </header>
-
-      {error ? <p className="alert error">{error}</p> : null}
-      {message ? <p className="alert success">{message}</p> : null}
-
-      <section className="tabs card">
+    <div className="dashboard-shell">
+      <aside className="dashboard-sidebar">
+        <h2>OMR Suite</h2>
         <button
           type="button"
           className={activeTab === 'edit' ? 'tab-btn active' : 'tab-btn'}
@@ -350,61 +343,73 @@ export default function App() {
           className={activeTab === 'list' ? 'tab-btn active' : 'tab-btn'}
           onClick={() => setActiveTab('list')}
         >
-          Listado de items ({items.length})
+          Listado ({items.length})
         </button>
-      </section>
+      </aside>
 
-      {activeTab === 'edit' ? (
-        <section className="single-pane">
-          <ItemForm
-            form={form}
-            onChange={setForm}
-            onSubmit={handleSubmit}
-            onReset={handleReset}
-            onDelete={handleDeleteItem}
-            onNavigatePrev={() => handleNavigate(-1)}
-            onNavigateNext={() => handleNavigate(1)}
-            hasPrev={items.findIndex((it) => it.id === selectedItemId) > 0}
-            hasNext={items.findIndex((it) => it.id === selectedItemId) < items.length - 1}
-            isSaving={saving}
-            mode={selectedItemId ? 'edit' : 'create'}
-          />
-        </section>
-      ) : (
-        <section className="single-pane">
-          <FiltersBar
-            filters={filters}
-            onChange={setFilters}
-            onClear={() => setFilters({ subject: '', difficulty: '', curricularTag: '' })}
-          />
-          {loading ? <p>Cargando items...</p> : null}
-          <ItemList
-            items={filteredItems}
-            selectedItemId={selectedItemId}
-            onSelect={handleSelectItem}
-            selectedItemIds={selectedItemIds}
-            onToggleItemSelection={handleToggleItemSelection}
-            onToggleAllVisibleItems={handleToggleAllVisibleItems}
-            onBulkDelete={(ids) => handleBulkDeleteItems(ids, false)}
-            onBulkForceDelete={(ids) => handleBulkDeleteItems(ids, true)}
-            isBulkDeleting={saving}
-          />
-        </section>
-      )}
+      <main className="dashboard-main">
+        <header className="dashboard-topbar card">
+          <div>
+            <h1>Banco de Items</h1>
+            <p>API: {API_BASE_URL}</p>
+          </div>
+        </header>
 
-      <ExamBuilder
-        items={items}
-        exams={exams}
-        selectedExam={selectedExam}
-        versions={examVersions}
-        onRefreshExams={refreshExams}
-        onCreateExam={handleCreateExam}
-        onSelectExam={handleSelectExam}
-        onAddItem={handleAddItemToExam}
-        onRemoveItem={handleRemoveItemFromExam}
-        onPublishVersion={handlePublishExamVersion}
-        loading={loadingExams}
-      />
-    </main>
+        {error ? <p className="alert error">{error}</p> : null}
+        {message ? <p className="alert success">{message}</p> : null}
+
+        {activeTab === 'edit' ? (
+          <section className="single-pane">
+            <ItemForm
+              form={form}
+              onChange={setForm}
+              onSubmit={handleSubmit}
+              onReset={handleReset}
+              onDelete={handleDeleteItem}
+              onNavigatePrev={() => handleNavigate(-1)}
+              onNavigateNext={() => handleNavigate(1)}
+              hasPrev={items.findIndex((it) => it.id === selectedItemId) > 0}
+              hasNext={items.findIndex((it) => it.id === selectedItemId) < items.length - 1}
+              isSaving={saving}
+              mode={selectedItemId ? 'edit' : 'create'}
+            />
+          </section>
+        ) : (
+          <section className="single-pane">
+            <FiltersBar
+              filters={filters}
+              onChange={setFilters}
+              onClear={() => setFilters({ subject: '', difficulty: '', curricularTag: '' })}
+            />
+            {loading ? <p>Cargando items...</p> : null}
+            <ItemList
+              items={filteredItems}
+              selectedItemId={selectedItemId}
+              onSelect={handleSelectItem}
+              selectedItemIds={selectedItemIds}
+              onToggleItemSelection={handleToggleItemSelection}
+              onToggleAllVisibleItems={handleToggleAllVisibleItems}
+              onBulkDelete={(ids) => handleBulkDeleteItems(ids, false)}
+              onBulkForceDelete={(ids) => handleBulkDeleteItems(ids, true)}
+              isBulkDeleting={saving}
+            />
+          </section>
+        )}
+
+        <ExamBuilder
+          items={items}
+          exams={exams}
+          selectedExam={selectedExam}
+          versions={examVersions}
+          onRefreshExams={refreshExams}
+          onCreateExam={handleCreateExam}
+          onSelectExam={handleSelectExam}
+          onAddItem={handleAddItemToExam}
+          onRemoveItem={handleRemoveItemFromExam}
+          onPublishVersion={handlePublishExamVersion}
+          loading={loadingExams}
+        />
+      </main>
+    </div>
   );
 }

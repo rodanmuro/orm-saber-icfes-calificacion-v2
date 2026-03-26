@@ -728,3 +728,92 @@ def test_generate_item_draft_swaps_media_target_and_compacts_after_normalizing_t
     assert result.correct_answer == "A"
     assert result.media_specs[0]["target"] == "option_a"
     assert result.options_doc["A"]["content"][0]["content"][0]["text"] == "Observa la grafica."
+
+
+def test_generate_item_draft_normalizes_latex_like_accent_escapes_in_text_nodes() -> None:
+    provider = _FakeProvider(
+        {
+            "statement_doc": _doc_text("Cada unidad en el gr\\'afico representa 10."),
+            "options_doc": {
+                "A": _doc_text("Correcta"),
+                "B": _doc_text("Distractor 1"),
+                "C": _doc_text("Distractor 2"),
+                "D": _doc_text("Distractor 3"),
+            },
+            "correct_answer": "A",
+        }
+    )
+
+    result = generate_item_draft(
+        GenerateItemDraftInput(
+            user_prompt="Crea pregunta con grafico",
+            standard_name="Datos",
+            competency_name="Interpreta",
+        ),
+        provider=provider,
+    )
+
+    statement_text = result.statement_doc["content"][0]["content"][0]["text"]
+    assert statement_text == "Cada unidad en el gráfico representa 10."
+
+
+def test_generate_item_draft_normalizes_table_with_ghost_edge_columns() -> None:
+    provider = _FakeProvider(
+        {
+            "statement_doc": {
+                "type": "doc",
+                "content": [
+                    {
+                        "type": "table",
+                        "content": [
+                            {
+                                "type": "tableRow",
+                                "content": [
+                                    {"type": "tableHeader", "content": [{"type": "paragraph", "content": [{"type": "text", "text": ""}]}]},
+                                    {"type": "tableHeader", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Rubro"}]}]},
+                                    {"type": "tableHeader", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Porcentaje"}]}]},
+                                    {"type": "tableHeader", "content": [{"type": "paragraph", "content": [{"type": "text", "text": ""}]}]},
+                                ],
+                            },
+                            {
+                                "type": "tableRow",
+                                "content": [
+                                    {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": ""}]}]},
+                                    {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Salarios"}]}]},
+                                    {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "45%"}]}]},
+                                    {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": ""}]}]},
+                                ],
+                            },
+                        ],
+                    }
+                ],
+            },
+            "options_doc": {
+                "A": _doc_text("Correcta"),
+                "B": _doc_text("Distractor 1"),
+                "C": _doc_text("Distractor 2"),
+                "D": _doc_text("Distractor 3"),
+            },
+            "correct_answer": "A",
+        }
+    )
+
+    result = generate_item_draft(
+        GenerateItemDraftInput(
+            user_prompt="Crea una pregunta con tabla",
+            standard_name="Datos",
+            competency_name="Interpreta",
+        ),
+        provider=provider,
+    )
+
+    table = result.statement_doc["content"][0]
+    header_cells = table["content"][0]["content"]
+    row_cells = table["content"][1]["content"]
+
+    assert len(header_cells) == 2
+    assert len(row_cells) == 2
+    assert header_cells[0]["content"][0]["content"][0]["text"] == "Rubro"
+    assert header_cells[1]["content"][0]["content"][0]["text"] == "Porcentaje"
+    assert row_cells[0]["content"][0]["content"][0]["text"] == "Salarios"
+    assert row_cells[1]["content"][0]["content"][0]["text"] == "45%"
