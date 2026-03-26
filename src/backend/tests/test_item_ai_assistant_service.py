@@ -552,3 +552,179 @@ def test_generate_item_draft_rejects_media_specs_with_duplicate_targets() -> Non
             ),
             provider=provider,
         )
+
+
+def _doc_table_simple() -> dict:
+    return {
+        "type": "doc",
+        "content": [
+            {
+                "type": "table",
+                "content": [
+                    {
+                        "type": "tableRow",
+                        "content": [
+                            {"type": "tableHeader", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Categoria"}]}]},
+                            {"type": "tableHeader", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Valor"}]}]},
+                        ],
+                    },
+                    {
+                        "type": "tableRow",
+                        "content": [
+                            {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "A"}]}]},
+                            {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "10"}]}]},
+                        ],
+                    },
+                ],
+            }
+        ],
+    }
+
+
+def test_generate_item_draft_repair_when_table_requested_but_missing() -> None:
+    first_payload = {
+        "statement_doc": _doc_text("Tabla en texto plano: A=10, B=20"),
+        "options_doc": {
+            "A": _doc_text("Correcta"),
+            "B": _doc_text("Distractor 1"),
+            "C": _doc_text("Distractor 2"),
+            "D": _doc_text("Distractor 3"),
+        },
+        "correct_answer": "A",
+    }
+    second_payload = {
+        "statement_doc": _doc_table_simple(),
+        "options_doc": {
+            "A": _doc_text("Correcta"),
+            "B": _doc_text("Distractor 1"),
+            "C": _doc_text("Distractor 2"),
+            "D": _doc_text("Distractor 3"),
+        },
+        "correct_answer": "A",
+    }
+
+    provider = _SequentialProvider([first_payload, second_payload])
+
+    result = generate_item_draft(
+        GenerateItemDraftInput(
+            user_prompt="Crea una pregunta con tabla y graficas",
+            standard_name="Datos",
+            competency_name="Interpreta",
+        ),
+        provider=provider,
+    )
+
+    assert provider.calls == 2
+    assert result.metadata["ai_repaired"] is True
+    assert result.statement_doc["content"][0]["type"] == "table"
+
+
+def test_generate_item_draft_compacts_option_text_when_option_has_chart() -> None:
+    provider = _FakeProvider(
+        {
+            "statement_doc": _doc_text("Observa las opciones"),
+            "options_doc": {
+                "A": _doc_text("Esta opcion describe toda la grafica circular con mucho texto y valores."),
+                "B": _doc_text("Otro texto largo de apoyo"),
+                "C": _doc_text("Distractor 2"),
+                "D": _doc_text("Distractor 3"),
+            },
+            "correct_answer": "A",
+            "media_specs": [
+                {
+                    "mode": "chart_deterministic",
+                    "target": "option_a",
+                    "spec": {
+                        "chart_type": "pie",
+                        "labels": ["A", "B"],
+                        "sizes": [70, 30],
+                    },
+                }
+            ],
+        }
+    )
+
+    result = generate_item_draft(
+        GenerateItemDraftInput(
+            user_prompt="Crea pregunta con grafica en opcion A",
+            standard_name="Datos",
+            competency_name="Interpreta",
+        ),
+        provider=provider,
+    )
+
+    option_a_text = result.options_doc["A"]["content"][0]["content"][0]["text"]
+    assert option_a_text == "Observa la grafica."
+
+def test_generate_item_draft_coerces_plain_text_rows_into_table_node() -> None:
+    provider = _FakeProvider(
+        {
+            "statement_doc": {
+                "type": "doc",
+                "content": [
+                    {"type": "paragraph", "content": [{"type": "text", "text": "En la tabla se muestran cantidades por categoria:"}]},
+                    {"type": "paragraph", "content": [{"type": "text", "text": "• A pie: 12"}]},
+                    {"type": "paragraph", "content": [{"type": "text", "text": "• Bicicleta: 8"}]},
+                    {"type": "paragraph", "content": [{"type": "text", "text": "• Bus escolar: 20"}]},
+                ],
+            },
+            "options_doc": {
+                "A": _doc_text("Correcta"),
+                "B": _doc_text("Distractor 1"),
+                "C": _doc_text("Distractor 2"),
+                "D": _doc_text("Distractor 3"),
+            },
+            "correct_answer": "A",
+        }
+    )
+
+    result = generate_item_draft(
+        GenerateItemDraftInput(
+            user_prompt="Crea una pregunta con tabla sobre transporte escolar",
+            standard_name="Datos",
+            competency_name="Interpreta",
+        ),
+        provider=provider,
+    )
+
+    content = result.statement_doc.get("content", [])
+    assert any(isinstance(n, dict) and n.get("type") == "table" for n in content)
+
+
+def test_generate_item_draft_swaps_media_target_and_compacts_after_normalizing_to_a() -> None:
+    provider = _FakeProvider(
+        {
+            "statement_doc": _doc_text("Observa las opciones"),
+            "options_doc": {
+                "A": _doc_text("Texto largo A"),
+                "B": _doc_text("Texto largo B con descripcion de grafica"),
+                "C": _doc_text("Distractor 2"),
+                "D": _doc_text("Distractor 3"),
+            },
+            "correct_answer": "B",
+            "media_specs": [
+                {
+                    "mode": "chart_deterministic",
+                    "target": "option_b",
+                    "spec": {
+                        "chart_type": "pie",
+                        "labels": ["X", "Y"],
+                        "sizes": [70, 30],
+                    },
+                }
+            ],
+        }
+    )
+
+    result = generate_item_draft(
+        GenerateItemDraftInput(
+            user_prompt="Crea pregunta con grafica en opcion correcta",
+            standard_name="Datos",
+            competency_name="Interpreta",
+        ),
+        provider=provider,
+    )
+
+    assert result.correct_answer == "A"
+    assert result.media_specs[0]["target"] == "option_a"
+    assert result.options_doc["A"]["content"][0]["content"][0]["text"] == "Observa la grafica."

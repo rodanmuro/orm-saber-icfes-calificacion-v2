@@ -1,10 +1,11 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, Response, status
-from sqlalchemy import select
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
+from sqlalchemy import delete, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.db.models import Competency, Item, Standard, Teacher
+from app.db.models import Competency, ExamItem, ExamVersion, ExamVersionItem, Item, Standard, Teacher
 from app.db.session import get_db
 from app.schemas.item_bank import CurriculumRef, ItemCreate, ItemRead, ItemUpdate
 
@@ -134,10 +135,42 @@ def update_item(item_id: int, payload: ItemUpdate, db: Session = Depends(get_db)
 
 
 @router.delete("/{item_id}")
-def delete_item(item_id: int, db: Session = Depends(get_db)) -> Response:
+def delete_item(
+    item_id: int,
+    force: bool = Query(default=False),
+    db: Session = Depends(get_db),
+) -> Response:
     item = db.get(Item, item_id)
     if item is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="item not found")
-    db.delete(item)
-    db.commit()
+
+    try:
+        if force:
+            linked_exam_items = db.scalars(select(ExamItem).where(ExamItem.item_id == item_id)).all()
+            linked_exam_item_ids = [row.id for row in linked_exam_items]
+            linked_exam_ids = sorted({row.exam_id for row in linked_exam_items})
+
+            db.execute(delete(ExamVersionItem).where(ExamVersionItem.item_id == item_id))
+
+            if linked_exam_item_ids:
+                db.execute(
+                    delete(ExamVersionItem).where(
+                        ExamVersionItem.source_exam_item_id.in_(linked_exam_item_ids)
+                    )
+                )
+
+            if linked_exam_ids:
+                db.execute(delete(ExamVersion).where(ExamVersion.exam_id.in_(linked_exam_ids)))
+
+            db.execute(delete(ExamItem).where(ExamItem.item_id == item_id))
+
+        db.delete(item)
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="item is linked to exam/exam_version and cannot be deleted",
+        )
+
     return Response(status_code=status.HTTP_204_NO_CONTENT)

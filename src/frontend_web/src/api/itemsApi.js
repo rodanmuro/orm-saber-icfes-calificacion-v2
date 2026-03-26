@@ -36,8 +36,11 @@ export function updateItem(itemId, payload) {
   });
 }
 
-export async function deleteItem(itemId) {
-  const response = await fetch(`${API_BASE_URL}/items/${itemId}`, {
+export async function deleteItem(itemId, { force = false } = {}) {
+  const path = force
+    ? `${API_BASE_URL}/items/${itemId}?force=true`
+    : `${API_BASE_URL}/items/${itemId}`;
+  const response = await fetch(path, {
     method: 'DELETE',
     headers: { 'Content-Type': 'application/json' },
   });

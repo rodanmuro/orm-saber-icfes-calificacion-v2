@@ -16,6 +16,27 @@ import ItemForm, { emptyForm, formToPayload, itemToForm } from './components/Ite
 import ItemList from './components/ItemList';
 import { docHasMeaningfulContent } from './utils/editorDoc';
 
+
+function parseDeleteErrorDetail(errorMessage) {
+  const raw = String(errorMessage || '');
+  const marker = 'HTTP ';
+  if (!raw.includes(marker)) return raw || 'Error desconocido';
+
+  const idx = raw.indexOf(':');
+  if (idx === -1) return raw;
+  const body = raw.slice(idx + 1).trim();
+
+  try {
+    const parsed = JSON.parse(body);
+    if (parsed && typeof parsed === 'object' && parsed.detail) {
+      return String(parsed.detail);
+    }
+  } catch {
+    // no-op
+  }
+  return body || raw;
+}
+
 function filterItems(items, filters) {
   const subject = filters.subject.trim().toLowerCase();
   const difficulty = filters.difficulty.trim().toLowerCase();
@@ -42,6 +63,7 @@ export default function App() {
   const [filters, setFilters] = useState({ subject: '', difficulty: '', curricularTag: '' });
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [selectedItemIds, setSelectedItemIds] = useState([]);
   const [loadingExams, setLoadingExams] = useState(false);
   const [exams, setExams] = useState([]);
   const [selectedExam, setSelectedExam] = useState(null);
@@ -140,6 +162,75 @@ export default function App() {
       await refreshItems();
     } catch (err) {
       setError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+
+  function handleToggleItemSelection(itemId, checked) {
+    setSelectedItemIds((prev) => {
+      if (checked) {
+        if (prev.includes(itemId)) return prev;
+        return [...prev, itemId];
+      }
+      return prev.filter((id) => id !== itemId);
+    });
+  }
+
+  function handleToggleAllVisibleItems(itemIds, checked) {
+    setSelectedItemIds((prev) => {
+      const set = new Set(prev);
+      if (checked) {
+        itemIds.forEach((id) => set.add(id));
+      } else {
+        itemIds.forEach((id) => set.delete(id));
+      }
+      return Array.from(set);
+    });
+  }
+
+  async function handleBulkDeleteItems(itemIds, force = false) {
+    const ids = (itemIds || []).filter((id) => Number.isFinite(id));
+    if (ids.length === 0) return;
+
+    const ok = window.confirm(
+      force
+        ? `¿FORZAR borrado de ${ids.length} item(s)? Esto eliminara asociaciones con examenes/versiones y no se puede deshacer.`
+        : `¿Borrar ${ids.length} item(s) seleccionados? Esta acción no se puede deshacer.`
+    );
+    if (!ok) return;
+
+    setSaving(true);
+    setError('');
+    setMessage('');
+
+    const failed = [];
+    let deleted = 0;
+
+    try {
+      for (const id of ids) {
+        try {
+          await deleteItem(id, { force });
+          deleted += 1;
+        } catch (err) {
+          failed.push({ id, error: parseDeleteErrorDetail(err?.message) });
+        }
+      }
+
+      if (ids.includes(selectedItemId)) {
+        setSelectedItemId(null);
+        setForm(emptyForm());
+      }
+
+      await refreshItems();
+      setSelectedItemIds((prev) => prev.filter((id) => !ids.includes(id)));
+
+      if (failed.length > 0) {
+        const failedRows = failed.map((f) => `#${f.id} (${f.error})`).join(', ');
+        setError(`No se pudieron borrar ${failed.length} item(s): ${failedRows}`);
+      }
+      setMessage(force ? `Forzar borrado completado. Eliminados: ${deleted}.` : `Borrado masivo completado. Eliminados: ${deleted}.`);
     } finally {
       setSaving(false);
     }
@@ -287,7 +378,17 @@ export default function App() {
             onClear={() => setFilters({ subject: '', difficulty: '', curricularTag: '' })}
           />
           {loading ? <p>Cargando items...</p> : null}
-          <ItemList items={filteredItems} selectedItemId={selectedItemId} onSelect={handleSelectItem} />
+          <ItemList
+            items={filteredItems}
+            selectedItemId={selectedItemId}
+            onSelect={handleSelectItem}
+            selectedItemIds={selectedItemIds}
+            onToggleItemSelection={handleToggleItemSelection}
+            onToggleAllVisibleItems={handleToggleAllVisibleItems}
+            onBulkDelete={(ids) => handleBulkDeleteItems(ids, false)}
+            onBulkForceDelete={(ids) => handleBulkDeleteItems(ids, true)}
+            isBulkDeleting={saving}
+          />
         </section>
       )}
 

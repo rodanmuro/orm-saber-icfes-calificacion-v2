@@ -1,8 +1,12 @@
 import { useEffect } from 'react';
 
 import { EditorContent, useEditor } from '@tiptap/react';
-import ResizableImage from '../editor/ResizableImage';
 import StarterKit from '@tiptap/starter-kit';
+import Table from '@tiptap/extension-table';
+import TableCell from '@tiptap/extension-table-cell';
+import TableHeader from '@tiptap/extension-table-header';
+import TableRow from '@tiptap/extension-table-row';
+import ResizableImage from '../editor/ResizableImage';
 import MathInline from '../editor/MathInline';
 import { uploadEditorImage } from '../api/assetsApi';
 
@@ -43,8 +47,21 @@ export default function RichTextEditor({
   };
 
   const editor = useEditor({
-    extensions: [StarterKit, ResizableImage, MathInline],
+    extensions: [
+      StarterKit,
+      Table.configure({
+        resizable: true,
+        lastColumnResizable: true,
+        allowTableNodeSelection: false,
+      }),
+      TableRow,
+      TableHeader,
+      TableCell,
+      ResizableImage,
+      MathInline,
+    ],
     content: value,
+    editable: true,
     editorProps: {
       attributes: {
         class: 'tiptap-editor',
@@ -89,6 +106,7 @@ export default function RichTextEditor({
 
   useEffect(() => {
     if (!editor) return;
+    if (editor.isFocused) return;
     const current = editor.getJSON();
     const currentRaw = JSON.stringify(current);
     const nextRaw = JSON.stringify(value);
@@ -149,8 +167,24 @@ export default function RichTextEditor({
         <button type="button" onClick={() => applyImageAlign('left')}>Img Izq</button>
         <button type="button" onClick={() => applyImageAlign('center')}>Img Centro</button>
         <button type="button" onClick={() => applyImageAlign('right')}>Img Der</button>
+        <button
+          type="button"
+          onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}
+        >
+          Tabla
+        </button>
+        <button type="button" onClick={() => editor.chain().focus().toggleHeaderRow().run()}>
+          Encabezado
+        </button>
+        <button type="button" onClick={() => editor.chain().focus().addRowBefore().run()}>Fila ↑</button>
+        <button type="button" onClick={() => editor.chain().focus().addRowAfter().run()}>+Fila</button>
+        <button type="button" onClick={() => editor.chain().focus().addColumnBefore().run()}>Col ←</button>
+        <button type="button" onClick={() => editor.chain().focus().addColumnAfter().run()}>+Col</button>
+        <button type="button" onClick={() => editor.chain().focus().deleteRow().run()}>-Fila</button>
+        <button type="button" onClick={() => editor.chain().focus().deleteColumn().run()}>-Col</button>
+        <button type="button" onClick={() => editor.chain().focus().deleteTable().run()}>-Tabla</button>
       </div>
-      <div className="editor-hint">Tip: pega imagen con Ctrl+V o arrastra archivos al editor.</div>
+      <div className="editor-hint">Tip: pega imagen con Ctrl+V o arrastra archivos al editor. Para editar tabla, haz clic dentro de una celda. Para escalar tabla, arrastra el borde entre columnas.</div>
       <EditorContent editor={editor} />
     </div>
   );

@@ -482,53 +482,53 @@ export default function ItemForm({
           </label>
         </div>
 
-        <label>
-          Enunciado
+        <div className="field-block">
+          <span className="field-title">Enunciado</span>
           <RichTextEditor
             value={form.statement_doc}
             onChange={(value) => onChange({ ...form, statement_doc: value })}
             placeholder="Escribe el enunciado..."
             minHeight="180px"
           />
-        </label>
+        </div>
 
         <div className="grid grid-2">
-          <label>
-            Opcion A
+          <div className="field-block">
+            <span className="field-title">Opcion A</span>
             <RichTextEditor
               value={form.optionA_doc}
               onChange={(value) => onChange({ ...form, optionA_doc: value })}
               placeholder="Contenido opcion A"
               minHeight="110px"
             />
-          </label>
-          <label>
-            Opcion B
+          </div>
+          <div className="field-block">
+            <span className="field-title">Opcion B</span>
             <RichTextEditor
               value={form.optionB_doc}
               onChange={(value) => onChange({ ...form, optionB_doc: value })}
               placeholder="Contenido opcion B"
               minHeight="110px"
             />
-          </label>
-          <label>
-            Opcion C
+          </div>
+          <div className="field-block">
+            <span className="field-title">Opcion C</span>
             <RichTextEditor
               value={form.optionC_doc}
               onChange={(value) => onChange({ ...form, optionC_doc: value })}
               placeholder="Contenido opcion C"
               minHeight="110px"
             />
-          </label>
-          <label>
-            Opcion D
+          </div>
+          <div className="field-block">
+            <span className="field-title">Opcion D</span>
             <RichTextEditor
               value={form.optionD_doc}
               onChange={(value) => onChange({ ...form, optionD_doc: value })}
               placeholder="Contenido opcion D"
               minHeight="110px"
             />
-          </label>
+          </div>
         </div>
 
         <div className="grid grid-2">

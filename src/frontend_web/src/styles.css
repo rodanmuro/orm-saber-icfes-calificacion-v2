@@ -443,3 +443,108 @@ th {
   opacity: 1;
   pointer-events: auto;
 }
+
+.tiptap-editor table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 8px 0;
+  table-layout: fixed;
+}
+
+.tiptap-editor th,
+.tiptap-editor td {
+  border: 1px solid #b8c9da;
+  padding: 6px 8px;
+  vertical-align: top;
+  background: #ffffff;
+}
+
+.tiptap-editor th {
+  background: #eef4fb;
+  font-weight: 600;
+}
+
+.tiptap-editor .selectedCell {
+  background: #dfefff;
+}
+
+/* Table editing UX */
+.tiptap-editor .tableWrapper {
+  overflow-x: auto;
+  margin: 8px 0;
+}
+
+.tiptap-editor table {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+  min-width: 320px;
+}
+
+.tiptap-editor th,
+.tiptap-editor td {
+  border: 1px solid #8ea7c1;
+  padding: 6px 8px;
+  vertical-align: top;
+  background: #fff;
+  position: relative;
+}
+
+.tiptap-editor th {
+  background: #eef4fb;
+  font-weight: 600;
+}
+
+.tiptap-editor .selectedCell::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(31, 95, 157, 0.15);
+  pointer-events: none;
+}
+
+.tiptap-editor .column-resize-handle {
+  background-color: #1f5f9d;
+  width: 2px;
+}
+
+.tiptap-editor .resize-cursor {
+  cursor: col-resize;
+}
+
+.tiptap-editor .ProseMirror-selectednode {
+  outline: 2px solid #1f5f9d;
+  outline-offset: 2px;
+}
+
+.field-block {
+  display: grid;
+  gap: 4px;
+}
+
+.field-title {
+  font-size: 14px;
+}
+
+.item-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.item-list-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-danger.force {
+  background: #fff4e5;
+  border-color: #f2c28b;
+  color: #7a3e00;
+}
+
+.btn-danger.force:hover:not(:disabled) {
+  background: #f9d8b1;
+}

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from typing import Any
 
 from app.modules.item_ai_assistant.domain import (
@@ -24,18 +25,203 @@ CACHED_INPUT_PRICE_PER_1M_USD = 0.125
 OUTPUT_PRICE_PER_1M_USD = 10.00
 MAX_SERVICE_REPAIR_ATTEMPTS = 3
 
+TABLE_HINTS = (
+    "tabla",
+    "table",
+    "tabular",
+)
+
+TARGET_TO_OPTION_KEY = {
+    "option_a": "A",
+    "option_b": "B",
+    "option_c": "C",
+    "option_d": "D",
+}
+OPTION_KEY_TO_TARGET = {v: k for k, v in TARGET_TO_OPTION_KEY.items()}
+
+
+def _doc_contains_node_type(node: Any, expected_type: str) -> bool:
+    if not isinstance(node, dict):
+        return False
+    if node.get("type") == expected_type:
+        return True
+    content = node.get("content")
+    if isinstance(content, list):
+        return any(_doc_contains_node_type(child, expected_type) for child in content)
+    return False
+
+
+def _requires_table_in_statement(user_prompt: str) -> bool:
+    text = (user_prompt or "").lower()
+    return any(hint in text for hint in TABLE_HINTS)
+
+
+def _enforce_table_requirement(*, user_prompt: str, statement_doc: dict[str, Any]) -> None:
+    if not _requires_table_in_statement(user_prompt):
+        return
+    if not _doc_contains_node_type(statement_doc, "table"):
+        raise ItemAIAssistantValidationError(
+            "Cuando se solicita tabla, statement_doc debe incluir un nodo table"
+        )
+
+
+def _paragraph_text(node: Any) -> str:
+    if not isinstance(node, dict) or node.get("type") != "paragraph":
+        return ""
+    content = node.get("content")
+    if not isinstance(content, list):
+        return ""
+    chunks: list[str] = []
+    for part in content:
+        if isinstance(part, dict) and part.get("type") == "text":
+            text = part.get("text")
+            if isinstance(text, str):
+                chunks.append(text)
+    return "".join(chunks).strip()
+
+
+def _build_text_paragraph(text: str) -> dict[str, Any]:
+    return {
+        "type": "paragraph",
+        "content": [{"type": "text", "text": text}],
+    }
+
+
+def _table_cell_node(cell_text: str, *, header: bool) -> dict[str, Any]:
+    node_type = "tableHeader" if header else "tableCell"
+    return {
+        "type": node_type,
+        "content": [_build_text_paragraph(cell_text)],
+    }
+
+
+def _try_extract_table_rows_from_plain_text(statement_doc: dict[str, Any]) -> tuple[list[str], list[tuple[str, str]]]:
+    content = statement_doc.get("content")
+    if not isinstance(content, list):
+        return [], []
+
+    kept_paragraphs: list[str] = []
+    rows: list[tuple[str, str]] = []
+
+    pattern = re.compile(r"^\s*(?:[•\-*]\s*)?([^:|]+?)\s*:\s*([0-9]+(?:[.,][0-9]+)?)\b")
+    for node in content:
+        text = _paragraph_text(node)
+        if not text:
+            continue
+        match = pattern.match(text)
+        if match:
+            rows.append((match.group(1).strip(), match.group(2).strip()))
+        else:
+            kept_paragraphs.append(text)
+
+    return kept_paragraphs, rows
+
+
+def _coerce_table_if_requested(*, user_prompt: str, statement_doc: dict[str, Any]) -> dict[str, Any]:
+    if not _requires_table_in_statement(user_prompt):
+        return statement_doc
+    if _doc_contains_node_type(statement_doc, "table"):
+        return statement_doc
+
+    intro_paragraphs, rows = _try_extract_table_rows_from_plain_text(statement_doc)
+    if len(rows) < 2:
+        return statement_doc
+
+    table_rows: list[dict[str, Any]] = [
+        {
+            "type": "tableRow",
+            "content": [
+                _table_cell_node("Categoria", header=True),
+                _table_cell_node("Valor", header=True),
+            ],
+        }
+    ]
+    for label, value in rows:
+        table_rows.append(
+            {
+                "type": "tableRow",
+                "content": [
+                    _table_cell_node(label, header=False),
+                    _table_cell_node(value, header=False),
+                ],
+            }
+        )
+
+    new_content: list[dict[str, Any]] = [_build_text_paragraph(p) for p in intro_paragraphs]
+    new_content.append({"type": "table", "content": table_rows})
+    return {
+        "type": "doc",
+        "content": new_content,
+    }
+
+
+def _minimal_option_doc() -> dict[str, Any]:
+    return {
+        "type": "doc",
+        "content": [
+            {
+                "type": "paragraph",
+                "content": [{"type": "text", "text": "Observa la grafica."}],
+            }
+        ],
+    }
+
+
+def _swap_media_targets(media_specs: list[dict[str, Any]], key_a: str, key_b: str) -> list[dict[str, Any]]:
+    target_a = OPTION_KEY_TO_TARGET.get(key_a)
+    target_b = OPTION_KEY_TO_TARGET.get(key_b)
+    if not target_a or not target_b:
+        return media_specs
+
+    swapped: list[dict[str, Any]] = []
+    for item in media_specs:
+        if not isinstance(item, dict):
+            swapped.append(item)
+            continue
+        current_target = item.get("target")
+        next_target = current_target
+        if current_target == target_a:
+            next_target = target_b
+        elif current_target == target_b:
+            next_target = target_a
+        swapped.append({**item, "target": next_target})
+    return swapped
+
+
+def _normalize_options_for_media_targets(
+    options_doc: dict[str, dict[str, Any]],
+    media_specs: list[dict[str, Any]],
+) -> dict[str, dict[str, Any]]:
+    result = dict(options_doc)
+    targets = {
+        item.get("target")
+        for item in media_specs
+        if isinstance(item, dict) and isinstance(item.get("target"), str)
+    }
+    for target in targets:
+        key = TARGET_TO_OPTION_KEY.get(target)
+        if key:
+            result[key] = _minimal_option_doc()
+    return result
+
 
 def _normalize_correct_answer_to_a(validated: dict) -> dict:
     options_doc = dict(validated["options_doc"])
+    media_specs = list(validated.get("media_specs", []))
     correct = validated["correct_answer"]
+
     if correct != "A":
         options_doc["A"], options_doc[correct] = options_doc[correct], options_doc["A"]
+        media_specs = _swap_media_targets(media_specs, "A", correct)
+
+    options_doc = _normalize_options_for_media_targets(options_doc, media_specs)
+
     return {
         "statement_doc": validated["statement_doc"],
         "options_doc": options_doc,
         "correct_answer": "A",
-        "media_spec": validated.get("media_spec"),
-        "media_specs": validated.get("media_specs", []),
+        "media_spec": media_specs[0] if media_specs else None,
+        "media_specs": media_specs,
     }
 
 
@@ -163,7 +349,16 @@ def generate_item_draft(
 
         attempts.append(raw_payload)
         try:
-            validated = validate_model_output(raw_payload)
+            validated_candidate = validate_model_output(raw_payload)
+            validated_candidate["statement_doc"] = _coerce_table_if_requested(
+                user_prompt=payload.user_prompt,
+                statement_doc=validated_candidate["statement_doc"],
+            )
+            _enforce_table_requirement(
+                user_prompt=payload.user_prompt,
+                statement_doc=validated_candidate["statement_doc"],
+            )
+            validated = validated_candidate
             break
         except ItemAIAssistantValidationError as exc:
             last_validation_exc = exc

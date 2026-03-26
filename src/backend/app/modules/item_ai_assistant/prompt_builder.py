@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from app.modules.item_ai_assistant.domain import GenerateItemDraftInput
 
-PROMPT_VERSION = "v5_0_media_specs_multi_target"
+PROMPT_VERSION = "v5_1_table_required_and_concise_option_media"
 
 
 def build_system_prompt() -> str:
@@ -48,5 +48,5 @@ def build_user_prompt(data: GenerateItemDraftInput) -> str:
         "En cada spec con chart_type=bar, labels es obligatorio y debe describir cada barra; "
         "values debe ser lista numerica pura (sin % ni texto) y tener misma longitud que labels. "
         "En chart_type=pie, usa sizes numerico (o values numerico) con la misma longitud que labels. "
-        "Si generas grafico, redacta el enunciado sin listar explicitamente los valores por categoria."
+        "Si generas grafico, redacta el enunciado sin listar explicitamente los valores por categoria. Si la instruccion pide tabla, construye un nodo table en statement_doc. Si una opcion tiene grafica, usa texto corto en esa opcion y evita describir la grafica en palabras."
     )
