@@ -21,6 +21,63 @@ def _is_valid_tiptap_doc(value: Any) -> bool:
     return isinstance(value, dict) and value.get("type") == "doc" and isinstance(value.get("content"), list)
 
 
+def _text_node(text: Any) -> dict[str, Any]:
+    return {"type": "text", "text": str(text)}
+
+
+def _paragraph_with_text(text: Any) -> dict[str, Any]:
+    return {"type": "paragraph", "content": [_text_node(text)]}
+
+
+def _normalize_doc_node(node: Any, parent_type: str | None = None) -> dict[str, Any] | None:
+    if isinstance(node, str):
+        if parent_type == "paragraph":
+            return _text_node(node)
+        if parent_type in {"doc", "tableCell", "tableHeader"}:
+            return _paragraph_with_text(node)
+        return _text_node(node)
+
+    if not isinstance(node, dict):
+        return None
+
+    normalized = dict(node)
+    node_type = normalized.get("type")
+    content = normalized.get("content")
+
+    if isinstance(content, list):
+        children: list[dict[str, Any]] = []
+        for child in content:
+            fixed = _normalize_doc_node(child, node_type if isinstance(node_type, str) else None)
+            if fixed is not None:
+                children.append(fixed)
+        normalized["content"] = children
+    elif node_type in {"doc", "paragraph", "tableRow", "tableCell", "tableHeader"}:
+        normalized["content"] = []
+
+    # Asegurar que nodos de texto tengan campo text string y no content.
+    if node_type == "text":
+        normalized["text"] = str(normalized.get("text", ""))
+        normalized.pop("content", None)
+
+    return normalized
+
+
+def _normalize_tiptap_doc(value: Any) -> dict[str, Any]:
+    if isinstance(value, str):
+        return {"type": "doc", "content": [_paragraph_with_text(value)]}
+
+    if not isinstance(value, dict):
+        return value
+
+    if value.get("type") != "doc":
+        return value
+
+    fixed = _normalize_doc_node(value)
+    if isinstance(fixed, dict):
+        return fixed
+    return value
+
+
 def _split_text_list(raw: str) -> list[str]:
     normalized = raw.replace(";", ",").replace("\n", ",")
     parts = [p.strip() for p in normalized.split(",")]
@@ -227,7 +284,7 @@ def validate_model_output(payload: dict) -> dict:
     if not isinstance(payload, dict):
         raise ItemAIAssistantValidationError("model output must be a JSON object")
 
-    statement_doc = payload.get("statement_doc")
+    statement_doc = _normalize_tiptap_doc(payload.get("statement_doc"))
     if not _is_valid_tiptap_doc(statement_doc):
         raise ItemAIAssistantValidationError(
             "statement_doc must be a valid TipTap doc object"
@@ -243,7 +300,7 @@ def validate_model_output(payload: dict) -> dict:
 
     normalized_options_doc: dict[str, dict] = {}
     for key in VALID_OPTION_KEYS:
-        value = options_doc.get(key)
+        value = _normalize_tiptap_doc(options_doc.get(key))
         if not _is_valid_tiptap_doc(value):
             raise ItemAIAssistantValidationError(f"option {key} must be a valid TipTap doc")
         normalized_options_doc[key] = value

@@ -56,6 +56,7 @@ const ResizableImage = Image.extend({
 
   addCommands() {
     return {
+      ...(this.parent?.() || {}),
       setImageAlign:
         (align) =>
         ({ tr, state, dispatch }) => {

@@ -29,12 +29,14 @@ def generate_item_with_ai(payload: GenerateItemAIPayload) -> GenerateItemAIRespo
                 competency_name=payload.competency_name,
                 subject=payload.subject,
                 difficulty=payload.difficulty,
+                ai_provider=payload.ai_provider,
+                ai_model=payload.ai_model,
             )
         )
     except ItemAIAssistantValidationError as exc:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
     except ItemAIAssistantProviderError as exc:
-        if "OPENAI_API_KEY" in str(exc):
+        if "API_KEY" in str(exc):
             raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)) from exc
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,

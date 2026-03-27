@@ -11,6 +11,8 @@ class GenerateItemAIPayload(BaseModel):
     competency_name: str = Field(min_length=1)
     subject: str | None = None
     difficulty: str | None = None
+    ai_provider: Literal["openai", "groq"] | None = None
+    ai_model: str | None = Field(default=None, min_length=1)
 
 
 class AIUsageCost(BaseModel):

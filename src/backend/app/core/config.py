@@ -21,6 +21,12 @@ class Settings(BaseSettings):
     openai_timeout_seconds: float = 60.0
     openai_max_retries: int = 4
     openai_retry_backoff_seconds: float = 1.0
+    ai_provider: str = "openai"
+    groq_api_key: str | None = None
+    groq_model: str = "meta-llama/llama-4-scout-17b-16e-instruct"
+    groq_timeout_seconds: float = 60.0
+    groq_max_retries: int = 4
+    groq_retry_backoff_seconds: float = 1.0
 
     @field_validator("debug", mode="before")
     @classmethod

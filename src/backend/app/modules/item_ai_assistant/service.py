@@ -17,8 +17,10 @@ from app.modules.item_ai_assistant.prompt_builder import (
     build_system_prompt,
     build_user_prompt,
 )
+from app.modules.item_ai_assistant.providers.groq_provider import GroqItemDraftProvider
 from app.modules.item_ai_assistant.providers.openai_provider import OpenAIItemDraftProvider
 from app.modules.item_ai_assistant.validators import validate_context, validate_model_output
+from app.core.config import settings
 
 INPUT_PRICE_PER_1M_USD = 1.25
 CACHED_INPUT_PRICE_PER_1M_USD = 0.125
@@ -452,6 +454,50 @@ def _build_usage_and_costs_from_usage(raw_usage: dict[str, int], model_name: str
     }
 
 
+def _build_usage_for_provider(
+    raw_usage: dict[str, int],
+    *,
+    model_name: str,
+    provider_name: str,
+) -> dict[str, int | float | str]:
+    if provider_name == "openai":
+        return _build_usage_and_costs_from_usage(raw_usage, model_name)
+
+    input_tokens = int(raw_usage.get("input_tokens", 0) or 0)
+    cached_input_tokens = int(raw_usage.get("cached_input_tokens", 0) or 0)
+    output_tokens = int(raw_usage.get("output_tokens", 0) or 0)
+    total_tokens = int(raw_usage.get("total_tokens", 0) or (input_tokens + output_tokens))
+
+    return {
+        "provider": provider_name,
+        "model": model_name,
+        "input_tokens": input_tokens,
+        "cached_input_tokens": cached_input_tokens,
+        "non_cached_input_tokens": max(input_tokens - cached_input_tokens, 0),
+        "output_tokens": output_tokens,
+        "total_tokens": total_tokens,
+        "input_cost_usd": 0.0,
+        "cached_input_cost_usd": 0.0,
+        "output_cost_usd": 0.0,
+        "total_cost_usd": 0.0,
+        "pricing_input_per_1m_usd": 0.0,
+        "pricing_cached_input_per_1m_usd": 0.0,
+        "pricing_output_per_1m_usd": 0.0,
+    }
+
+
+def _build_default_provider(*, requested_provider: str | None = None, requested_model: str | None = None) -> LLMProvider:
+    provider_name = (requested_provider or settings.ai_provider or "openai").strip().lower()
+    model_name = (requested_model or "").strip() or None
+    if provider_name == "groq":
+        return GroqItemDraftProvider(model_name=model_name)
+    if provider_name == "openai":
+        return OpenAIItemDraftProvider(model_name=model_name)
+    raise ItemAIAssistantProviderError(
+        f"Unsupported AI provider '{provider_name}'. Use 'openai' or 'groq'."
+    )
+
+
 def _build_repair_prompt(original_user_prompt: str, validation_error: str) -> str:
     return (
         f"{original_user_prompt}\n\n"
@@ -488,7 +534,10 @@ def generate_item_draft(
         competency_name=payload.competency_name,
     )
 
-    llm_provider = provider or OpenAIItemDraftProvider()
+    llm_provider = provider or _build_default_provider(
+        requested_provider=payload.ai_provider,
+        requested_model=payload.ai_model,
+    )
     system_prompt = build_system_prompt()
     base_user_prompt = build_user_prompt(payload)
 
@@ -550,7 +599,11 @@ def generate_item_draft(
         "ai_prompt_version": PROMPT_VERSION,
         "ai_repaired": repaired,
     }
-    usage = _build_usage_and_costs_from_usage(_sum_usage(attempts), llm_provider.model_name)
+    usage = _build_usage_for_provider(
+        _sum_usage(attempts),
+        model_name=llm_provider.model_name,
+        provider_name=getattr(llm_provider, "provider_name", "openai"),
+    )
 
     return GenerateItemDraftOutput(
         statement_doc=normalized["statement_doc"],

@@ -27,6 +27,21 @@ const EMPTY_FORM = {
   metadata: {},
 };
 
+const AI_MODEL_OPTIONS = [
+  {
+    value: 'openai|gpt-5.1',
+    label: 'OpenAI · gpt-5.1',
+    provider: 'openai',
+    model: 'gpt-5.1',
+  },
+  {
+    value: 'groq|meta-llama/llama-4-scout-17b-16e-instruct',
+    label: 'Groq · Llama 4 Scout 17B',
+    provider: 'groq',
+    model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+  },
+];
+
 export function itemToForm(item) {
   if (!item) return EMPTY_FORM;
   return {
@@ -151,6 +166,7 @@ export default function ItemForm({
   const [competencyOptions, setCompetencyOptions] = useState([]);
 
   const [aiPrompt, setAiPrompt] = useState('');
+  const [aiModelSelection, setAiModelSelection] = useState(AI_MODEL_OPTIONS[0].value);
   const [aiDraft, setAiDraft] = useState(null);
   const [aiUsage, setAiUsage] = useState(null);
   const [aiLoading, setAiLoading] = useState(false);
@@ -229,8 +245,10 @@ export default function ItemForm({
       return;
     }
 
+    const selectedModel = AI_MODEL_OPTIONS.find((it) => it.value === aiModelSelection) || AI_MODEL_OPTIONS[0];
+
     setAiLoading(true);
-    pushAiMessage('user', userPrompt);
+    pushAiMessage('user', `[${selectedModel.label}] ${userPrompt}`);
 
     try {
       const response = await generateItemAIDraft({
@@ -239,6 +257,8 @@ export default function ItemForm({
         competency_name: competencyName,
         subject: form.subject || null,
         difficulty: form.difficulty || null,
+        ai_provider: selectedModel.provider,
+        ai_model: selectedModel.model,
       });
 
       let nextForm = {
@@ -409,6 +429,22 @@ export default function ItemForm({
 
         <h4>Asistente IA (borrador)</h4>
         <div className="ai-panel">
+          <label className="ai-model-field">
+            Modelo IA
+            <select
+              className="ai-model-select"
+              value={aiModelSelection}
+              onChange={(e) => setAiModelSelection(e.target.value)}
+              disabled={aiLoading}
+            >
+              {AI_MODEL_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
           <label>
             Instruccion para IA
             <textarea

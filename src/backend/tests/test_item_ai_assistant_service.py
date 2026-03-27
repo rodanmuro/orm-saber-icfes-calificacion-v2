@@ -8,6 +8,7 @@ from app.modules.item_ai_assistant.service import generate_item_draft
 
 
 class _FakeProvider:
+    provider_name = "openai"
     model_name = "fake-model"
 
     def __init__(self, payload: dict):
@@ -20,6 +21,7 @@ class _FakeProvider:
 
 
 class _SequentialProvider:
+    provider_name = "openai"
     model_name = "fake-model"
 
     def __init__(self, payloads: list[dict]):
@@ -101,6 +103,47 @@ def test_generate_item_draft_structured_docs_normalizes_to_a_and_reports_cost() 
     assert result.usage["cached_input_cost_usd"] == pytest.approx(0.000025)
     assert result.usage["output_cost_usd"] == pytest.approx(0.003)
     assert result.usage["total_cost_usd"] == pytest.approx(0.004025)
+
+
+def test_generate_item_draft_non_openai_provider_sets_zero_pricing() -> None:
+    class _FakeGroqProvider(_FakeProvider):
+        provider_name = "groq"
+        model_name = "meta-llama/llama-4-scout-17b-16e-instruct"
+
+    provider = _FakeGroqProvider(
+        {
+            "statement_doc": _doc_text("Enunciado"),
+            "options_doc": {
+                "A": _doc_text("Correcta"),
+                "B": _doc_text("Distractor 1"),
+                "C": _doc_text("Distractor 2"),
+                "D": _doc_text("Distractor 3"),
+            },
+            "correct_answer": "A",
+            "__usage": {
+                "input_tokens": 120,
+                "cached_input_tokens": 0,
+                "output_tokens": 90,
+                "total_tokens": 210,
+            },
+        }
+    )
+
+    result = generate_item_draft(
+        GenerateItemDraftInput(
+            user_prompt="Crea una pregunta",
+            standard_name="S",
+            competency_name="C",
+        ),
+        provider=provider,
+    )
+
+    assert result.usage is not None
+    assert result.usage["provider"] == "groq"
+    assert result.usage["input_tokens"] == 120
+    assert result.usage["output_tokens"] == 90
+    assert result.usage["total_tokens"] == 210
+    assert result.usage["total_cost_usd"] == 0.0
 
 
 def test_generate_item_draft_rejects_invalid_options() -> None:
@@ -817,3 +860,54 @@ def test_generate_item_draft_normalizes_table_with_ghost_edge_columns() -> None:
     assert header_cells[1]["content"][0]["content"][0]["text"] == "Porcentaje"
     assert row_cells[0]["content"][0]["content"][0]["text"] == "Salarios"
     assert row_cells[1]["content"][0]["content"][0]["text"] == "45%"
+
+
+def test_generate_item_draft_normalizes_string_fragments_in_paragraph_content() -> None:
+    provider = _FakeProvider(
+        {
+            "statement_doc": {
+                "type": "doc",
+                "content": [
+                    {
+                        "type": "paragraph",
+                        "content": [
+                            "Una tienda ofrece un descuento del ",
+                            {"type": "mathInline", "attrs": {"latex": "20"}},
+                            "% sobre un producto.",
+                        ],
+                    }
+                ],
+            },
+            "options_doc": {
+                "A": {
+                    "type": "doc",
+                    "content": [
+                        {
+                            "type": "paragraph",
+                            "content": [{"type": "mathInline", "attrs": {"latex": "40"}}],
+                        }
+                    ],
+                },
+                "B": _doc_text("42"),
+                "C": _doc_text("45"),
+                "D": _doc_text("48"),
+            },
+            "correct_answer": "A",
+        }
+    )
+
+    result = generate_item_draft(
+        GenerateItemDraftInput(
+            user_prompt="Crea una pregunta de porcentajes",
+            standard_name="Porcentajes",
+            competency_name="Resuelve problemas",
+        ),
+        provider=provider,
+    )
+
+    paragraph_content = result.statement_doc["content"][0]["content"]
+    assert isinstance(paragraph_content[0], dict)
+    assert paragraph_content[0]["type"] == "text"
+    assert "descuento" in paragraph_content[0]["text"]
+    assert paragraph_content[1]["type"] == "mathInline"
+    assert paragraph_content[2]["type"] == "text"

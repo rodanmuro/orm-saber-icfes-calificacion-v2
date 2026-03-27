@@ -11,6 +11,8 @@ class GenerateItemDraftInput:
     competency_name: str
     subject: str | None = None
     difficulty: str | None = None
+    ai_provider: str | None = None
+    ai_model: str | None = None
 
 
 @dataclass(frozen=True)
@@ -26,6 +28,7 @@ class GenerateItemDraftOutput:
 
 class LLMProvider(Protocol):
     model_name: str
+    provider_name: str
 
     def generate_item_draft(
         self,

@@ -148,6 +148,36 @@ DEBUG=false PYTHONPATH=. python3 scripts/verify_dummy_dataset.py
   - `GET /api/v1/exams/{exam_id}/versions/{version_id}`
   - `GET /api/v1/exams/{exam_id}/answer-key`
 
+## Asistente IA (OpenAI / Groq)
+Selector de proveedor por variable de entorno:
+
+```bash
+AI_PROVIDER=openai   # o groq
+```
+
+Variables para OpenAI:
+```bash
+OPENAI_API_KEY=...
+OPENAI_MODEL=gpt-5.1
+OPENAI_TIMEOUT_SECONDS=60
+OPENAI_MAX_RETRIES=4
+OPENAI_RETRY_BACKOFF_SECONDS=1.0
+```
+
+Variables para Groq:
+```bash
+GROQ_API_KEY=...
+GROQ_MODEL=meta-llama/llama-4-scout-17b-16e-instruct
+GROQ_TIMEOUT_SECONDS=60
+GROQ_MAX_RETRIES=4
+GROQ_RETRY_BACKOFF_SECONDS=1.0
+```
+
+Notas:
+- Endpoint de generación: `POST /api/v1/ai/generate-item`
+- El contrato de salida (`statement_doc`, `options_doc`, `correct_answer`) es el mismo para ambos proveedores.
+- Costo/tarifas automáticas solo se calculan con valores OpenAI en este momento; en Groq se reportan en `0.0` por defecto.
+
 ## Assets de items (editor web)
 - Upload de imagen: `POST /api/v1/assets/images` (multipart campo `image`)
 - Tipos permitidos: `png`, `jpeg`, `webp`

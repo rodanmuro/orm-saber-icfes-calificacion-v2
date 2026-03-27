@@ -385,6 +385,17 @@ th {
   background: #f9fbfe;
 }
 
+.ai-model-field {
+  width: fit-content;
+  min-width: 280px;
+}
+
+.ai-model-select {
+  width: auto;
+  min-width: 280px;
+  max-width: 420px;
+}
+
 .ai-chat-log {
   margin-top: 10px;
   border: 1px solid #dbe5f0;

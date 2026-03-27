@@ -11,6 +11,8 @@ from app.modules.item_ai_assistant.errors import ItemAIAssistantProviderError
 
 
 class OpenAIItemDraftProvider:
+    provider_name = "openai"
+
     def __init__(
         self,
         api_key: str | None = None,
