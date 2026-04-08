@@ -107,6 +107,12 @@ def test_publish_exam_version_from_exam_items(tmp_path: Path) -> None:
         detail = version_detail_response.json()
         assert detail["id"] == version_id
         assert len(detail["items"]) == 2
+
+        pdf_response = client.get(f"/api/v1/exams/{exam_id}/versions/{version_id}/export/pdf")
+        assert pdf_response.status_code == 200
+        assert pdf_response.headers["content-type"] == "application/pdf"
+        assert "attachment; filename=" in pdf_response.headers.get("content-disposition", "")
+        assert pdf_response.content.startswith(b"%PDF")
     finally:
         client.close()
         app.dependency_overrides.clear()

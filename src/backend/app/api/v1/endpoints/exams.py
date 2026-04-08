@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -10,6 +10,8 @@ from sqlalchemy.orm import Session
 from app.db.models import Exam, ExamItem, ExamVersion, ExamVersionItem, Item, Teacher
 from app.db.session import get_db
 from app.modules.exam_version.service import publish_exam_version
+from app.modules.exam_export.pdf_service import build_exam_version_pdf
+from app.modules.exam_export.docx_service import build_exam_version_docx
 from app.modules.omr_scoring.service import build_answer_key_from_exam_items
 from app.schemas.exam_bank import (
     ExamCreate,
@@ -339,3 +341,83 @@ def get_exam_version(exam_id: int, version_id: int, db: Session = Depends(get_db
         .order_by(ExamVersionItem.question_number.asc())
     ).all()
     return _exam_version_to_detail(version=version, version_items=version_items)
+
+
+@router.get("/{exam_id}/versions/{version_id}/export/pdf")
+def export_exam_version_pdf(exam_id: int, version_id: int, db: Session = Depends(get_db)) -> Response:
+    exam = db.get(Exam, exam_id)
+    if exam is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="exam not found")
+
+    version = db.get(ExamVersion, version_id)
+    if version is None or version.exam_id != exam_id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="exam version not found")
+
+    version_items = db.scalars(
+        select(ExamVersionItem)
+        .where(ExamVersionItem.exam_version_id == version_id)
+        .order_by(ExamVersionItem.question_number.asc())
+    ).all()
+    if not version_items:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="cannot export an empty exam version",
+        )
+
+    item_ids = {row.item_id for row in version_items}
+    items_by_id = {
+        item.id: item
+        for item in db.scalars(select(Item).where(Item.id.in_(item_ids))).all()
+    }
+
+    pdf_bytes = build_exam_version_pdf(
+        exam=exam,
+        version=version,
+        version_items=version_items,
+        items_by_id=items_by_id,
+    )
+    filename = f"cuadernillo_exam_{exam.exam_code}_{version.version_code}.pdf"
+    headers = {"Content-Disposition": f'attachment; filename="{filename}"'}
+    return Response(content=pdf_bytes, media_type="application/pdf", headers=headers)
+
+
+@router.get("/{exam_id}/versions/{version_id}/export/docx")
+def export_exam_version_docx(exam_id: int, version_id: int, db: Session = Depends(get_db)) -> Response:
+    exam = db.get(Exam, exam_id)
+    if exam is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="exam not found")
+
+    version = db.get(ExamVersion, version_id)
+    if version is None or version.exam_id != exam_id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="exam version not found")
+
+    version_items = db.scalars(
+        select(ExamVersionItem)
+        .where(ExamVersionItem.exam_version_id == version_id)
+        .order_by(ExamVersionItem.question_number.asc())
+    ).all()
+    if not version_items:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="cannot export an empty exam version",
+        )
+
+    item_ids = {row.item_id for row in version_items}
+    items_by_id = {
+        item.id: item
+        for item in db.scalars(select(Item).where(Item.id.in_(item_ids))).all()
+    }
+
+    docx_bytes = build_exam_version_docx(
+        exam=exam,
+        version=version,
+        version_items=version_items,
+        items_by_id=items_by_id,
+    )
+    filename = f"cuadernillo_exam_{exam.exam_code}_{version.version_code}.docx"
+    headers = {"Content-Disposition": f'attachment; filename="{filename}"'}
+    return Response(
+        content=docx_bytes,
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        headers=headers,
+    )
