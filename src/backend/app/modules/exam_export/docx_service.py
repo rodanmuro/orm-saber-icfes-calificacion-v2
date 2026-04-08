@@ -11,7 +11,8 @@ from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
-from docx.shared import Emu, Inches, Pt, RGBColor
+from docx.shared import Emu, Inches, Pt, RGBColor, Twips
+from reportlab.lib.utils import ImageReader
 
 from app.db.models import Exam, ExamVersion, ExamVersionItem, Item
 
@@ -25,6 +26,9 @@ MARGIN_IN = 0.5
 GUTTER_IN = 0.3
 CONTENT_WIDTH_IN = PAGE_WIDTH_IN - 2 * MARGIN_IN
 COLUMN_WIDTH_IN = (CONTENT_WIDTH_IN - GUTTER_IN) / 2  # ~3.6"
+
+# Altura inline para ecuaciones y valores numéricos (puntos)
+INLINE_IMG_HEIGHT_PT = 11.0
 
 BACKEND_DIR = Path(__file__).resolve().parents[3]
 ASSETS_DIR = BACKEND_DIR / "data" / "input" / "item_assets"
@@ -75,7 +79,7 @@ def _render_latex_to_png(latex: str) -> Path | None:
     clean = str(latex or "").strip()
     if not clean:
         return None
-    if clean.startswith("$") and clean.endswith("$") and len(clean) >= 2:
+    while clean.startswith("$") and clean.endswith("$") and len(clean) >= 2:
         clean = clean[1:-1].strip()
     if not clean:
         return None
@@ -101,8 +105,118 @@ def _render_latex_to_png(latex: str) -> Path | None:
         return None
 
 
+def _image_pixel_size(path: Path) -> tuple[int, int]:
+    try:
+        reader = ImageReader(str(path))
+        iw, ih = reader.getSize()
+        return int(iw), int(ih)
+    except Exception:  # noqa: BLE001
+        return 0, 0
+
+
+def _merge_inline_image_paragraphs(nodes: list[Any]) -> list[Any]:
+    """
+    Fusiona párrafos de imagen pequeña (alto < 160px) con el párrafo de texto anterior
+    para que se rendericen inline en lugar de como bloque separado.
+    """
+    result: list[Any] = []
+    for node in nodes:
+        if not isinstance(node, dict) or node.get("type") != "paragraph":
+            result.append(node)
+            continue
+
+        content = node.get("content") or []
+        # ¿Es un párrafo de imagen pura?
+        if len(content) != 1 or not isinstance(content[0], dict) or content[0].get("type") != "image":
+            result.append(node)
+            continue
+
+        src = (content[0].get("attrs") or {}).get("src", "")
+        path = _asset_path_from_src(str(src)) if isinstance(src, str) else None
+        if not path:
+            result.append(node)
+            continue
+
+        _iw, ih = _image_pixel_size(path)
+        is_small = 0 < ih < 160
+
+        if is_small and result and isinstance(result[-1], dict) and result[-1].get("type") == "paragraph":
+            merged_content = list(result[-1].get("content") or []) + list(content)
+            result[-1] = {**result[-1], "content": merged_content}
+        else:
+            result.append(node)
+
+    return result
+
+
+def _no_spacing(p: Any) -> Any:
+    """Elimina espacio antes y después del párrafo."""
+    p.paragraph_format.space_before = Twips(0)
+    p.paragraph_format.space_after = Twips(0)
+    return p
+
+
+def _remove_image_border(run: Any) -> None:
+    """Quita el recuadro/borde de una imagen inline insertada con run.add_picture()."""
+    from lxml import etree
+
+    NS_A   = "http://schemas.openxmlformats.org/drawingml/2006/main"
+    NS_PIC = "http://schemas.openxmlformats.org/drawingml/2006/picture"
+    NS_WP  = "http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing"
+
+    r_elem = run._r
+    drawing = r_elem.find(qn("w:drawing"))
+    if drawing is None:
+        return
+
+    inline = drawing.find(f"{{{NS_WP}}}inline")
+    if inline is None:
+        return
+
+    graphic = inline.find(f"{{{NS_A}}}graphic")
+    if graphic is None:
+        return
+
+    graphic_data = graphic.find(f"{{{NS_A}}}graphicData")
+    if graphic_data is None:
+        return
+
+    pic_el = graphic_data.find(f"{{{NS_PIC}}}pic")
+    if pic_el is None:
+        return
+
+    sp_pr = pic_el.find(f"{{{NS_PIC}}}spPr")
+    if sp_pr is None:
+        return
+
+    # Quitar bordes existentes y agregar línea sin relleno
+    for ln in sp_pr.findall(f"{{{NS_A}}}ln"):
+        sp_pr.remove(ln)
+    ln_el = etree.SubElement(sp_pr, f"{{{NS_A}}}ln")
+    etree.SubElement(ln_el, f"{{{NS_A}}}noFill")
+
+    # Agregar solidFill transparente para evitar fondo de placeholder
+    for solidFill in sp_pr.findall(f"{{{NS_A}}}solidFill"):
+        sp_pr.remove(solidFill)
+    solidFill_el = etree.SubElement(sp_pr, f"{{{NS_A}}}solidFill")
+    srgbClr = etree.SubElement(solidFill_el, f"{{{NS_A}}}srgbClr")
+    srgbClr.set("val", "FFFFFF")
+    alpha_el = etree.SubElement(srgbClr, f"{{{NS_A}}}alpha")
+    alpha_el.set("val", "0")
+
+    # Deshabilitar el marco de recorte en cNvPicPr
+    cNvPicPr = pic_el.find(f"{{{NS_PIC}}}nvPicPr/{{{NS_PIC}}}cNvPicPr")
+    if cNvPicPr is not None:
+        cNvPicPr.set("preferRelativeResize", "0")
+
+
+def _add_picture_no_border(run: Any, path: Path, **kwargs: Any) -> None:
+    """Inserta una imagen en el run y le quita el borde."""
+    run.add_picture(str(path), **kwargs)
+    _remove_image_border(run)
+
+
 def _set_page_size_letter(doc: Document) -> None:
-    """Configura tamaño carta y dos columnas en el documento Word."""
     section = doc.sections[0]
     section.page_width = Emu(int(PAGE_WIDTH_IN * 914400))
     section.page_height = Emu(int(PAGE_HEIGHT_IN * 914400))
@@ -111,62 +225,92 @@ def _set_page_size_letter(doc: Document) -> None:
     section.top_margin = Emu(int(MARGIN_IN * 914400))
     section.bottom_margin = Emu(int(MARGIN_IN * 914400))
 
-    # Dos columnas con gutter de 0.3"
     sectPr = section._sectPr
-    # Eliminar <w:cols> previo si existe
     for existing in sectPr.findall(qn("w:cols")):
         sectPr.remove(existing)
     cols = OxmlElement("w:cols")
     cols.set(qn("w:num"), "2")
-    cols.set(qn("w:space"), str(int(0.3 * 1440)))  # 1440 twips por pulgada
+    cols.set(qn("w:space"), str(int(0.3 * 1440)))
     sectPr.append(cols)
 
 
-def _add_heading(doc: Document, text: str, level: int = 2) -> None:
-    p = doc.add_heading(text, level=level)
-    p.alignment = WD_ALIGN_PARAGRAPH.LEFT
+def _fill_cell_content(p: Any, cell_node: dict[str, Any], is_header: bool, cell_height_pt: float = 9.0) -> None:
+    """Rellena un párrafo de celda con contenido mixto: texto y mathInline renderizado."""
+    def walk(node: Any) -> None:
+        if not isinstance(node, dict):
+            return
+        ntype = node.get("type")
+        if ntype == "text":
+            txt = node.get("text") or ""
+            if txt:
+                r = p.add_run(str(txt))
+                r.font.size = Pt(8)
+                if is_header:
+                    r.bold = True
+        elif ntype == "hardBreak":
+            p.add_run().add_break()
+        elif ntype == "mathInline":
+            latex = (node.get("attrs") or {}).get("latex", "")
+            if latex:
+                path = _render_latex_to_png(str(latex))
+                if path:
+                    r = p.add_run()
+                    _add_picture_no_border(r, path, height=Pt(cell_height_pt))
+        else:
+            for child in (node.get("content") or []):
+                walk(child)
+    walk(cell_node)
 
 
-def _add_table_node(doc: Document, node: dict[str, Any]) -> None:
+def _add_table_node(doc: Document, node: dict[str, Any], column_width_in: float = COLUMN_WIDTH_IN) -> None:
     rows_nodes = [r for r in (node.get("content") or []) if isinstance(r, dict) and r.get("type") == "tableRow"]
     if not rows_nodes:
         return
 
-    matrix: list[list[str]] = []
-    for row_node in rows_nodes:
-        cells = [c for c in (row_node.get("content") or []) if isinstance(c, dict)]
-        row_texts: list[str] = []
-        for cell in cells:
-            parts: list[str] = []
-            _collect_text(cell, parts)
-            row_texts.append(" ".join(p for p in parts if p).strip())
-        if row_texts:
-            matrix.append(row_texts)
-
-    if not matrix:
-        return
-
-    num_cols = max(len(r) for r in matrix)
+    # Contar columnas
+    num_cols = max(
+        len([c for c in (r.get("content") or []) if isinstance(c, dict)])
+        for r in rows_nodes
+    )
     if num_cols == 0:
         return
 
-    table = doc.add_table(rows=len(matrix), cols=num_cols)
+    col_width_twips = int((column_width_in / num_cols) * 1440)
+
+    table = doc.add_table(rows=len(rows_nodes), cols=num_cols)
     table.style = "Table Grid"
-    for r_idx, row_data in enumerate(matrix):
+
+    # Ancho total de tabla
+    tbl = table._tbl
+    tblW = OxmlElement("w:tblW")
+    tblW.set(qn("w:w"), str(int(column_width_in * 1440)))
+    tblW.set(qn("w:type"), "dxa")
+    tbl.tblPr.append(tblW)
+
+    for r_idx, row_node in enumerate(rows_nodes):
+        cells_nodes = [c for c in (row_node.get("content") or []) if isinstance(c, dict)]
+        is_header_row = any(c.get("type") == "tableHeader" for c in cells_nodes)
+
         for c_idx in range(num_cols):
-            cell_text = row_data[c_idx] if c_idx < len(row_data) else ""
             cell = table.cell(r_idx, c_idx)
-            cell.text = cell_text
-            if r_idx == 0:
-                for run in cell.paragraphs[0].runs:
-                    run.bold = True
-                    run.font.size = Pt(8)
-            else:
-                for run in cell.paragraphs[0].runs:
-                    run.font.size = Pt(8)
+            # Fijar ancho de celda
+            tc = cell._tc
+            tcPr = tc.get_or_add_tcPr()
+            tcW = OxmlElement("w:tcW")
+            tcW.set(qn("w:w"), str(col_width_twips))
+            tcW.set(qn("w:type"), "dxa")
+            tcPr.append(tcW)
+
+            # Limpiar contenido previo y rellenar
+            p = _no_spacing(cell.paragraphs[0])
+            for run in list(p.runs):
+                run._r.getparent().remove(run._r)
+
+            if c_idx < len(cells_nodes):
+                _fill_cell_content(p, cells_nodes[c_idx], is_header=is_header_row)
 
 
-def _collect_text(node: Any, parts: list[str]) -> None:
+def _collect_plain_text(node: Any, parts: list[str]) -> None:
     if not isinstance(node, dict):
         return
     node_type = node.get("type")
@@ -176,97 +320,154 @@ def _collect_text(node: Any, parts: list[str]) -> None:
             parts.append(str(text))
         return
     if node_type == "hardBreak":
-        parts.append("\n")
+        parts.append(" ")
         return
-    content = node.get("content")
-    if isinstance(content, list):
-        for child in content:
-            _collect_text(child, parts)
-
-
-def _render_doc_node_to_paragraph(
-    doc: Document,
-    node: Any,
-    prefix: str = "",
-    image_max_width: float = COLUMN_WIDTH_IN - 0.1,
-) -> None:
-    """Renderiza un nodo Tiptap al documento Word."""
-    if not isinstance(node, dict):
-        return
-
-    node_type = node.get("type")
-
-    if node_type == "doc":
-        for child in (node.get("content") or []):
-            _render_doc_node_to_paragraph(doc, child, prefix=prefix, image_max_width=image_max_width)
-        return
-
-    if node_type == "paragraph":
-        text_parts: list[str] = []
-        image_paths: list[Path] = []
-        math_paths: list[Path] = []
-
-        for child in (node.get("content") or []):
-            child_type = child.get("type") if isinstance(child, dict) else None
-            if child_type == "text":
-                txt = child.get("text")
-                if txt:
-                    text_parts.append(str(txt))
-            elif child_type == "hardBreak":
-                text_parts.append("\n")
-            elif child_type == "image":
-                src = (child.get("attrs") or {}).get("src", "")
-                path = _asset_path_from_src(str(src))
-                if path:
-                    image_paths.append(path)
-            elif child_type == "mathInline":
-                latex = (child.get("attrs") or {}).get("latex", "")
-                if latex:
-                    eq_path = _render_latex_to_png(str(latex))
-                    if eq_path:
-                        math_paths.append(eq_path)
-
-        full_text = (prefix + "".join(text_parts)).strip()
-        if full_text:
-            p = doc.add_paragraph()
-            run = p.add_run(full_text)
-            run.font.size = Pt(9)
-        for path in image_paths:
-            p = doc.add_paragraph()
-            run = p.add_run()
-            run.add_picture(str(path), width=Inches(min(image_max_width, 3.5)))
-        for path in math_paths:
-            p = doc.add_paragraph()
-            run = p.add_run()
-            run.add_picture(str(path), width=Inches(min(1.5, image_max_width)))
-        return
-
-    if node_type == "image":
-        src = (node.get("attrs") or {}).get("src", "")
-        path = _asset_path_from_src(str(src))
-        if path:
-            p = doc.add_paragraph()
-            run = p.add_run()
-            run.add_picture(str(path), width=Inches(min(image_max_width, 3.5)))
-        return
-
     if node_type == "mathInline":
         latex = (node.get("attrs") or {}).get("latex", "")
         if latex:
-            eq_path = _render_latex_to_png(str(latex))
-            if eq_path:
-                p = doc.add_paragraph()
-                run = p.add_run()
-                run.add_picture(str(eq_path), width=Inches(min(1.5, image_max_width)))
+            # Quitar delimitadores $ para mostrar el latex limpio en la celda
+            clean = str(latex).strip()
+            while clean.startswith("$") and clean.endswith("$") and len(clean) >= 2:
+                clean = clean[1:-1].strip()
+            parts.append(clean)
         return
-
-    if node_type == "table":
-        _add_table_node(doc, node)
-        return
-
-    # Listas y otros nodos con content
     for child in (node.get("content") or []):
-        _render_doc_node_to_paragraph(doc, child, prefix=prefix, image_max_width=image_max_width)
+        _collect_plain_text(child, parts)
+
+
+def _render_paragraph_node(
+    doc: Document,
+    node: dict[str, Any],
+    body_size_pt: float,
+    column_width_in: float,
+    prefix: str = "",
+) -> None:
+    """
+    Renderiza un nodo párrafo Tiptap como un único párrafo Word con runs múltiples.
+    Texto, mathInline e imágenes pequeñas van en el mismo párrafo (inline).
+    Imágenes grandes van en un párrafo propio.
+    """
+    content = node.get("content") or []
+
+    # Párrafo de imagen pura (grande): va en su propio párrafo
+    if len(content) == 1 and isinstance(content[0], dict) and content[0].get("type") == "image":
+        src = (content[0].get("attrs") or {}).get("src", "")
+        path = _asset_path_from_src(str(src)) if isinstance(src, str) else None
+        if path:
+            p = _no_spacing(doc.add_paragraph())
+            run = p.add_run()
+            _add_picture_no_border(run, path, width=Inches(min(column_width_in - 0.1, 3.5)))
+        return
+
+    # Párrafo mixto: crear UN párrafo y agregar runs secuencialmente
+    p = _no_spacing(doc.add_paragraph())
+
+    if prefix:
+        r = p.add_run(prefix)
+        r.bold = True
+        r.font.size = Pt(body_size_pt)
+
+    for child in content:
+        if not isinstance(child, dict):
+            continue
+        child_type = child.get("type")
+
+        if child_type == "text":
+            txt = child.get("text") or ""
+            if not txt:
+                continue
+            r = p.add_run(str(txt))
+            r.font.size = Pt(body_size_pt)
+            for mark in (child.get("marks") or []):
+                if not isinstance(mark, dict):
+                    continue
+                mt = mark.get("type")
+                if mt == "bold":
+                    r.bold = True
+                elif mt == "italic":
+                    r.italic = True
+                elif mt == "underline":
+                    r.underline = True
+
+        elif child_type == "hardBreak":
+            r = p.add_run()
+            r.add_break()
+
+        elif child_type == "mathInline":
+            latex = (child.get("attrs") or {}).get("latex", "")
+            if latex:
+                path = _render_latex_to_png(str(latex))
+                if path:
+                    r = p.add_run()
+                    _add_picture_no_border(r, path, height=Pt(INLINE_IMG_HEIGHT_PT))
+
+        elif child_type == "image":
+            src = (child.get("attrs") or {}).get("src", "")
+            path = _asset_path_from_src(str(src)) if isinstance(src, str) else None
+            if path:
+                _iw, ih = _image_pixel_size(path)
+                if ih > 0 and ih < 160:
+                    # Imagen pequeña inline (número, valor)
+                    r = p.add_run()
+                    _add_picture_no_border(r, path, height=Pt(INLINE_IMG_HEIGHT_PT))
+                else:
+                    # Imagen grande
+                    r = p.add_run()
+                    _add_picture_no_border(r, path, width=Inches(min(column_width_in - 0.1, 3.5)))
+
+
+def _render_tiptap_to_docx(
+    value: Any,
+    doc: Document,
+    body_size_pt: float,
+    column_width_in: float,
+    prefix: str = "",
+) -> None:
+    """Renderiza un doc Tiptap completo al documento Word."""
+    tiptap_doc = _parse_storage_doc(value)
+    raw_nodes = tiptap_doc.get("content") or []
+    nodes = _merge_inline_image_paragraphs(raw_nodes)
+
+    first = True
+    for node in nodes:
+        if not isinstance(node, dict):
+            continue
+        node_type = node.get("type")
+
+        if node_type == "image":
+            # Imagen a nivel de doc (no dentro de paragraph): siempre bloque
+            src = (node.get("attrs") or {}).get("src", "")
+            path = _asset_path_from_src(str(src)) if isinstance(src, str) else None
+            if path:
+                p = _no_spacing(doc.add_paragraph())
+                if prefix and first:
+                    r = p.add_run(prefix)
+                    r.bold = True
+                    r.font.size = Pt(body_size_pt)
+                r = p.add_run()
+                _add_picture_no_border(r, path, width=Inches(min(column_width_in - 0.1, 3.5)))
+                first = False
+
+        elif node_type == "table":
+            _add_table_node(doc, node, column_width_in=column_width_in)
+
+        elif node_type == "paragraph":
+            _render_paragraph_node(
+                doc, node, body_size_pt, column_width_in,
+                prefix=prefix if first else "",
+            )
+            first = False
+
+        else:
+            # Otros nodos (bulletList, etc.): extraer texto plano
+            parts: list[str] = []
+            _collect_plain_text(node, parts)
+            text = " ".join(p for p in parts if p).strip()
+            if text:
+                p = _no_spacing(doc.add_paragraph())
+                r = p.add_run((prefix if first else "") + text)
+                r.font.size = Pt(body_size_pt)
+                first = False
 
 
 def _mapped_options_for_version(item: Item, option_map: dict[str, str] | None) -> dict[str, Any]:
@@ -293,40 +494,36 @@ def build_exam_version_docx(
     doc = Document()
     _set_page_size_letter(doc)
 
-    # Encabezado del examen
     title_p = doc.add_heading(f"Cuadernillo: {exam.title}", level=1)
     title_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
     meta = doc.add_paragraph()
     meta.add_run(f"Código de examen: {exam.exam_code}   |   Versión: {version.version_code}").bold = True
     meta.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    doc.add_paragraph()  # espaciado
+    doc.add_paragraph()
 
-    for row in version_items:
-        item = items_by_id.get(row.item_id)
+    for version_row in version_items:
+        item = items_by_id.get(version_row.item_id)
         if item is None:
             continue
 
-        # Título de la pregunta
         q_heading = doc.add_paragraph()
-        q_run = q_heading.add_run(f"Pregunta {row.question_number}")
+        q_run = q_heading.add_run(f"Pregunta {version_row.question_number}")
         q_run.bold = True
         q_run.font.size = Pt(10)
         q_run.font.color.rgb = RGBColor(0x1A, 0x56, 0xDB)
 
-        # Enunciado
-        statement_doc = _parse_storage_doc(item.statement)
-        _render_doc_node_to_paragraph(doc, statement_doc, image_max_width=COLUMN_WIDTH_IN - 0.1)
+        _render_tiptap_to_docx(item.statement, doc, body_size_pt=9, column_width_in=COLUMN_WIDTH_IN)
 
-        # Opciones A/B/C/D
-        mapped_options = _mapped_options_for_version(item, row.option_map_json)
+        mapped_options = _mapped_options_for_version(item, version_row.option_map_json)
         for label in ("A", "B", "C", "D"):
-            option_doc = _parse_storage_doc(mapped_options.get(label, ""))
-            _render_doc_node_to_paragraph(
-                doc, option_doc, prefix=f"{label}. ", image_max_width=COLUMN_WIDTH_IN - 0.3
+            _render_tiptap_to_docx(
+                mapped_options.get(label, ""), doc,
+                body_size_pt=9, column_width_in=COLUMN_WIDTH_IN,
+                prefix=f"{label}. ",
             )
 
-        doc.add_paragraph()  # separador entre preguntas
+        _no_spacing(doc.add_paragraph())
 
     buffer = BytesIO()
     doc.save(buffer)
