@@ -266,6 +266,12 @@ button:disabled {
   margin-top: 12px;
 }
 
+.helper-text {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: #4c6480;
+}
+
 .item-form-header {
   display: flex;
   align-items: center;
@@ -329,6 +335,20 @@ button:disabled {
   overflow-x: auto;
 }
 
+.exam-items-pane {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.exam-items-pane .table-wrap {
+  max-height: 420px;
+  overflow-x: auto;
+  overflow-y: auto;
+  border: 1px solid #dce4ec;
+  border-radius: 8px;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -343,12 +363,87 @@ td {
   vertical-align: top;
 }
 
+.col-action {
+  white-space: nowrap;
+  width: 1%;
+}
+
+.col-action button + button {
+  margin-left: 6px;
+}
+
+.cell-truncate {
+  display: inline-block;
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: top;
+}
+
 th {
   background: #f0f5fb;
 }
 
 .row-selected {
   background: #e8f1ff;
+}
+
+.preview-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 29, 48, 0.45);
+  display: grid;
+  place-items: center;
+  z-index: 1200;
+  padding: 18px;
+}
+
+.preview-modal {
+  width: min(1100px, 96vw);
+  max-height: 92vh;
+  overflow: auto;
+  background: #ffffff;
+  border: 1px solid #cbd8e6;
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.preview-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.preview-modal-header h4 {
+  margin: 0;
+}
+
+.preview-modal-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.preview-modal-section {
+  margin-bottom: 12px;
+}
+
+.preview-modal-section h5 {
+  margin: 0 0 6px;
+}
+
+.preview-modal-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.rich-doc-preview .tiptap-editor {
+  min-height: 56px;
+  padding: 10px;
 }
 
 @media (max-width: 960px) {

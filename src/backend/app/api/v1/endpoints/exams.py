@@ -26,6 +26,19 @@ from app.schemas.exam_bank import (
 router = APIRouter(prefix="/exams", tags=["exams"])
 
 
+def _resolve_exam_code(db: Session, teacher_id: int, requested: str | None) -> str:
+    if requested is not None and requested.strip():
+        return requested.strip()
+
+    used_codes = set(
+        db.scalars(select(Exam.exam_code).where(Exam.teacher_id == teacher_id)).all()
+    )
+    candidate = 1
+    while str(candidate) in used_codes:
+        candidate += 1
+    return str(candidate)
+
+
 def _exam_to_read(exam: Exam) -> ExamRead:
     return ExamRead.model_validate(exam)
 
@@ -93,9 +106,11 @@ def create_exam(payload: ExamCreate, db: Session = Depends(get_db)) -> ExamRead:
             detail=f"teacher_id={payload.teacher_id} not found",
         )
 
+    exam_code = _resolve_exam_code(db=db, teacher_id=payload.teacher_id, requested=payload.exam_code)
+
     exam = Exam(
         teacher_id=payload.teacher_id,
-        exam_code=payload.exam_code.strip(),
+        exam_code=exam_code,
         title=payload.title.strip(),
         description=payload.description,
     )

@@ -7,7 +7,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 class ExamCreate(BaseModel):
     teacher_id: int = Field(gt=0)
-    exam_code: str = Field(min_length=1, max_length=64)
+    exam_code: str | None = Field(default=None, max_length=64)
     title: str = Field(min_length=1, max_length=255)
     description: str | None = None
 

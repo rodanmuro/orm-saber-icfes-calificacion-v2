@@ -1,12 +1,21 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { docHasMeaningfulContent, docToPlainText, storageToDoc } from '../utils/editorDoc';
+import RichDocPreview from './RichDocPreview';
 
 function emptyExamForm(defaultTeacherId) {
   return {
     teacher_id: defaultTeacherId || 1,
-    exam_code: '',
     title: '',
     description: '',
   };
+}
+
+function statementPreview(value) {
+  const doc = storageToDoc(value);
+  const text = docToPlainText(doc);
+  if (!text && docHasMeaningfulContent(doc)) return '[contenido no textual]';
+  if (!text) return '-';
+  return text;
 }
 
 export default function ExamBuilder({
@@ -23,12 +32,90 @@ export default function ExamBuilder({
   loading,
 }) {
   const [form, setForm] = useState(emptyExamForm(exams[0]?.teacher_id || 1));
+  const [previewModalItem, setPreviewModalItem] = useState(null);
+  const [previewModalContext, setPreviewModalContext] = useState(null);
+
+  useEffect(() => {
+    if (!Number.isFinite(form.teacher_id) || form.teacher_id <= 0) return;
+    onRefreshExams(form.teacher_id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.teacher_id]);
 
   const itemsNotAdded = useMemo(() => {
     if (!selectedExam) return [];
     const existing = new Set(selectedExam.items.map((row) => row.item_id));
-    return items.filter((item) => !existing.has(item.id));
+    return items.filter(
+      (item) =>
+        item.teacher_id === selectedExam.teacher_id &&
+        !existing.has(item.id)
+    );
   }, [items, selectedExam]);
+
+  const itemsById = useMemo(() => {
+    const map = new Map();
+    items.forEach((item) => map.set(item.id, item));
+    return map;
+  }, [items]);
+
+  const availableItemIds = useMemo(() => itemsNotAdded.map((item) => item.id), [itemsNotAdded]);
+  const assignedItemIds = useMemo(
+    () => (selectedExam ? selectedExam.items.map((row) => row.item_id) : []),
+    [selectedExam],
+  );
+
+  const buildCellText = (value, maxLen = 70) => {
+    const full = (value || '-').toString();
+    if (full.length <= maxLen) return { short: full, full };
+    return { short: `${full.slice(0, maxLen)}...`, full };
+  };
+
+  useEffect(() => {
+    if (!selectedExam) {
+      setPreviewModalItem(null);
+      setPreviewModalContext(null);
+    }
+  }, [selectedExam]);
+
+  function openPreviewByItem(item, context) {
+    if (!item) return;
+    setPreviewModalItem(item);
+    setPreviewModalContext(context || null);
+  }
+
+  function openPreviewByExamRow(row, context) {
+    const fromList = itemsById.get(row.item_id);
+    if (fromList) {
+      setPreviewModalItem(fromList);
+      setPreviewModalContext(context || null);
+      return;
+    }
+    setPreviewModalItem({
+      id: row.item_id,
+      statement: row.item_statement,
+      options: {},
+      correct_answer: null,
+    });
+    setPreviewModalContext(context || null);
+  }
+
+  function getContextIds() {
+    if (previewModalContext === 'available') return availableItemIds;
+    if (previewModalContext === 'assigned') return assignedItemIds;
+    return [];
+  }
+
+  function navigatePreview(step) {
+    if (!previewModalItem) return;
+    const ids = getContextIds();
+    if (!ids.length) return;
+    const idx = ids.findIndex((id) => id === previewModalItem.id);
+    if (idx < 0) return;
+    const nextIdx = idx + step;
+    if (nextIdx < 0 || nextIdx >= ids.length) return;
+    const nextItem = itemsById.get(ids[nextIdx]);
+    if (!nextItem) return;
+    setPreviewModalItem(nextItem);
+  }
 
   return (
     <section className="card">
@@ -45,14 +132,6 @@ export default function ExamBuilder({
           />
         </label>
         <label>
-          Exam code
-          <input
-            value={form.exam_code}
-            onChange={(e) => setForm({ ...form, exam_code: e.target.value })}
-            placeholder="Ej: MAT-001"
-          />
-        </label>
-        <label>
           Titulo
           <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
         </label>
@@ -64,6 +143,7 @@ export default function ExamBuilder({
           />
         </label>
       </div>
+      <p className="helper-text">Codigo de examen: se genera automaticamente por docente (1, 2, 3, ...).</p>
 
       <div className="actions">
         <button
@@ -75,9 +155,6 @@ export default function ExamBuilder({
           }}
         >
           Crear examen
-        </button>
-        <button type="button" onClick={() => onRefreshExams(form.teacher_id)}>
-          Recargar examenes
         </button>
       </div>
 
@@ -118,6 +195,9 @@ export default function ExamBuilder({
           <h4>
             Examen seleccionado: #{selectedExam.id} - {selectedExam.exam_code}
           </h4>
+          <p className="helper-text">
+            Docente del examen: {selectedExam.teacher_id}. Solo se listan items de este docente para asociar.
+          </p>
           <div className="actions">
             <button
               type="button"
@@ -158,14 +238,16 @@ export default function ExamBuilder({
           ) : null}
 
           <div className="grid grid-2">
-            <div>
-              <h5>Items disponibles</h5>
+            <div className="exam-items-pane">
+              <h5>Items disponibles ({itemsNotAdded.length})</h5>
               <div className="table-wrap">
                 <table>
                   <thead>
                     <tr>
                       <th>ID</th>
                       <th>Enunciado</th>
+                      <th>Estandar</th>
+                      <th>Desempeño</th>
                       <th></th>
                     </tr>
                   </thead>
@@ -173,8 +255,43 @@ export default function ExamBuilder({
                     {itemsNotAdded.map((item) => (
                       <tr key={item.id}>
                         <td>{item.id}</td>
-                        <td>{item.statement}</td>
                         <td>
+                          {(() => {
+                            const cell = buildCellText(statementPreview(item.statement), 90);
+                            return (
+                              <span className="cell-truncate" title={cell.full}>
+                                {cell.short}
+                              </span>
+                            );
+                          })()}
+                        </td>
+                        <td>
+                          {(() => {
+                            const cell = buildCellText(item.curriculum?.standard_name || '-', 42);
+                            return (
+                              <span className="cell-truncate" title={cell.full}>
+                                {cell.short}
+                              </span>
+                            );
+                          })()}
+                        </td>
+                        <td>
+                          {(() => {
+                            const cell = buildCellText(item.curriculum?.competency_name || '-', 42);
+                            return (
+                              <span className="cell-truncate" title={cell.full}>
+                                {cell.short}
+                              </span>
+                            );
+                          })()}
+                        </td>
+                        <td className="col-action">
+                          <button
+                            type="button"
+                            onClick={() => openPreviewByItem(item, 'available')}
+                          >
+                            Vista previa
+                          </button>
                           <button type="button" onClick={() => onAddItem(selectedExam.id, item.id)}>
                             Asociar
                           </button>
@@ -186,8 +303,8 @@ export default function ExamBuilder({
               </div>
             </div>
 
-            <div>
-              <h5>Items asociados (orden inicial)</h5>
+            <div className="exam-items-pane">
+              <h5>Items asociados (orden inicial) ({selectedExam.items.length})</h5>
               <div className="table-wrap">
                 <table>
                   <thead>
@@ -195,6 +312,8 @@ export default function ExamBuilder({
                       <th>Orden</th>
                       <th>Item ID</th>
                       <th>Enunciado</th>
+                      <th>Estandar</th>
+                      <th>Desempeño</th>
                       <th></th>
                     </tr>
                   </thead>
@@ -203,8 +322,45 @@ export default function ExamBuilder({
                       <tr key={`${row.exam_id}-${row.item_id}`}>
                         <td>{row.order_position}</td>
                         <td>{row.item_id}</td>
-                        <td>{row.item_statement}</td>
                         <td>
+                          {(() => {
+                            const cell = buildCellText(statementPreview(row.item_statement), 90);
+                            return (
+                              <span className="cell-truncate" title={cell.full}>
+                                {cell.short}
+                              </span>
+                            );
+                          })()}
+                        </td>
+                        <td>
+                          {(() => {
+                            const item = itemsById.get(row.item_id);
+                            const cell = buildCellText(item?.curriculum?.standard_name || '-', 42);
+                            return (
+                              <span className="cell-truncate" title={cell.full}>
+                                {cell.short}
+                              </span>
+                            );
+                          })()}
+                        </td>
+                        <td>
+                          {(() => {
+                            const item = itemsById.get(row.item_id);
+                            const cell = buildCellText(item?.curriculum?.competency_name || '-', 42);
+                            return (
+                              <span className="cell-truncate" title={cell.full}>
+                                {cell.short}
+                              </span>
+                            );
+                          })()}
+                        </td>
+                        <td className="col-action">
+                          <button
+                            type="button"
+                            onClick={() => openPreviewByExamRow(row, 'assigned')}
+                          >
+                            Vista previa
+                          </button>
                           <button type="button" onClick={() => onRemoveItem(selectedExam.id, row.item_id)}>
                             Quitar
                           </button>
@@ -217,6 +373,84 @@ export default function ExamBuilder({
             </div>
           </div>
         </>
+      ) : null}
+
+      {previewModalItem ? (
+        <div
+          className="preview-modal-overlay"
+          onClick={() => {
+            setPreviewModalItem(null);
+            setPreviewModalContext(null);
+          }}
+        >
+          <div className="preview-modal" onClick={(event) => event.stopPropagation()}>
+            <div className="preview-modal-header">
+              <h4>
+                Vista previa item #{previewModalItem.id}{' '}
+                {previewModalContext === 'available' ? '(por asignar)' : ''}
+                {previewModalContext === 'assigned' ? '(asignado)' : ''}
+              </h4>
+              <div className="preview-modal-actions">
+                <button
+                  type="button"
+                  onClick={() => navigatePreview(-1)}
+                  disabled={
+                    !previewModalItem ||
+                    !getContextIds().length ||
+                    getContextIds().findIndex((id) => id === previewModalItem.id) <= 0
+                  }
+                >
+                  ← Anterior
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigatePreview(1)}
+                  disabled={
+                    !previewModalItem ||
+                    !getContextIds().length ||
+                    getContextIds().findIndex((id) => id === previewModalItem.id) >=
+                      getContextIds().length - 1
+                  }
+                >
+                  Siguiente →
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPreviewModalItem(null);
+                    setPreviewModalContext(null);
+                  }}
+                >
+                  Cerrar
+                </button>
+              </div>
+            </div>
+
+            <div className="preview-modal-section">
+              <h5>Enunciado</h5>
+              <RichDocPreview value={storageToDoc(previewModalItem.statement)} />
+            </div>
+
+            <div className="preview-modal-options">
+              <div className="preview-modal-section">
+                <h5>Opcion A</h5>
+                <RichDocPreview value={storageToDoc(previewModalItem.options?.A)} />
+              </div>
+              <div className="preview-modal-section">
+                <h5>Opcion B</h5>
+                <RichDocPreview value={storageToDoc(previewModalItem.options?.B)} />
+              </div>
+              <div className="preview-modal-section">
+                <h5>Opcion C</h5>
+                <RichDocPreview value={storageToDoc(previewModalItem.options?.C)} />
+              </div>
+              <div className="preview-modal-section">
+                <h5>Opcion D</h5>
+                <RichDocPreview value={storageToDoc(previewModalItem.options?.D)} />
+              </div>
+            </div>
+          </div>
+        </div>
       ) : null}
     </section>
   );

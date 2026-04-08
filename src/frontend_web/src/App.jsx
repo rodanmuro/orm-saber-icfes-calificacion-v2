@@ -262,7 +262,6 @@ export default function App() {
     setMessage('');
     const payload = {
       teacher_id: Number(formData.teacher_id),
-      exam_code: formData.exam_code,
       title: formData.title,
       description: formData.description || null,
     };
@@ -345,6 +344,13 @@ export default function App() {
         >
           Listado ({items.length})
         </button>
+        <button
+          type="button"
+          className={activeTab === 'exam' ? 'tab-btn active' : 'tab-btn'}
+          onClick={() => setActiveTab('exam')}
+        >
+          Armado de examen
+        </button>
       </aside>
 
       <main className="dashboard-main">
@@ -374,7 +380,9 @@ export default function App() {
               mode={selectedItemId ? 'edit' : 'create'}
             />
           </section>
-        ) : (
+        ) : null}
+
+        {activeTab === 'list' ? (
           <section className="single-pane">
             <FiltersBar
               filters={filters}
@@ -394,21 +402,23 @@ export default function App() {
               isBulkDeleting={saving}
             />
           </section>
-        )}
+        ) : null}
 
-        <ExamBuilder
-          items={items}
-          exams={exams}
-          selectedExam={selectedExam}
-          versions={examVersions}
-          onRefreshExams={refreshExams}
-          onCreateExam={handleCreateExam}
-          onSelectExam={handleSelectExam}
-          onAddItem={handleAddItemToExam}
-          onRemoveItem={handleRemoveItemFromExam}
-          onPublishVersion={handlePublishExamVersion}
-          loading={loadingExams}
-        />
+        {activeTab === 'exam' ? (
+          <ExamBuilder
+            items={items}
+            exams={exams}
+            selectedExam={selectedExam}
+            versions={examVersions}
+            onRefreshExams={refreshExams}
+            onCreateExam={handleCreateExam}
+            onSelectExam={handleSelectExam}
+            onAddItem={handleAddItemToExam}
+            onRemoveItem={handleRemoveItemFromExam}
+            onPublishVersion={handlePublishExamVersion}
+            loading={loadingExams}
+          />
+        ) : null}
       </main>
     </div>
   );
