@@ -4,7 +4,7 @@ Frontend web base para gestion de items (HU_005 / ACT_0033).
 
 ## Requisitos
 - Node.js 18+
-- Backend FastAPI corriendo en `http://localhost:8000`
+- Backend FastAPI corriendo en `http://localhost:8001`
 
 ## Configuracion
 1. Copiar variables de entorno:

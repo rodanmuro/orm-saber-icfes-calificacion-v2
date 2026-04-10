@@ -21,7 +21,7 @@ cd "${SCRIPT_DIR}"
 export DATABASE_URL="${DATABASE_URL:-postgresql+psycopg://administrador:12345678@localhost:5432/omr_app}"
 export DEBUG="${DEBUG:-false}"
 export HOST="${HOST:-0.0.0.0}"
-export PORT="${PORT:-8000}"
+export PORT="${PORT:-8001}"
 export RELOAD="${RELOAD:-true}"
 
 if [[ "${RELOAD}" == "true" ]]; then
@@ -29,4 +29,3 @@ if [[ "${RELOAD}" == "true" ]]; then
 else
   exec uvicorn app.main:app --host "${HOST}" --port "${PORT}"
 fi
-

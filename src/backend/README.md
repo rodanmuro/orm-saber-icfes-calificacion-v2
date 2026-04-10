@@ -287,7 +287,7 @@ python -m app.modules.omr_reader.scripts.classify_bubbles \
 Recibe una foto por `multipart/form-data` y retorna JSON OMR por pregunta.
 
 ```bash
-curl -X POST "http://127.0.0.1:8000/api/v1/omr/read-photo" \
+curl -X POST "http://127.0.0.1:8001/api/v1/omr/read-photo" \
   -F "photo=@src/backend/data/input/diligenciadas/foto_001.jpeg" \
   -F "metadata_path=data/output/template_basica_omr_v2_wireframe.json"
 ```

@@ -28,15 +28,15 @@
 Listar exámenes y versiones para obtener los IDs:
 
 ```bash
-curl -s http://localhost:8000/api/v1/exams | jq '[.[] | {id, title}]'
-curl -s http://localhost:8000/api/v1/exams/{exam_id}/versions | jq '[.[] | {id, version_code}]'
+curl -s http://localhost:8001/api/v1/exams | jq '[.[] | {id, title}]'
+curl -s http://localhost:8001/api/v1/exams/{exam_id}/versions | jq '[.[] | {id, version_code}]'
 ```
 
 Exportar con los IDs reales (ejemplo: exam_id=6, version_id=5):
 
 ```bash
-curl -o examen.pdf "http://localhost:8000/api/v1/exams/6/versions/5/export/pdf"
-curl -o examen.docx "http://localhost:8000/api/v1/exams/6/versions/5/export/docx"
+curl -o examen.pdf "http://localhost:8001/api/v1/exams/6/versions/5/export/pdf"
+curl -o examen.docx "http://localhost:8001/api/v1/exams/6/versions/5/export/docx"
 ```
 
 Los archivos se crean en el directorio donde se ejecute el comando.

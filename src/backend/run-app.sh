@@ -20,7 +20,7 @@ cd "${SCRIPT_DIR}"
 
 export DEBUG="${DEBUG:-false}"
 export HOST="${HOST:-0.0.0.0}"
-export PORT="${PORT:-8000}"
+export PORT="${PORT:-8001}"
 export RELOAD="${RELOAD:-true}"
 
 if [[ "${RELOAD}" == "true" ]]; then

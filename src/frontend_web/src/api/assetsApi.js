@@ -4,7 +4,22 @@ const API_ORIGIN = API_BASE_URL.replace(/\/api\/v1$/, '');
 
 export function resolveAssetUrl(url) {
   if (!url) return '';
-  return url.startsWith('http') ? url : `${API_ORIGIN}${url}`;
+  if (!url.startsWith('http')) {
+    return `${API_ORIGIN}${url}`;
+  }
+
+  try {
+    const parsed = new URL(url);
+    const isLocalHost =
+      parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1';
+    if (isLocalHost) {
+      // Reescribe urls antiguas (ej. :8000) al backend actual configurado.
+      return `${API_ORIGIN}${parsed.pathname}${parsed.search}${parsed.hash}`;
+    }
+  } catch {
+    return url;
+  }
+  return url;
 }
 
 export async function uploadEditorImage(file) {

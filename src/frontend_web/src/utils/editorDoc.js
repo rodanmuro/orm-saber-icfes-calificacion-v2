@@ -1,3 +1,5 @@
+import { resolveAssetUrl } from '../api/assetsApi';
+
 export function emptyDoc() {
   return {
     type: 'doc',
@@ -15,8 +17,27 @@ export function textToDoc(text) {
 }
 
 export function storageToDoc(value) {
+  const normalizeDocImageSrcs = (node) => {
+    if (!node || typeof node !== 'object') return node;
+
+    if (Array.isArray(node)) {
+      return node.map(normalizeDocImageSrcs);
+    }
+
+    const out = { ...node };
+    if (out.type === 'image') {
+      const attrs = { ...(out.attrs || {}) };
+      attrs.src = resolveAssetUrl(attrs.src || '');
+      out.attrs = attrs;
+    }
+    if (Array.isArray(out.content)) {
+      out.content = out.content.map(normalizeDocImageSrcs);
+    }
+    return out;
+  };
+
   if (!value) return emptyDoc();
-  if (typeof value === 'object') return value;
+  if (typeof value === 'object') return normalizeDocImageSrcs(value);
 
   if (typeof value === 'string') {
     const raw = value.trim();
@@ -24,7 +45,7 @@ export function storageToDoc(value) {
     try {
       const parsed = JSON.parse(raw);
       if (parsed && typeof parsed === 'object' && parsed.type === 'doc') {
-        return parsed;
+        return normalizeDocImageSrcs(parsed);
       }
     } catch {
       // fallback to plain text doc
