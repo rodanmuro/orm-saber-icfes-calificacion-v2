@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { createItem, deleteItem, getItem, listItems, updateItem, API_BASE_URL } from './api/itemsApi';
 import { listStudents } from './api/studentsApi';
-import { getOmrAttempt, listOmrAttempts } from './api/omrApi';
+import { getOmrAttempt, listOmrAttempts, updateOmrAttemptAnswers } from './api/omrApi';
 import {
   addItemToExam,
   createExam,
@@ -93,6 +93,11 @@ export default function App() {
   const [loadingAttempts, setLoadingAttempts] = useState(false);
   const [attemptModal, setAttemptModal] = useState({ open: false, detail: null });
   const [attemptImage, setAttemptImage] = useState(null);
+  const [attemptEdits, setAttemptEdits] = useState({});
+  const [savingAttempt, setSavingAttempt] = useState(false);
+  const [pendingAttemptSave, setPendingAttemptSave] = useState(false);
+  const attemptEditsRef = useRef({});
+  const [attemptFilters, setAttemptFilters] = useState({ query: '', status: '', group: '' });
 
   async function refreshItems() {
     setLoading(true);
@@ -160,14 +165,80 @@ export default function App() {
     }
   }
 
+  function buildManualValue(row) {
+    if (row.manual_override) {
+      return row.manual_answer ? row.manual_answer : '__blank__';
+    }
+    return '';
+  }
+
   async function handleViewAttempt(row) {
     setError('');
     try {
       const detail = await getOmrAttempt(row.attempt_id);
       setAttemptModal({ open: true, detail });
+      const nextEdits = {};
+      detail.answers.forEach((answer) => {
+        nextEdits[answer.question_number] = buildManualValue(answer);
+      });
+      setAttemptEdits(nextEdits);
+      attemptEditsRef.current = nextEdits;
     } catch (err) {
       setError(err.message);
     }
+  }
+
+  async function handleAttemptEditChange(questionNumber, value) {
+    const nextEdits = { ...attemptEdits, [questionNumber]: value };
+    setAttemptEdits(nextEdits);
+    attemptEditsRef.current = nextEdits;
+    await saveAttemptEdits(nextEdits, questionNumber);
+  }
+
+  async function saveAttemptEdits(edits, singleQuestionNumber = null) {
+    if (!attemptModal.detail) return;
+    if (savingAttempt) {
+      setPendingAttemptSave(true);
+      return;
+    }
+    setSavingAttempt(true);
+    setError('');
+    try {
+      const sourceRows = attemptModal.detail.answers;
+      const answers = sourceRows
+        .filter((row) => singleQuestionNumber === null || row.question_number === singleQuestionNumber)
+        .map((row) => {
+        const value = edits[row.question_number] ?? '';
+        if (value === '') {
+          return { question_number: row.question_number, manual_override: false, manual_answer: null };
+        }
+        if (value === '__blank__') {
+          return { question_number: row.question_number, manual_override: true, manual_answer: null };
+        }
+        return { question_number: row.question_number, manual_override: true, manual_answer: value };
+      });
+      const updated = await updateOmrAttemptAnswers(attemptModal.detail.attempt_id, answers);
+      setAttemptModal({ open: true, detail: updated });
+      const nextEdits = {};
+      updated.answers.forEach((answer) => {
+        nextEdits[answer.question_number] = buildManualValue(answer);
+      });
+      setAttemptEdits(nextEdits);
+      attemptEditsRef.current = nextEdits;
+      refreshAttempts();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSavingAttempt(false);
+      if (pendingAttemptSave) {
+        setPendingAttemptSave(false);
+        saveAttemptEdits(attemptEditsRef.current, null);
+      }
+    }
+  }
+
+  function handleSaveAttemptEdits() {
+    return saveAttemptEdits(attemptEdits, null);
   }
 
   function handleViewAttemptImage(row) {
@@ -203,6 +274,9 @@ export default function App() {
 
   function closeAttemptModal() {
     setAttemptModal({ open: false, detail: null });
+    setAttemptEdits({});
+    attemptEditsRef.current = {};
+    setPendingAttemptSave(false);
   }
 
   function closeAttemptImage() {
@@ -210,6 +284,45 @@ export default function App() {
   }
 
   const filteredItems = useMemo(() => filterItems(items, filters), [items, filters]);
+  const filteredAttempts = useMemo(() => {
+    const query = attemptFilters.query.trim().toLowerCase();
+    return attempts.filter((row) => {
+      if (attemptFilters.status && row.status !== attemptFilters.status) {
+        return false;
+      }
+      if (attemptFilters.group && row.student_group !== attemptFilters.group) {
+        return false;
+      }
+      if (!query) return true;
+      const haystack = [
+        row.exam_title,
+        row.student_name,
+        row.exam_id,
+        row.exam_version_code,
+        row.exam_code,
+      ]
+        .filter(Boolean)
+        .map((value) => String(value).toLowerCase())
+        .join(' ');
+      return haystack.includes(query);
+    });
+  }, [attempts, attemptFilters]);
+
+  const attemptStatusOptions = useMemo(() => {
+    const values = new Set();
+    attempts.forEach((row) => {
+      if (row.status) values.add(row.status);
+    });
+    return Array.from(values).sort();
+  }, [attempts]);
+
+  const attemptGroupOptions = useMemo(() => {
+    const values = new Set();
+    attempts.forEach((row) => {
+      if (row.student_group) values.add(row.student_group);
+    });
+    return Array.from(values).sort();
+  }, [attempts]);
 
   async function handleSelectItem(itemId) {
     setError('');
@@ -697,7 +810,11 @@ export default function App() {
           <section className="single-pane">
             {loadingAttempts ? <p>Cargando intentos...</p> : null}
             <AttemptList
-              attempts={attempts}
+              attempts={filteredAttempts}
+              filters={attemptFilters}
+              statusOptions={attemptStatusOptions}
+              groupOptions={attemptGroupOptions}
+              onFilterChange={setAttemptFilters}
               onView={handleViewAttempt}
               onViewImage={handleViewAttemptImage}
             />
@@ -725,14 +842,21 @@ export default function App() {
             <p className="helper-text">
               Examen #{attemptModal.detail.exam_id} | Version {attemptModal.detail.exam_version_id || '-'} | Estado {attemptModal.detail.status}
             </p>
+            <div className="modal-actions">
+              <button type="button" onClick={handleSaveAttemptEdits} disabled={savingAttempt}>
+                {savingAttempt ? 'Guardando...' : 'Guardar ahora'}
+              </button>
+              <span className="helper-text">Los cambios se guardan automaticamente al cambiar el selector.</span>
+            </div>
             <div className="table-wrap">
               <table>
                 <thead>
                   <tr>
                     <th>Pregunta</th>
                     <th>Correcta</th>
-                    <th>Marcada</th>
-                    <th>Estado</th>
+                    <th>Detectada</th>
+                    <th>Correccion</th>
+                    <th>Final</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -742,18 +866,32 @@ export default function App() {
                       <td>{row.correct_answer || '-'}</td>
                       <td>{row.marked_answer || '-'}</td>
                       <td>
+                        <select
+                          value={attemptEdits[row.question_number] ?? ''}
+                          onChange={(e) => handleAttemptEditChange(row.question_number, e.target.value)}
+                        >
+                          <option value="">Sin override</option>
+                          <option value="__blank__">Forzar blanco</option>
+                          <option value="A">A</option>
+                          <option value="B">B</option>
+                          <option value="C">C</option>
+                          <option value="D">D</option>
+                        </select>
+                      </td>
+                      <td className="final-status-cell">
+                        <span className="final-answer">{row.effective_answer || '-'}</span>
                         <span
                           className={[
                             'status-icon',
-                            row.status === 'correct'
+                            row.effective_status === 'correct'
                               ? 'status-correct'
-                              : row.status === 'incorrect'
+                              : row.effective_status === 'incorrect'
                                 ? 'status-incorrect'
-                                : row.status === 'blank'
+                                : row.effective_status === 'blank'
                                   ? 'status-blank'
                                   : 'status-ambiguous',
                           ].join(' ')}
-                          title={row.status}
+                          title={row.effective_status}
                         />
                       </td>
                     </tr>

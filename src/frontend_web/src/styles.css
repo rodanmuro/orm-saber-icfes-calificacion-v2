@@ -456,6 +456,54 @@ th {
   gap: 10px;
 }
 
+.filters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.filters-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.9rem;
+}
+
+.filters-grid input,
+.filters-grid select {
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #c9d4e5;
+}
+
+.modal-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.modal-actions button {
+  min-width: 180px;
+}
+
+.final-status-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.final-answer {
+  min-width: 24px;
+  font-weight: 600;
+}
+
+.preview-modal table select {
+  min-width: 130px;
+}
+
 .status-icon {
   display: inline-block;
   width: 14px;

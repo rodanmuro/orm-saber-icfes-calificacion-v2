@@ -246,6 +246,8 @@ class OmrAttemptAnswer(Base):
     marked_answer: Mapped[str | None] = mapped_column(String(8), nullable=True)
     status: Mapped[str] = mapped_column(String(32), index=True)
     marked_options_json: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
+    manual_answer: Mapped[str | None] = mapped_column(String(8), nullable=True)
+    manual_override: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     attempt: Mapped[OmrAttempt] = relationship(back_populates="answers")

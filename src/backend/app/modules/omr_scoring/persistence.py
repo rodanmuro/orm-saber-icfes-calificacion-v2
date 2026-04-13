@@ -7,6 +7,65 @@ from sqlalchemy.orm import Session
 from app.db.models import OmrAttempt, OmrAttemptAnswer
 
 
+def _normalize_manual_answer(value: str | None) -> str | None:
+    if value is None:
+        return None
+    normalized = str(value).strip().upper()
+    if normalized == "":
+        return None
+    return normalized
+
+
+def _effective_answer(row: OmrAttemptAnswer) -> tuple[str | None, str]:
+    if row.manual_override:
+        manual_answer = _normalize_manual_answer(row.manual_answer)
+        if manual_answer is None:
+            return None, "blank"
+        if manual_answer == row.correct_answer:
+            return manual_answer, "correct"
+        return manual_answer, "incorrect"
+
+    status = str(row.status or "blank")
+    if status in {"correct", "incorrect", "blank", "ambiguous"}:
+        return row.marked_answer, status
+    if status == "detected":
+        return row.marked_answer, "incorrect"
+    return row.marked_answer, "blank"
+
+
+def recompute_attempt_summary(db: Session, attempt: OmrAttempt) -> OmrAttempt:
+    answers = db.query(OmrAttemptAnswer).filter(OmrAttemptAnswer.attempt_id == attempt.id).all()
+    total = len(answers)
+    correct = incorrect = blank = ambiguous = 0
+
+    for row in answers:
+        _, status = _effective_answer(row)
+        if status == "correct":
+            correct += 1
+        elif status == "incorrect":
+            incorrect += 1
+        elif status == "ambiguous":
+            ambiguous += 1
+        else:
+            blank += 1
+
+    attempt.total_questions = total
+    attempt.correct_count = correct
+    attempt.incorrect_count = incorrect
+    attempt.blank_count = blank
+    attempt.ambiguous_count = ambiguous
+    attempt.score_percent = round((correct / total) * 100, 2) if total else None
+    attempt.manual_review_required = ambiguous > 0
+
+    if attempt.status in {"graded", "needs_review", "read_only"}:
+        attempt.status = "needs_review" if attempt.manual_review_required else "graded"
+
+    db.add(attempt)
+    db.commit()
+    db.refresh(attempt)
+    return attempt
+
+
 def _derive_attempt_status(grading_block: dict | None, manual_review_required: bool) -> str:
     if grading_block is None:
         return 'read_only'

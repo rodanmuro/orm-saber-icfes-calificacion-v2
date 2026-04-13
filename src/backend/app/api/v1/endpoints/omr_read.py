@@ -5,6 +5,7 @@ import logging
 import time
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile, Query, status
+from pydantic import BaseModel, Field
 from sqlalchemy import select
 
 from app.core.config import settings
@@ -20,7 +21,7 @@ from app.modules.omr_reader.api_service import (
     run_omr_read_from_image_bytes,
 )
 from app.modules.omr_reader.errors import OMRReadInputError
-from app.modules.omr_scoring.persistence import persist_omr_attempt
+from app.modules.omr_scoring.persistence import persist_omr_attempt, recompute_attempt_summary
 from app.modules.omr_scoring.service import (
     build_answer_key_from_exam_items,
     build_answer_key_from_version_items,
@@ -28,6 +29,16 @@ from app.modules.omr_scoring.service import (
 )
 
 router = APIRouter(prefix="/omr", tags=["omr"])
+
+
+class ManualAnswerUpdate(BaseModel):
+    question_number: int = Field(..., ge=1)
+    manual_answer: str | None = None
+    manual_override: bool | None = None
+
+
+class ManualAnswerPayload(BaseModel):
+    answers: list[ManualAnswerUpdate] = Field(default_factory=list)
 logger = logging.getLogger("uvicorn.error")
 
 
@@ -423,6 +434,21 @@ def get_omr_attempt(attempt_id: int) -> dict:
             .where(OmrAttemptAnswer.attempt_id == attempt_id)
             .order_by(OmrAttemptAnswer.question_number.asc())
         ).all()
+        def _effective_answer(row: OmrAttemptAnswer) -> tuple[str | None, str]:
+            if row.manual_override:
+                manual_answer = str(row.manual_answer or "").strip().upper()
+                if manual_answer == "":
+                    return None, "blank"
+                if manual_answer == row.correct_answer:
+                    return manual_answer, "correct"
+                return manual_answer, "incorrect"
+            status = str(row.status or "blank")
+            if status in {"correct", "incorrect", "blank", "ambiguous"}:
+                return row.marked_answer, status
+            if status == "detected":
+                return row.marked_answer, "incorrect"
+            return row.marked_answer, "blank"
+
         return {
             "attempt_id": attempt.id,
             "teacher_id": attempt.teacher_id,
@@ -461,10 +487,64 @@ def get_omr_attempt(attempt_id: int) -> dict:
                     "marked_answer": row.marked_answer,
                     "status": row.status,
                     "marked_options": row.marked_options_json or [],
+                    "manual_answer": row.manual_answer,
+                    "manual_override": row.manual_override,
+                    "effective_answer": _effective_answer(row)[0],
+                    "effective_status": _effective_answer(row)[1],
                 }
                 for row in answers
             ],
         }
+
+
+@router.patch("/attempts/{attempt_id}/answers")
+def update_omr_attempt_answers(attempt_id: int, payload: ManualAnswerPayload) -> dict:
+    updates = {row.question_number: row for row in payload.answers}
+    if not updates:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="answers payload is empty")
+
+    with SessionLocal() as db:
+        attempt = db.get(OmrAttempt, attempt_id)
+        if attempt is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="attempt not found")
+
+        answers = db.scalars(
+            select(OmrAttemptAnswer).where(OmrAttemptAnswer.attempt_id == attempt_id)
+        ).all()
+        for row in answers:
+            update = updates.get(row.question_number)
+            if update is None:
+                continue
+            manual_override = update.manual_override
+            manual_answer = update.manual_answer
+
+            if manual_override is False:
+                row.manual_override = False
+                row.manual_answer = None
+                continue
+
+            normalized = str(manual_answer or "").strip().upper()
+            if normalized == "":
+                row.manual_override = True
+                row.manual_answer = None
+                continue
+            if normalized not in {"A", "B", "C", "D"}:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail=f"manual_answer invalido para pregunta {row.question_number}",
+                )
+            if row.correct_answer is None:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="no se puede corregir manualmente sin clave de respuestas",
+                )
+            row.manual_override = True
+            row.manual_answer = normalized
+
+        db.commit()
+        recompute_attempt_summary(db, attempt)
+
+    return get_omr_attempt(attempt_id)
 
 
 @router.get("/attempts")
