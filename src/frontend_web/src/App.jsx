@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { createItem, deleteItem, getItem, listItems, updateItem, API_BASE_URL } from './api/itemsApi';
 import { listStudents } from './api/studentsApi';
+import { getOmrAttempt, listOmrAttempts } from './api/omrApi';
 import {
   addItemToExam,
   createExam,
@@ -19,6 +20,7 @@ import FiltersBar from './components/FiltersBar';
 import ItemForm, { emptyForm, formToPayload, itemToForm } from './components/ItemForm';
 import ItemList from './components/ItemList';
 import StudentList from './components/StudentList';
+import AttemptList from './components/AttemptList';
 import { docHasMeaningfulContent } from './utils/editorDoc';
 
 
@@ -87,6 +89,10 @@ export default function App() {
   const [loadingStudents, setLoadingStudents] = useState(false);
   const [studentFilters, setStudentFilters] = useState({ query: '', group: '' });
   const [studentSortKey, setStudentSortKey] = useState('id_asc');
+  const [attempts, setAttempts] = useState([]);
+  const [loadingAttempts, setLoadingAttempts] = useState(false);
+  const [attemptModal, setAttemptModal] = useState({ open: false, detail: null });
+  const [attemptImage, setAttemptImage] = useState(null);
 
   async function refreshItems() {
     setLoading(true);
@@ -124,6 +130,84 @@ export default function App() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
+
+  useEffect(() => {
+    if (activeTab === 'graded') {
+      refreshAttempts();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (activeTab !== 'graded') return;
+    const timer = setInterval(() => {
+      refreshAttempts();
+    }, 5000);
+    return () => clearInterval(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]);
+
+  async function refreshAttempts() {
+    setLoadingAttempts(true);
+    setError('');
+    try {
+      const data = await listOmrAttempts({ teacherId: 1 });
+      setAttempts(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoadingAttempts(false);
+    }
+  }
+
+  async function handleViewAttempt(row) {
+    setError('');
+    try {
+      const detail = await getOmrAttempt(row.attempt_id);
+      setAttemptModal({ open: true, detail });
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
+  function handleViewAttemptImage(row) {
+    if (!row.uploaded_image_path) return;
+    const raw = String(row.uploaded_image_path);
+    if (raw.startsWith('http://') || raw.startsWith('https://')) {
+      setAttemptImage(raw);
+      return;
+    }
+    if (raw.includes('/data/input/')) {
+      const idx = raw.indexOf('/data/input/');
+      const relative = raw.slice(idx + '/data/input/'.length);
+      const base = API_BASE_URL.replace(/\/api\/v1\/?$/, '');
+      setAttemptImage(`${base}/assets/${relative}`);
+      return;
+    }
+    const base = API_BASE_URL.replace(/\/api\/v1\/?$/, '');
+    if (raw.startsWith('/assets/')) {
+      setAttemptImage(`${base}${raw}`);
+      return;
+    }
+    if (raw.startsWith('assets/')) {
+      setAttemptImage(`${base}/${raw}`);
+      return;
+    }
+    if (raw.startsWith('data/input/')) {
+      const relative = raw.replace(/^data\/input\//, '');
+      setAttemptImage(`${base}/assets/${relative}`);
+      return;
+    }
+    setAttemptImage(`${base}/assets/${raw}`);
+  }
+
+  function closeAttemptModal() {
+    setAttemptModal({ open: false, detail: null });
+  }
+
+  function closeAttemptImage() {
+    setAttemptImage(null);
+  }
 
   const filteredItems = useMemo(() => filterItems(items, filters), [items, filters]);
 
@@ -468,6 +552,13 @@ export default function App() {
         </button>
         <button
           type="button"
+          className={activeTab === 'graded' ? 'tab-btn active' : 'tab-btn'}
+          onClick={() => setActiveTab('graded')}
+        >
+          Examenes calificados
+        </button>
+        <button
+          type="button"
           className={activeTab === 'students' ? 'tab-btn active' : 'tab-btn'}
           onClick={() => setActiveTab('students')}
         >
@@ -601,6 +692,17 @@ export default function App() {
             <StudentList students={students} filters={studentFilters} sortKey={studentSortKey} />
           </section>
         ) : null}
+
+        {activeTab === 'graded' ? (
+          <section className="single-pane">
+            {loadingAttempts ? <p>Cargando intentos...</p> : null}
+            <AttemptList
+              attempts={attempts}
+              onView={handleViewAttempt}
+              onViewImage={handleViewAttemptImage}
+            />
+          </section>
+        ) : null}
       </main>
       {exporting.examId ? (
         <div className="loading-overlay" role="status" aria-live="polite">
@@ -609,6 +711,68 @@ export default function App() {
             <p>
               Generando exportación {exporting.format?.toUpperCase()} del examen #{exporting.examId}...
             </p>
+          </div>
+        </div>
+      ) : null}
+
+      {attemptModal.open && attemptModal.detail ? (
+        <div className="preview-modal-overlay" onClick={closeAttemptModal}>
+          <div className="preview-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="preview-modal-header">
+              <h4>Intento #{attemptModal.detail.attempt_id}</h4>
+              <button type="button" onClick={closeAttemptModal}>Cerrar</button>
+            </div>
+            <p className="helper-text">
+              Examen #{attemptModal.detail.exam_id} | Version {attemptModal.detail.exam_version_id || '-'} | Estado {attemptModal.detail.status}
+            </p>
+            <div className="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Pregunta</th>
+                    <th>Correcta</th>
+                    <th>Marcada</th>
+                    <th>Estado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {attemptModal.detail.answers.map((row) => (
+                    <tr key={row.question_number}>
+                      <td>{row.question_number}</td>
+                      <td>{row.correct_answer || '-'}</td>
+                      <td>{row.marked_answer || '-'}</td>
+                      <td>
+                        <span
+                          className={[
+                            'status-icon',
+                            row.status === 'correct'
+                              ? 'status-correct'
+                              : row.status === 'incorrect'
+                                ? 'status-incorrect'
+                                : row.status === 'blank'
+                                  ? 'status-blank'
+                                  : 'status-ambiguous',
+                          ].join(' ')}
+                          title={row.status}
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {attemptImage ? (
+        <div className="preview-modal-overlay" onClick={closeAttemptImage}>
+          <div className="preview-modal image-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="preview-modal-header">
+              <h4>Imagen del examen</h4>
+              <button type="button" onClick={closeAttemptImage}>Cerrar</button>
+            </div>
+            <img src={attemptImage} alt="omr" style={{ width: '100%', borderRadius: 8 }} />
           </div>
         </div>
       ) : null}

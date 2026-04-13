@@ -456,6 +456,69 @@ th {
   gap: 10px;
 }
 
+.status-icon {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid #b4c3d6;
+  position: relative;
+}
+
+.status-correct {
+  border-color: #1b7d3a;
+  background: #1b7d3a;
+}
+
+.status-correct::after {
+  content: '';
+  position: absolute;
+  width: 6px;
+  height: 3px;
+  border-left: 2px solid #ffffff;
+  border-bottom: 2px solid #ffffff;
+  transform: rotate(-45deg);
+  left: 3px;
+  top: 3px;
+}
+
+.status-incorrect {
+  border-color: #b81d1d;
+  background: #b81d1d;
+}
+
+.status-incorrect::after {
+  content: '';
+  position: absolute;
+  width: 8px;
+  height: 2px;
+  background: #ffffff;
+  top: 5px;
+  left: 2px;
+  transform: rotate(45deg);
+}
+
+.status-incorrect::before {
+  content: '';
+  position: absolute;
+  width: 8px;
+  height: 2px;
+  background: #ffffff;
+  top: 5px;
+  left: 2px;
+  transform: rotate(-45deg);
+}
+
+.status-blank {
+  border-color: #6f7d8c;
+  background: #f4f7fb;
+}
+
+.status-ambiguous {
+  border-color: #b68a00;
+  background: #ffd766;
+}
+
 .answer-key-modal {
   width: min(760px, 96vw);
 }

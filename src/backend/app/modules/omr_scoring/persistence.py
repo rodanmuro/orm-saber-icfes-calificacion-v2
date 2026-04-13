@@ -48,6 +48,8 @@ def persist_omr_attempt(
     result_payload: dict[str, Any],
     teacher_id: int | None,
     exam_id: int | None,
+    exam_version_id: int | None,
+    student_id: int | None,
     exam_code_detected: str | None,
     grading_block: dict | None,
 ) -> OmrAttempt:
@@ -74,6 +76,8 @@ def persist_omr_attempt(
     attempt = OmrAttempt(
         teacher_id=teacher_id,
         exam_id=exam_id,
+        exam_version_id=exam_version_id,
+        student_id=student_id,
         exam_code_detected=exam_code_detected,
         status=attempt_status,
         score_percent=summary.get('score_percent'),

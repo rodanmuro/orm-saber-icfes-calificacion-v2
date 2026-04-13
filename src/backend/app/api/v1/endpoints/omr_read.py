@@ -4,11 +4,11 @@ import json
 import logging
 import time
 
-from fastapi import APIRouter, File, Form, HTTPException, UploadFile, status
+from fastapi import APIRouter, File, Form, HTTPException, UploadFile, Query, status
 from sqlalchemy import select
 
 from app.core.config import settings
-from app.db.models import Exam, ExamItem, OmrAttempt, OmrAttemptAnswer
+from app.db.models import Exam, ExamItem, ExamVersion, ExamVersionItem, OmrAttempt, OmrAttemptAnswer, Student
 from app.db.session import SessionLocal
 from app.modules.omr_reader.api_service import (
     DEFAULT_METADATA_PATH,
@@ -21,7 +21,11 @@ from app.modules.omr_reader.api_service import (
 )
 from app.modules.omr_reader.errors import OMRReadInputError
 from app.modules.omr_scoring.persistence import persist_omr_attempt
-from app.modules.omr_scoring.service import build_answer_key_from_exam_items, grade_omr_questions
+from app.modules.omr_scoring.service import (
+    build_answer_key_from_exam_items,
+    build_answer_key_from_version_items,
+    grade_omr_questions,
+)
 
 router = APIRouter(prefix="/omr", tags=["omr"])
 logger = logging.getLogger("uvicorn.error")
@@ -35,6 +39,8 @@ async def read_photo_omr(
     robust_mode: bool = Form(False),
     save_debug_artifacts: bool = Form(True),
     teacher_id: int | None = Form(None),
+    exam_id: int | None = Form(None),
+    exam_version_id: int | None = Form(None),
 ) -> dict:
     try:
         request_start = time.perf_counter()
@@ -172,7 +178,78 @@ async def read_photo_omr(
 
         grading_block: dict | None = None
         resolved_exam_id: int | None = None
-        if teacher_id is not None and exam_value:
+        resolved_exam_version_id: int | None = None
+        resolved_student_id: int | None = None
+
+        def _resolve_student(db) -> int | None:
+            doc_type = str(doc_value or "CC").strip()
+            doc_number = str(student_value or "").strip()
+            if not doc_number:
+                return None
+            student = db.scalar(
+                select(Student).where(
+                    Student.document_type == doc_type,
+                    Student.document_number == doc_number,
+                )
+            )
+            return student.id if student else None
+
+        if exam_version_id is not None:
+            with SessionLocal() as db:
+                version = db.get(ExamVersion, exam_version_id)
+                if version is None:
+                    grading_block = {
+                        "status": "resolution_error",
+                        "message": f"exam_version_id={exam_version_id} not found",
+                    }
+                else:
+                    exam = db.get(Exam, version.exam_id)
+                    if exam is None:
+                        grading_block = {
+                            "status": "resolution_error",
+                            "message": f"exam not found for version_id={exam_version_id}",
+                        }
+                    elif exam_id is not None and exam.id != exam_id:
+                        grading_block = {
+                            "status": "resolution_error",
+                            "message": "exam_id does not match exam_version_id",
+                        }
+                    elif teacher_id is not None and exam.teacher_id != teacher_id:
+                        grading_block = {
+                            "status": "resolution_error",
+                            "message": "teacher_id does not match exam owner",
+                        }
+                    else:
+                        resolved_exam_id = exam.id
+                        resolved_exam_version_id = version.id
+                        version_items = db.scalars(
+                            select(ExamVersionItem)
+                            .where(ExamVersionItem.exam_version_id == version.id)
+                            .order_by(ExamVersionItem.question_number.asc())
+                        ).all()
+                        answer_key = build_answer_key_from_version_items(version_items)
+                        score_payload = grade_omr_questions(
+                            answer_key=answer_key,
+                            omr_questions=result.get("questions", []),
+                        )
+                        resolved_student_id = _resolve_student(db)
+                        grading_block = {
+                            "status": "graded",
+                            "teacher_id": exam.teacher_id,
+                            "exam_id": exam.id,
+                            "exam_code": exam.exam_code,
+                            "exam_version_id": version.id,
+                            "summary": score_payload["summary"],
+                            "details": score_payload["details"],
+                        }
+                        logger.info(
+                            "OMR grading summary | teacher_id=%s exam_id=%s version_id=%s summary=%s",
+                            exam.teacher_id,
+                            exam.id,
+                            version.id,
+                            json.dumps(score_payload["summary"], ensure_ascii=False),
+                        )
+        elif teacher_id is not None and exam_value:
             exam_code = str(exam_value).strip()
             with SessionLocal() as db:
                 exam = db.scalar(
@@ -185,32 +262,46 @@ async def read_photo_omr(
                     }
                 else:
                     resolved_exam_id = exam.id
-                    exam_items = db.scalars(
-                        select(ExamItem)
-                        .where(ExamItem.exam_id == exam.id)
-                        .order_by(ExamItem.order_position.asc())
-                    ).all()
-                    answer_key = build_answer_key_from_exam_items(exam_items)
-                    score_payload = grade_omr_questions(
-                        answer_key=answer_key,
-                        omr_questions=result.get("questions", []),
+                    latest_version = db.scalar(
+                        select(ExamVersion)
+                        .where(ExamVersion.exam_id == exam.id)
+                        .order_by(ExamVersion.id.desc())
                     )
-                    grading_block = {
-                        "status": "graded",
-                        "teacher_id": teacher_id,
-                        "exam_id": exam.id,
-                        "exam_code": exam.exam_code,
-                        "summary": score_payload["summary"],
-                        "details": score_payload["details"],
-                    }
-                    logger.info(
-                        "OMR grading summary | teacher_id=%s exam_id=%s exam_code=%s summary=%s",
-                        teacher_id,
-                        exam.id,
-                        exam.exam_code,
-                        json.dumps(score_payload["summary"], ensure_ascii=False),
-                    )
-        elif teacher_id is not None and not exam_value:
+                    if latest_version is None:
+                        grading_block = {
+                            "status": "resolution_error",
+                            "message": "exam has no published versions for grading",
+                        }
+                    else:
+                        resolved_exam_version_id = latest_version.id
+                        version_items = db.scalars(
+                            select(ExamVersionItem)
+                            .where(ExamVersionItem.exam_version_id == latest_version.id)
+                            .order_by(ExamVersionItem.question_number.asc())
+                        ).all()
+                        answer_key = build_answer_key_from_version_items(version_items)
+                        score_payload = grade_omr_questions(
+                            answer_key=answer_key,
+                            omr_questions=result.get("questions", []),
+                        )
+                        resolved_student_id = _resolve_student(db)
+                        grading_block = {
+                            "status": "graded",
+                            "teacher_id": teacher_id,
+                            "exam_id": exam.id,
+                            "exam_code": exam.exam_code,
+                            "exam_version_id": latest_version.id,
+                            "summary": score_payload["summary"],
+                            "details": score_payload["details"],
+                        }
+                        logger.info(
+                            "OMR grading summary | teacher_id=%s exam_id=%s version_id=%s summary=%s",
+                            teacher_id,
+                            exam.id,
+                            latest_version.id,
+                            json.dumps(score_payload["summary"], ensure_ascii=False),
+                        )
+        elif teacher_id is not None and not exam_value and exam_version_id is None:
             grading_block = {
                 "status": "resolution_error",
                 "message": "exam_identifier not detected in OMR auxiliary block",
@@ -231,6 +322,8 @@ async def read_photo_omr(
                 result_payload=result,
                 teacher_id=teacher_id,
                 exam_id=resolved_exam_id,
+                exam_version_id=resolved_exam_version_id,
+                student_id=resolved_student_id,
                 exam_code_detected=str(exam_value).strip() if exam_value else None,
                 grading_block=grading_block,
             )
@@ -334,6 +427,7 @@ def get_omr_attempt(attempt_id: int) -> dict:
             "attempt_id": attempt.id,
             "teacher_id": attempt.teacher_id,
             "exam_id": attempt.exam_id,
+            "exam_version_id": attempt.exam_version_id,
             "exam_code_detected": attempt.exam_code_detected,
             "status": attempt.status,
             "summary": {
@@ -351,6 +445,14 @@ def get_omr_attempt(attempt_id: int) -> dict:
                 "ratios_csv_path": attempt.ratios_csv_path,
                 "auxiliary_ratios_csv_path": attempt.auxiliary_ratios_csv_path,
             },
+            "student": {
+                "id": attempt.student_id,
+                "document_number": attempt.student.document_number if attempt.student else None,
+                "document_type": attempt.student.document_type if attempt.student else None,
+                "first_name": attempt.student.first_name if attempt.student else None,
+                "last_name": attempt.student.last_name if attempt.student else None,
+                "group_name": attempt.student.group_name if attempt.student else None,
+            },
             "answers": [
                 {
                     "question_number": row.question_number,
@@ -363,3 +465,40 @@ def get_omr_attempt(attempt_id: int) -> dict:
                 for row in answers
             ],
         }
+
+
+@router.get("/attempts")
+def list_omr_attempts(
+    teacher_id: int | None = Query(default=None, gt=0),
+    limit: int = Query(default=200, ge=1, le=1000),
+    offset: int = Query(default=0, ge=0),
+) -> list[dict]:
+    with SessionLocal() as db:
+        statement = select(OmrAttempt).order_by(OmrAttempt.id.desc()).limit(limit).offset(offset)
+        if teacher_id is not None:
+            statement = statement.where(OmrAttempt.teacher_id == teacher_id)
+        attempts = db.scalars(statement).all()
+        rows = []
+        for attempt in attempts:
+            rows.append(
+                {
+                    "attempt_id": attempt.id,
+                    "teacher_id": attempt.teacher_id,
+                    "exam_id": attempt.exam_id,
+                    "exam_code": attempt.exam.exam_code if attempt.exam else None,
+                    "exam_title": attempt.exam.title if attempt.exam else None,
+                    "exam_version_id": attempt.exam_version_id,
+                    "exam_version_code": attempt.exam_version.version_code if attempt.exam_version else None,
+                    "student_id": attempt.student_id,
+                    "student_name": (
+                        f"{attempt.student.first_name} {attempt.student.last_name}" if attempt.student else None
+                    ),
+                    "student_group": attempt.student.group_name if attempt.student else None,
+                    "status": attempt.status,
+                    "score_percent": attempt.score_percent,
+                    "manual_review_required": attempt.manual_review_required,
+                    "uploaded_image_path": attempt.uploaded_image_path,
+                    "created_at": attempt.created_at,
+                }
+            )
+        return rows

@@ -1,0 +1,22 @@
+import { API_BASE_URL } from './itemsApi';
+
+async function request(path) {
+  const response = await fetch(`${API_BASE_URL}${path}`);
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error(`HTTP ${response.status}: ${body}`);
+  }
+  return response.json();
+}
+
+export function listOmrAttempts({ teacherId, limit = 200, offset = 0 } = {}) {
+  const query = new URLSearchParams();
+  if (teacherId) query.append('teacher_id', teacherId);
+  query.append('limit', String(limit));
+  query.append('offset', String(offset));
+  return request(`/omr/attempts?${query.toString()}`);
+}
+
+export function getOmrAttempt(attemptId) {
+  return request(`/omr/attempts/${attemptId}`);
+}

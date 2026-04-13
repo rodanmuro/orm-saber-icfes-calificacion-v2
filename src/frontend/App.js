@@ -23,6 +23,7 @@ import {
 } from './src/config/api';
 import { checkHealth } from './src/services/health';
 import { sendPhotoToOcr } from './src/services/omrRead';
+import { listExams, listExamVersions } from './src/services/exams';
 
 export default function App() {
   const [apiBaseUrl, setApiBaseUrl] = useState(getApiBaseUrl());
@@ -33,6 +34,12 @@ export default function App() {
   const [photoPreviewVisible, setPhotoPreviewVisible] = useState(false);
   const [omrLoading, setOmrLoading] = useState(false);
   const [omrResult, setOmrResult] = useState(null);
+  const [teacherId, setTeacherId] = useState('1');
+  const [exams, setExams] = useState([]);
+  const [versions, setVersions] = useState([]);
+  const [selectedExam, setSelectedExam] = useState(null);
+  const [selectedVersion, setSelectedVersion] = useState(null);
+  const [loadingExams, setLoadingExams] = useState(false);
   const healthUrl = useMemo(() => buildHealthUrl(apiBaseUrl), [apiBaseUrl]);
   const omrReadUrl = useMemo(() => buildOcrReadUrl(apiBaseUrl), [apiBaseUrl]);
 
@@ -149,10 +156,18 @@ export default function App() {
     setOmrLoading(true);
     setOmrResult(null);
     try {
+      const optimized = await ImageManipulator.manipulateAsync(
+        photoUri,
+        [{ resize: { width: 900 } }],
+        { compress: 0.5, format: ImageManipulator.SaveFormat.JPEG }
+      );
       const response = await sendPhotoToOcr({
         endpointUrl: omrReadUrl,
-        photoUri,
+        photoUri: optimized.uri,
         metadataPath,
+        teacherId,
+        examId: selectedExam?.id,
+        examVersionId: selectedVersion?.id,
       });
       if (response.ok) {
         setOmrResult({
@@ -179,6 +194,56 @@ export default function App() {
       setOmrLoading(false);
     }
   }
+
+  async function handleLoadExams() {
+    if (!apiBaseUrl) {
+      setOmrResult({
+        type: 'error',
+        title: 'URL inválida',
+        detail: 'Configura URL base del backend antes de cargar examenes.',
+      });
+      return;
+    }
+    setLoadingExams(true);
+    setOmrResult(null);
+    try {
+      const data = await listExams({ baseUrl: apiBaseUrl, teacherId });
+      setExams(data);
+      setSelectedExam(null);
+      setVersions([]);
+      setSelectedVersion(null);
+    } catch (error) {
+      setOmrResult({
+        type: 'error',
+        title: 'No se pudieron cargar examenes',
+        detail: String(error?.message || error),
+      });
+    } finally {
+      setLoadingExams(false);
+    }
+  }
+
+  async function handleSelectExam(exam) {
+    setSelectedExam(exam);
+    setSelectedVersion(null);
+    setVersions([]);
+    if (!apiBaseUrl) return;
+    setLoadingExams(true);
+    try {
+      const data = await listExamVersions({ baseUrl: apiBaseUrl, examId: exam.id });
+      setVersions(data);
+    } catch (error) {
+      setOmrResult({
+        type: 'error',
+        title: 'No se pudieron cargar versiones',
+        detail: String(error?.message || error),
+      });
+    } finally {
+      setLoadingExams(false);
+    }
+  }
+
+
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -241,6 +306,83 @@ export default function App() {
             autoCorrect={false}
             placeholder="data/output/template_basica_omr_v1.json"
           />
+
+          <Text style={styles.label}>Docente (ID)</Text>
+          <TextInput
+            style={styles.input}
+            value={teacherId}
+            onChangeText={setTeacherId}
+            keyboardType="numeric"
+            placeholder="1"
+          />
+
+          <Pressable
+            onPress={handleLoadExams}
+            disabled={loadingExams}
+            style={[styles.secondaryButton, loadingExams && styles.buttonDisabled]}
+          >
+            {loadingExams ? (
+              <ActivityIndicator color="#ffffff" />
+            ) : (
+              <Text style={styles.secondaryButtonText}>Cargar examenes</Text>
+            )}
+          </Pressable>
+
+          {exams.length ? (
+            <View style={styles.selectionBox}>
+              <Text style={styles.label}>Examen</Text>
+              {exams.map((exam) => (
+                <Pressable
+                  key={exam.id}
+                  onPress={() => handleSelectExam(exam)}
+                  style={[
+                    styles.optionButton,
+                    selectedExam?.id === exam.id && styles.optionButtonActive,
+                  ]}
+                >
+                  <Text
+                    style={
+                      selectedExam?.id === exam.id
+                        ? styles.optionButtonTextActive
+                        : styles.optionButtonText
+                    }
+                  >
+                    #{exam.id} - {exam.title}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+          ) : null}
+
+          {selectedExam ? (
+            <View style={styles.selectionBox}>
+              <Text style={styles.label}>Version</Text>
+              {versions.length ? (
+                versions.map((version) => (
+                  <Pressable
+                    key={version.id}
+                    onPress={() => setSelectedVersion(version)}
+                    style={[
+                      styles.optionButton,
+                      selectedVersion?.id === version.id && styles.optionButtonActive,
+                    ]}
+                  >
+                    <Text
+                      style={
+                        selectedVersion?.id === version.id
+                          ? styles.optionButtonTextActive
+                          : styles.optionButtonText
+                      }
+                    >
+                      {version.version_code} (seed {version.seed_shuffle})
+                    </Text>
+                  </Pressable>
+                ))
+              ) : (
+                <Text style={styles.urlHint}>No hay versiones publicadas.</Text>
+              )}
+            </View>
+          ) : null}
 
           <Pressable onPress={handleTakePhoto} style={styles.secondaryButton}>
             <Text style={styles.secondaryButtonText}>Tomar foto</Text>
@@ -458,5 +600,31 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#1f2937',
     maxHeight: 240,
+  },
+  selectionBox: {
+    marginTop: 8,
+    gap: 6,
+  },
+  optionButton: {
+    borderWidth: 1,
+    borderColor: '#cbd5f5',
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    backgroundColor: '#eff6ff',
+  },
+  optionButtonActive: {
+    backgroundColor: '#1d4ed8',
+    borderColor: '#1d4ed8',
+  },
+  optionButtonText: {
+    color: '#1e3a8a',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  optionButtonTextActive: {
+    color: '#ffffff',
+    fontSize: 13,
+    fontWeight: '600',
   },
 });

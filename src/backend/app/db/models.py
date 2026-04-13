@@ -203,6 +203,12 @@ class OmrAttempt(Base):
     exam_id: Mapped[int | None] = mapped_column(
         ForeignKey("exam.id", ondelete="SET NULL"), nullable=True, index=True
     )
+    exam_version_id: Mapped[int | None] = mapped_column(
+        ForeignKey("exam_version.id", ondelete="SET NULL"), nullable=True, index=True
+    )
+    student_id: Mapped[int | None] = mapped_column(
+        ForeignKey("student.id", ondelete="SET NULL"), nullable=True, index=True
+    )
     exam_code_detected: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
     status: Mapped[str] = mapped_column(String(32), index=True)
     score_percent: Mapped[float | None] = mapped_column(Float, nullable=True)
@@ -220,6 +226,8 @@ class OmrAttempt(Base):
 
     teacher: Mapped[Teacher | None] = relationship(back_populates="omr_attempts")
     exam: Mapped[Exam | None] = relationship(back_populates="omr_attempts")
+    exam_version: Mapped[ExamVersion | None] = relationship()
+    student: Mapped[Student | None] = relationship()
     answers: Mapped[list[OmrAttemptAnswer]] = relationship(
         back_populates="attempt",
         cascade="all, delete-orphan",

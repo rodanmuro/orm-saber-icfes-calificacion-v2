@@ -17,6 +17,20 @@ def build_answer_key_from_exam_items(exam_items: list[Any]) -> list[dict[str, An
     return answer_key
 
 
+def build_answer_key_from_version_items(version_items: list[Any]) -> list[dict[str, Any]]:
+    answer_key: list[dict[str, Any]] = []
+    for row in version_items:
+        answer_key.append(
+            {
+                "question_number": int(row.question_number),
+                "order_position": int(row.question_number),
+                "item_id": int(row.item_id),
+                "correct_answer": str(row.correct_answer_mapped),
+            }
+        )
+    return answer_key
+
+
 def grade_omr_questions(
     answer_key: list[dict[str, Any]],
     omr_questions: list[dict[str, Any]],
@@ -80,4 +94,3 @@ def grade_omr_questions(
         },
         "details": details,
     }
-
