@@ -31,7 +31,11 @@ export default function ExamBuilder({
   onPublishVersion,
   onExportExamPdf,
   onExportExamDocx,
+  onViewVersionAnswerKey,
+  answerKeyModal,
+  onCloseAnswerKeyModal,
   exporting,
+  loadingAnswerKey,
   loading,
 }) {
   const [form, setForm] = useState(emptyExamForm(exams[0]?.teacher_id || 1));
@@ -242,6 +246,7 @@ export default function ExamBuilder({
                     <th>Seed</th>
                     <th>Preguntas barajadas</th>
                     <th>Opciones barajadas</th>
+                    <th>Accion</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -252,6 +257,15 @@ export default function ExamBuilder({
                       <td>{version.seed_shuffle}</td>
                       <td>{version.shuffle_questions ? 'Si' : 'No'}</td>
                       <td>{version.shuffle_options ? 'Si' : 'No'}</td>
+                      <td className="col-action">
+                        <button
+                          type="button"
+                          onClick={() => onViewVersionAnswerKey(selectedExam, version)}
+                          disabled={loadingAnswerKey}
+                        >
+                          {loadingAnswerKey ? 'Consultando...' : 'Ver respuestas correctas'}
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -470,6 +484,42 @@ export default function ExamBuilder({
                 <h5>Opcion D</h5>
                 <RichDocPreview value={storageToDoc(previewModalItem.options?.D)} />
               </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {answerKeyModal?.open ? (
+        <div className="preview-modal-overlay" onClick={onCloseAnswerKeyModal}>
+          <div className="preview-modal answer-key-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="preview-modal-header">
+              <h4>
+                Clave de respuestas - Examen #{answerKeyModal.exam?.id} ({answerKeyModal.exam?.exam_code})
+              </h4>
+              <button type="button" onClick={onCloseAnswerKeyModal}>Cerrar</button>
+            </div>
+            <p className="helper-text">
+              Version: {answerKeyModal.version?.version_code} | Seed: {answerKeyModal.version?.seed_shuffle}
+            </p>
+            <div className="table-wrap">
+              <table className="answer-key-table">
+                <thead>
+                  <tr>
+                    <th>Pregunta</th>
+                    <th>Respuesta correcta</th>
+                    <th>Item ID</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {answerKeyModal.rows.map((row) => (
+                    <tr key={`${row.question_number}-${row.item_id}`}>
+                      <td>{row.question_number}</td>
+                      <td>{row.correct_answer}</td>
+                      <td>{row.item_id}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>

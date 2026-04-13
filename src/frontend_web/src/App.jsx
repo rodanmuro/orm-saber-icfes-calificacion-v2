@@ -5,6 +5,7 @@ import {
   addItemToExam,
   createExam,
   getExam,
+  getExamVersion,
   listExams,
   listExamVersions,
   exportExamVersionPdf,
@@ -73,6 +74,13 @@ export default function App() {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [exporting, setExporting] = useState({ examId: null, format: null });
+  const [loadingAnswerKey, setLoadingAnswerKey] = useState(false);
+  const [answerKeyModal, setAnswerKeyModal] = useState({
+    open: false,
+    exam: null,
+    version: null,
+    rows: [],
+  });
 
   async function refreshItems() {
     setLoading(true);
@@ -371,6 +379,42 @@ export default function App() {
     }
   }
 
+  async function handleViewVersionAnswerKey(exam, version) {
+    setError('');
+    setMessage('');
+    setLoadingAnswerKey(true);
+    try {
+      const detail = await getExamVersion(exam.id, version.id);
+      const rows = (detail.items || [])
+        .map((row) => ({
+          question_number: row.question_number,
+          correct_answer: row.correct_answer_mapped,
+          item_id: row.item_id,
+        }))
+        .sort((a, b) => a.question_number - b.question_number);
+
+      setAnswerKeyModal({
+        open: true,
+        exam,
+        version,
+        rows,
+      });
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoadingAnswerKey(false);
+    }
+  }
+
+  function handleCloseAnswerKeyModal() {
+    setAnswerKeyModal({
+      open: false,
+      exam: null,
+      version: null,
+      rows: [],
+    });
+  }
+
   return (
     <div className="dashboard-shell">
       <aside className="dashboard-sidebar">
@@ -463,7 +507,11 @@ export default function App() {
             onPublishVersion={handlePublishExamVersion}
             onExportExamPdf={handleExportExamPdf}
             onExportExamDocx={handleExportExamDocx}
+            onViewVersionAnswerKey={handleViewVersionAnswerKey}
+            answerKeyModal={answerKeyModal}
+            onCloseAnswerKeyModal={handleCloseAnswerKeyModal}
             exporting={exporting}
+            loadingAnswerKey={loadingAnswerKey}
             loading={loadingExams}
           />
         ) : null}
