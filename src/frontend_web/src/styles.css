@@ -372,6 +372,21 @@ td {
   margin-left: 6px;
 }
 
+.col-export {
+  min-width: 170px;
+}
+
+.export-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.export-actions button {
+  min-width: 72px;
+  padding: 6px 10px;
+}
+
 .cell-truncate {
   display: inline-block;
   max-width: 240px;
@@ -439,6 +454,48 @@ th {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
+}
+
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(9, 20, 34, 0.45);
+  display: grid;
+  place-items: center;
+  z-index: 1600;
+}
+
+.loading-card {
+  background: #fff;
+  border: 1px solid #d4dde7;
+  border-radius: 12px;
+  padding: 16px 18px;
+  min-width: 290px;
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  box-shadow: 0 8px 24px rgba(8, 26, 46, 0.22);
+}
+
+.loading-card p {
+  margin: 0;
+  color: #204365;
+  font-size: 14px;
+}
+
+.loading-spinner {
+  width: 26px;
+  height: 26px;
+  border: 3px solid #c9d8ea;
+  border-top-color: #1f5f9d;
+  border-radius: 50%;
+  animation: spin-360 0.85s linear infinite;
+}
+
+@keyframes spin-360 {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .rich-doc-preview .tiptap-editor {

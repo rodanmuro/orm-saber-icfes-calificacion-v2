@@ -29,6 +29,9 @@ export default function ExamBuilder({
   onAddItem,
   onRemoveItem,
   onPublishVersion,
+  onExportExamPdf,
+  onExportExamDocx,
+  exporting,
   loading,
 }) {
   const [form, setForm] = useState(emptyExamForm(exams[0]?.teacher_id || 1));
@@ -164,30 +167,49 @@ export default function ExamBuilder({
       {loading ? <p>Cargando examenes...</p> : null}
       <div className="table-wrap">
         <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Code</th>
-              <th>Titulo</th>
-              <th>Accion</th>
-            </tr>
-          </thead>
-          <tbody>
-            {exams.map((exam) => (
-              <tr key={exam.id} className={selectedExam?.id === exam.id ? 'row-selected' : ''}>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Code</th>
+                    <th>Titulo</th>
+                    <th>Accion</th>
+                    <th>Exportar</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {exams.map((exam) => (
+                    <tr key={exam.id} className={selectedExam?.id === exam.id ? 'row-selected' : ''}>
                 <td>{exam.id}</td>
                 <td>{exam.exam_code}</td>
                 <td>{exam.title}</td>
-                <td>
+                      <td className="col-action">
                   <button type="button" onClick={() => onSelectExam(exam.id)}>
                     Abrir
                   </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                      </td>
+                      <td className="col-action col-export">
+                        <div className="export-actions">
+                          <button
+                            type="button"
+                            onClick={() => onExportExamPdf(exam)}
+                            disabled={exporting?.examId === exam.id}
+                          >
+                            {exporting?.examId === exam.id && exporting?.format === 'pdf' ? 'Generando...' : 'PDF'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => onExportExamDocx(exam)}
+                            disabled={exporting?.examId === exam.id}
+                          >
+                            {exporting?.examId === exam.id && exporting?.format === 'docx' ? 'Generando...' : 'DOCX'}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
       {selectedExam ? (
         <>

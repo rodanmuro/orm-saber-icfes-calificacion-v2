@@ -7,6 +7,8 @@ import {
   getExam,
   listExams,
   listExamVersions,
+  exportExamVersionPdf,
+  exportExamVersionDocx,
   publishExamVersion,
   removeItemFromExam,
 } from './api/examsApi';
@@ -70,6 +72,7 @@ export default function App() {
   const [examVersions, setExamVersions] = useState([]);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [exporting, setExporting] = useState({ examId: null, format: null });
 
   async function refreshItems() {
     setLoading(true);
@@ -326,6 +329,48 @@ export default function App() {
     }
   }
 
+  async function handleExportExamPdf(exam) {
+    setError('');
+    setMessage('');
+    setExporting({ examId: exam.id, format: 'pdf' });
+    try {
+      const versions = await listExamVersions(exam.id);
+      if (!versions.length) throw new Error('El examen no tiene versiones publicadas.');
+      const latest = versions[versions.length - 1];
+      await exportExamVersionPdf(
+        exam.id,
+        latest.id,
+        `cuadernillo_exam_${exam.exam_code}_${latest.version_code}.pdf`
+      );
+      setMessage(`PDF descargado para examen #${exam.id} versión ${latest.version_code}.`);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setExporting({ examId: null, format: null });
+    }
+  }
+
+  async function handleExportExamDocx(exam) {
+    setError('');
+    setMessage('');
+    setExporting({ examId: exam.id, format: 'docx' });
+    try {
+      const versions = await listExamVersions(exam.id);
+      if (!versions.length) throw new Error('El examen no tiene versiones publicadas.');
+      const latest = versions[versions.length - 1];
+      await exportExamVersionDocx(
+        exam.id,
+        latest.id,
+        `cuadernillo_exam_${exam.exam_code}_${latest.version_code}.docx`
+      );
+      setMessage(`DOCX descargado para examen #${exam.id} versión ${latest.version_code}.`);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setExporting({ examId: null, format: null });
+    }
+  }
+
   return (
     <div className="dashboard-shell">
       <aside className="dashboard-sidebar">
@@ -416,10 +461,23 @@ export default function App() {
             onAddItem={handleAddItemToExam}
             onRemoveItem={handleRemoveItemFromExam}
             onPublishVersion={handlePublishExamVersion}
+            onExportExamPdf={handleExportExamPdf}
+            onExportExamDocx={handleExportExamDocx}
+            exporting={exporting}
             loading={loadingExams}
           />
         ) : null}
       </main>
+      {exporting.examId ? (
+        <div className="loading-overlay" role="status" aria-live="polite">
+          <div className="loading-card">
+            <div className="loading-spinner" />
+            <p>
+              Generando exportación {exporting.format?.toUpperCase()} del examen #{exporting.examId}...
+            </p>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

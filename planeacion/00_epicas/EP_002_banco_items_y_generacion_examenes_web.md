@@ -14,7 +14,9 @@ Implementar un modulo web para docentes que permita crear, gestionar y versionar
 - Habilitar variacion de examen mediante:
   - cambio de orden de preguntas,
   - barajado de opciones por pregunta.
-- Exportar examen a formato imprimible compatible con aplicacion OMR.
+- Exportar cuadernillo de examen a formatos de salida para aplicacion en aula:
+  - PDF imprimible por version publicada.
+  - DOCX editable por version publicada.
 
 ## Fuera de alcance
 - Autenticacion/autorizacion completa.
@@ -27,7 +29,7 @@ Implementar un modulo web para docentes que permita crear, gestionar y versionar
 - API backend para CRUD de items, examenes y versiones.
 - Modelo de datos inicial para banco de items y versiones de examen.
 - Flujo reproducible para publicar una version de examen con orden/opciones definidos.
-- Evidencia de exportacion de examen apto para aplicacion en hoja OMR.
+- Evidencia de exportacion de cuadernillo por version (PDF/DOCX).
 
 ## Restricciones tecnicas
 - Backend unico en FastAPI.
