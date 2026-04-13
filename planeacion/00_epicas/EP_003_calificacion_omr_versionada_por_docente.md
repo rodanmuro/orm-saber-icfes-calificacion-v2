@@ -20,6 +20,8 @@ Extender el flujo de calificacion OMR para evaluar hojas contra versiones public
   - respuestas marcadas,
   - ambiguedades,
   - rutas de artefactos (imagen, result.json, ratios).
+- Permitir en interfaz movil seleccionar examen y version (sin perfiles) y enviar intento a backend.
+- Exponer en frontend web un tablero de "Examenes calificados" con detalle de intentos.
 - Mantener compatibilidad del flujo actual de lectura OMR como base tecnica.
 
 ## Fuera de alcance
@@ -33,6 +35,8 @@ Extender el flujo de calificacion OMR para evaluar hojas contra versiones public
 - API backend para registrar intentos y consultar resultados.
 - Flujo backend de calificacion por version de examen.
 - Persistencia de trazabilidad por intento OMR.
+- UI movil para seleccionar examen/version y enviar intento de calificacion.
+- UI web para listar intentos calificados y revisar evidencia/imagenes.
 - Casos de prueba de calificacion correcta con versiones distintas del mismo examen.
 
 ## Restricciones tecnicas
@@ -47,3 +51,5 @@ Extender el flujo de calificacion OMR para evaluar hojas contra versiones public
 3. La calificacion funciona aun cuando las opciones fueron barajadas en la version aplicada.
 4. Se almacenan evidencias tecnicas del intento para auditoria.
 5. El resultado puede consultarse de forma estructurada por intento y por examen/version.
+6. La app movil permite elegir examen y version antes de calificar (docente por defecto).
+7. El frontend web muestra intentos calificados con opciones de ver detalle e imagen.

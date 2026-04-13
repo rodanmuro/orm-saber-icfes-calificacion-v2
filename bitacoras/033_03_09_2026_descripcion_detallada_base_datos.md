@@ -46,6 +46,7 @@
   - historial de intentos y respuestas del intento.
 - Integrar esta documentacion con actividades de integracion total EP_003 (calificacion por docente + version).
 - Definir y documentar criterio de seleccion de clave al momento de calificar OMR cuando exista version publicada.
+- Actualizar este documento cuando se agreguen nuevos campos estructurales relevantes (por ejemplo, datos de estudiante y grupo).
 
 *(Agregar enlaces a archivos clave o referencias adicionales si aplica.)*
 
@@ -74,6 +75,7 @@ Este sistema guarda la informacion en varios bloques que trabajan juntos, como s
 - Cada version (`exam_version`) tiene su detalle por pregunta en `exam_version_item`.
 - Cada intento OMR (`omr_attempt`) puede vincularse con un docente y un examen, y tiene sus respuestas por pregunta en `omr_attempt_answer`.
 - Una pregunta (`item`) puede vincularse opcionalmente a un estandar (`standard`) y a una competencia (`competency`).
+- Cada estudiante (`student`) ahora tambien tiene un **grupo** (`group_name`) para clasificacion escolar interna.
 
 ### Donde vive la respuesta correcta
 
@@ -99,6 +101,11 @@ En palabras simples: la pregunta original tiene una correcta, pero si se cambian
 
 - El codigo que identifica el examen para operar en el flujo (`exam_code`) se guarda en la entidad de examenes.
 - Ese codigo se interpreta junto con el docente, para evitar choques entre examenes de docentes diferentes.
+
+### Grupo del estudiante (nuevo)
+
+- Se agrego `student.group_name` como texto corto **obligatorio** para registrar el grupo del estudiante.
+- Este dato alimenta el tablero de **Examenes calificados** y permite filtrar resultados por grupo.
 
 ---
 
