@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { createItem, deleteItem, getItem, listItems, updateItem, API_BASE_URL } from './api/itemsApi';
+import { listStudents } from './api/studentsApi';
 import {
   addItemToExam,
   createExam,
@@ -17,6 +18,7 @@ import ExamBuilder from './components/ExamBuilder';
 import FiltersBar from './components/FiltersBar';
 import ItemForm, { emptyForm, formToPayload, itemToForm } from './components/ItemForm';
 import ItemList from './components/ItemList';
+import StudentList from './components/StudentList';
 import { docHasMeaningfulContent } from './utils/editorDoc';
 
 
@@ -81,6 +83,10 @@ export default function App() {
     version: null,
     rows: [],
   });
+  const [students, setStudents] = useState([]);
+  const [loadingStudents, setLoadingStudents] = useState(false);
+  const [studentFilters, setStudentFilters] = useState({ query: '', group: '' });
+  const [studentSortKey, setStudentSortKey] = useState('id_asc');
 
   async function refreshItems() {
     setLoading(true);
@@ -95,9 +101,29 @@ export default function App() {
     }
   }
 
+  async function refreshStudents() {
+    setLoadingStudents(true);
+    setError('');
+    try {
+      const data = await listStudents();
+      setStudents(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoadingStudents(false);
+    }
+  }
+
   useEffect(() => {
     refreshItems();
   }, []);
+
+  useEffect(() => {
+    if (activeTab === 'students') {
+      refreshStudents();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]);
 
   const filteredItems = useMemo(() => filterItems(items, filters), [items, filters]);
 
@@ -440,6 +466,13 @@ export default function App() {
         >
           Armado de examen
         </button>
+        <button
+          type="button"
+          className={activeTab === 'students' ? 'tab-btn active' : 'tab-btn'}
+          onClick={() => setActiveTab('students')}
+        >
+          Estudiantes
+        </button>
       </aside>
 
       <main className="dashboard-main">
@@ -514,6 +547,59 @@ export default function App() {
             loadingAnswerKey={loadingAnswerKey}
             loading={loadingExams}
           />
+        ) : null}
+
+        {activeTab === 'students' ? (
+          <section className="single-pane">
+            {loadingStudents ? <p>Cargando estudiantes...</p> : null}
+            <section className="card">
+              <h3>Filtros</h3>
+              <div className="grid grid-3">
+                <label>
+                  Buscar (nombre, correo, documento, UUID)
+                  <input
+                    value={studentFilters.query}
+                    onChange={(e) => setStudentFilters({ ...studentFilters, query: e.target.value })}
+                    placeholder="Ej: maria, 1032, @cevu.edu.co"
+                  />
+                </label>
+                <label>
+                  Grupo
+                  <input
+                    value={studentFilters.group}
+                    onChange={(e) => setStudentFilters({ ...studentFilters, group: e.target.value })}
+                    placeholder="Ej: 11A2026"
+                  />
+                </label>
+                <label>
+                  Ordenar por
+                  <select
+                    value={studentSortKey}
+                    onChange={(e) => setStudentSortKey(e.target.value)}
+                  >
+                    <option value="id_asc">ID (asc)</option>
+                    <option value="id_desc">ID (desc)</option>
+                    <option value="apellido_asc">Apellido (A-Z)</option>
+                    <option value="apellido_desc">Apellido (Z-A)</option>
+                    <option value="grupo_asc">Grupo (A-Z)</option>
+                    <option value="grupo_desc">Grupo (Z-A)</option>
+                    <option value="documento_asc">Documento (asc)</option>
+                    <option value="documento_desc">Documento (desc)</option>
+                  </select>
+                </label>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setStudentFilters({ query: '', group: '' });
+                  setStudentSortKey('id_asc');
+                }}
+              >
+                Limpiar filtros
+              </button>
+            </section>
+            <StudentList students={students} filters={studentFilters} sortKey={studentSortKey} />
+          </section>
         ) : null}
       </main>
       {exporting.examId ? (
