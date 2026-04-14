@@ -10,9 +10,15 @@ export default function AttemptList({
   filters,
   statusOptions,
   groupOptions,
+  thresholds,
+  savingThresholds,
   onFilterChange,
+  onThresholdChange,
+  onThresholdBlur,
   onView,
   onViewImage,
+  onViewRatios,
+  onViewOverlay,
 }) {
   return (
     <section className="card">
@@ -55,7 +61,34 @@ export default function AttemptList({
             ))}
           </select>
         </label>
+        <label>
+          Umbral marcada
+          <input
+            type="number"
+            step="0.01"
+            min="0"
+            max="1"
+            value={thresholds.marked}
+            onChange={(event) => onThresholdChange('marked', event.target.value)}
+            onBlur={onThresholdBlur}
+          />
+        </label>
+        <label>
+          Umbral no marcada
+          <input
+            type="number"
+            step="0.01"
+            min="0"
+            max="1"
+            value={thresholds.unmarked}
+            onChange={(event) => onThresholdChange('unmarked', event.target.value)}
+            onBlur={onThresholdBlur}
+          />
+        </label>
       </div>
+      <p className="helper-text">
+        Los nuevos umbrales aplican a lecturas futuras. {savingThresholds ? 'Guardando...' : ''}
+      </p>
       <div className="table-wrap">
         <table>
           <thead>
@@ -74,7 +107,7 @@ export default function AttemptList({
           </thead>
           <tbody>
             {attempts.map((row) => (
-              <tr key={row.attempt_id}>
+              <tr key={row.attempt_id} className={row.status === 'needs_review' ? 'row-needs-review' : undefined}>
                 <td>{row.attempt_id}</td>
                 <td>{row.exam_id || '-'}</td>
                 <td>{row.exam_version_code || '-'}</td>
@@ -87,6 +120,12 @@ export default function AttemptList({
                 <td className="col-action">
                   <button type="button" onClick={() => onView(row)}>
                     Ver
+                  </button>
+                  <button type="button" onClick={() => onViewRatios(row)}>
+                    Ratios
+                  </button>
+                  <button type="button" onClick={() => onViewOverlay(row)}>
+                    Overlay
                   </button>
                   <button
                     type="button"

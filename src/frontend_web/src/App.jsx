@@ -2,7 +2,16 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { createItem, deleteItem, getItem, listItems, updateItem, API_BASE_URL } from './api/itemsApi';
 import { listStudents } from './api/studentsApi';
-import { getOmrAttempt, listOmrAttempts, updateOmrAttemptAnswers } from './api/omrApi';
+import {
+  getOmrAttempt,
+  listOmrAttempts,
+  updateOmrAttemptAnswers,
+  getOmrAttemptRatios,
+  getOmrAttemptOverlay,
+  assignOmrAttempt,
+  getOmrThresholds,
+  updateOmrThresholds,
+} from './api/omrApi';
 import {
   addItemToExam,
   createExam,
@@ -93,11 +102,22 @@ export default function App() {
   const [loadingAttempts, setLoadingAttempts] = useState(false);
   const [attemptModal, setAttemptModal] = useState({ open: false, detail: null });
   const [attemptImage, setAttemptImage] = useState(null);
+  const [attemptRatios, setAttemptRatios] = useState({ open: false, detail: null });
+  const [attemptOverlay, setAttemptOverlay] = useState({ open: false, detail: null, image: null });
+  const [assignExamId, setAssignExamId] = useState('');
+  const [assignExamCode, setAssignExamCode] = useState('');
+  const [assignVersionId, setAssignVersionId] = useState('');
+  const [assignStudentId, setAssignStudentId] = useState('');
+  const [assignStudentQuery, setAssignStudentQuery] = useState('');
+  const [assignDocumentNumber, setAssignDocumentNumber] = useState('');
+  const [assigningAttempt, setAssigningAttempt] = useState(false);
   const [attemptEdits, setAttemptEdits] = useState({});
   const [savingAttempt, setSavingAttempt] = useState(false);
   const [pendingAttemptSave, setPendingAttemptSave] = useState(false);
   const attemptEditsRef = useRef({});
   const [attemptFilters, setAttemptFilters] = useState({ query: '', status: '', group: '' });
+  const [omrThresholds, setOmrThresholds] = useState({ marked: '0.32', unmarked: '0.30' });
+  const [savingThresholds, setSavingThresholds] = useState(false);
 
   async function refreshItems() {
     setLoading(true);
@@ -139,6 +159,7 @@ export default function App() {
   useEffect(() => {
     if (activeTab === 'graded') {
       refreshAttempts();
+      refreshThresholds();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
@@ -165,11 +186,28 @@ export default function App() {
     }
   }
 
+  async function refreshThresholds() {
+    setError('');
+    try {
+      const data = await getOmrThresholds();
+      setOmrThresholds({
+        marked: String(data.marked ?? ''),
+        unmarked: String(data.unmarked ?? ''),
+      });
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
   function buildManualValue(row) {
     if (row.manual_override) {
       return row.manual_answer ? row.manual_answer : '__blank__';
     }
     return '';
+  }
+
+  function formatStudentOption(student) {
+    return `${student.document_number} - ${student.first_name} ${student.last_name}`;
   }
 
   async function handleViewAttempt(row) {
@@ -183,6 +221,34 @@ export default function App() {
       });
       setAttemptEdits(nextEdits);
       attemptEditsRef.current = nextEdits;
+      const teacherId = detail.teacher_id || 1;
+      if (exams.length === 0) {
+        const data = await listExams(teacherId);
+        setExams(data);
+      }
+      if (students.length === 0) {
+        const data = await listStudents({ limit: 500 });
+        setStudents(data);
+      }
+      if (detail.exam_id) {
+        setAssignExamId(String(detail.exam_id));
+        const versions = await listExamVersions(detail.exam_id);
+        setExamVersions(versions);
+        setAssignVersionId(detail.exam_version_id ? String(detail.exam_version_id) : '');
+      } else {
+        setAssignExamId('');
+        setAssignVersionId('');
+      }
+      setAssignExamCode(detail.exam_code_detected || '');
+      setAssignStudentId(detail.student?.id ? String(detail.student.id) : '');
+      if (detail.student?.id && detail.student?.document_number) {
+        setAssignStudentQuery(
+          `${detail.student.document_number} - ${detail.student.first_name || ''} ${detail.student.last_name || ''}`.trim()
+        );
+      } else {
+        setAssignStudentQuery('');
+      }
+      setAssignDocumentNumber(detail.student?.document_number || '');
     } catch (err) {
       setError(err.message);
     }
@@ -241,35 +307,110 @@ export default function App() {
     return saveAttemptEdits(attemptEdits, null);
   }
 
-  function handleViewAttemptImage(row) {
-    if (!row.uploaded_image_path) return;
-    const raw = String(row.uploaded_image_path);
+  function mapAssetUrl(pathValue) {
+    if (!pathValue) return null;
+    const raw = String(pathValue);
     if (raw.startsWith('http://') || raw.startsWith('https://')) {
-      setAttemptImage(raw);
-      return;
+      return raw;
     }
     if (raw.includes('/data/input/')) {
       const idx = raw.indexOf('/data/input/');
       const relative = raw.slice(idx + '/data/input/'.length);
       const base = API_BASE_URL.replace(/\/api\/v1\/?$/, '');
-      setAttemptImage(`${base}/assets/${relative}`);
-      return;
+      return `${base}/assets/${relative}`;
     }
     const base = API_BASE_URL.replace(/\/api\/v1\/?$/, '');
     if (raw.startsWith('/assets/')) {
-      setAttemptImage(`${base}${raw}`);
-      return;
+      return `${base}${raw}`;
     }
     if (raw.startsWith('assets/')) {
-      setAttemptImage(`${base}/${raw}`);
-      return;
+      return `${base}/${raw}`;
     }
     if (raw.startsWith('data/input/')) {
       const relative = raw.replace(/^data\/input\//, '');
-      setAttemptImage(`${base}/assets/${relative}`);
+      return `${base}/assets/${relative}`;
+    }
+    return `${base}/assets/${raw}`;
+  }
+
+  function handleViewAttemptImage(row) {
+    if (!row.uploaded_image_path) return;
+    const mapped = mapAssetUrl(row.uploaded_image_path);
+    if (mapped) setAttemptImage(mapped);
+  }
+
+  async function handleViewAttemptRatios(row) {
+    setError('');
+    try {
+      const detail = await getOmrAttemptRatios(row.attempt_id);
+      setAttemptRatios({ open: true, detail });
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
+  async function handleViewAttemptOverlay(row) {
+    setError('');
+    try {
+      const detail = await getOmrAttemptOverlay(row.attempt_id);
+      const mapped = mapAssetUrl(detail.aligned_image_path);
+      setAttemptOverlay({ open: true, detail, image: mapped });
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
+  async function handleAssignExamChange(value) {
+    setAssignExamId(value);
+    setAssignVersionId('');
+    if (!value) {
+      setExamVersions([]);
       return;
     }
-    setAttemptImage(`${base}/assets/${raw}`);
+    try {
+      const versions = await listExamVersions(Number(value));
+      setExamVersions(versions);
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
+  function handleAssignStudentQueryChange(value) {
+    setAssignStudentQuery(value);
+    const normalized = value.trim().toLowerCase();
+    if (!normalized) {
+      setAssignStudentId('');
+      return;
+    }
+    const matched = students.find((student) => formatStudentOption(student).toLowerCase() === normalized);
+    if (matched) {
+      setAssignStudentId(String(matched.id));
+      setAssignDocumentNumber(matched.document_number || '');
+      return;
+    }
+    setAssignStudentId('');
+  }
+
+  async function handleApplyAssignment() {
+    if (!attemptModal.detail) return;
+    setAssigningAttempt(true);
+    setError('');
+    try {
+      const payload = {
+        exam_id: assignExamId ? Number(assignExamId) : null,
+        exam_code: assignExamCode || null,
+        exam_version_id: assignVersionId ? Number(assignVersionId) : null,
+        student_id: assignStudentId ? Number(assignStudentId) : null,
+        document_number: assignDocumentNumber || null,
+      };
+      const updated = await assignOmrAttempt(attemptModal.detail.attempt_id, payload);
+      setAttemptModal({ open: true, detail: updated });
+      refreshAttempts();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setAssigningAttempt(false);
+    }
   }
 
   function closeAttemptModal() {
@@ -277,10 +418,52 @@ export default function App() {
     setAttemptEdits({});
     attemptEditsRef.current = {};
     setPendingAttemptSave(false);
+    setAssignExamId('');
+    setAssignExamCode('');
+    setAssignVersionId('');
+    setAssignStudentId('');
+    setAssignStudentQuery('');
+    setAssignDocumentNumber('');
   }
 
   function closeAttemptImage() {
     setAttemptImage(null);
+  }
+
+  function closeAttemptRatios() {
+    setAttemptRatios({ open: false, detail: null });
+  }
+
+  function closeAttemptOverlay() {
+    setAttemptOverlay({ open: false, detail: null, image: null });
+  }
+
+  function handleThresholdChange(field, value) {
+    setOmrThresholds((prev) => ({ ...prev, [field]: value }));
+  }
+
+  async function handleThresholdBlur() {
+    const marked = Number(omrThresholds.marked);
+    const unmarked = Number(omrThresholds.unmarked);
+    if (Number.isNaN(marked) || Number.isNaN(unmarked)) {
+      setError('Los umbrales deben ser numéricos.');
+      return;
+    }
+    setSavingThresholds(true);
+    setError('');
+    try {
+      const data = await updateOmrThresholds({ marked, unmarked });
+      setOmrThresholds({
+        marked: String(data.marked),
+        unmarked: String(data.unmarked),
+      });
+      setMessage(`Umbrales actualizados: marcada=${data.marked}, no marcada=${data.unmarked}`);
+    } catch (err) {
+      setError(err.message);
+      refreshThresholds();
+    } finally {
+      setSavingThresholds(false);
+    }
   }
 
   const filteredItems = useMemo(() => filterItems(items, filters), [items, filters]);
@@ -814,9 +997,15 @@ export default function App() {
               filters={attemptFilters}
               statusOptions={attemptStatusOptions}
               groupOptions={attemptGroupOptions}
+              thresholds={omrThresholds}
+              savingThresholds={savingThresholds}
               onFilterChange={setAttemptFilters}
+              onThresholdChange={handleThresholdChange}
+              onThresholdBlur={handleThresholdBlur}
               onView={handleViewAttempt}
               onViewImage={handleViewAttemptImage}
+              onViewRatios={handleViewAttemptRatios}
+              onViewOverlay={handleViewAttemptOverlay}
             />
           </section>
         ) : null}
@@ -848,23 +1037,86 @@ export default function App() {
               </button>
               <span className="helper-text">Los cambios se guardan automaticamente al cambiar el selector.</span>
             </div>
+            <div className="assign-grid">
+              <label>
+                Examen (selector)
+                <select value={assignExamId} onChange={(e) => handleAssignExamChange(e.target.value)}>
+                  <option value="">Selecciona examen</option>
+                  {exams.map((exam) => (
+                    <option key={exam.id} value={exam.id}>
+                      {exam.exam_code} - {exam.title}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                Version
+                <select value={assignVersionId} onChange={(e) => setAssignVersionId(e.target.value)}>
+                  <option value="">Ultima version</option>
+                  {examVersions.map((version) => (
+                    <option key={version.id} value={version.id}>
+                      {version.version_code}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                Exam code (manual)
+                <input
+                  type="text"
+                  value={assignExamCode}
+                  onChange={(e) => setAssignExamCode(e.target.value)}
+                  placeholder="Ej: 1"
+                />
+              </label>
+              <label>
+                Estudiante (autocompletar)
+                <input
+                  type="text"
+                  list="students-attempt-assign-list"
+                  value={assignStudentQuery}
+                  onChange={(e) => handleAssignStudentQueryChange(e.target.value)}
+                  placeholder="Busca por documento o nombre"
+                />
+                <datalist id="students-attempt-assign-list">
+                  {students.map((student) => (
+                    <option key={student.id} value={formatStudentOption(student)} />
+                  ))}
+                </datalist>
+              </label>
+              <label>
+                Documento (manual)
+                <input
+                  type="text"
+                  value={assignDocumentNumber}
+                  onChange={(e) => setAssignDocumentNumber(e.target.value)}
+                  placeholder="Documento"
+                />
+              </label>
+              <button type="button" onClick={handleApplyAssignment} disabled={assigningAttempt}>
+                {assigningAttempt ? 'Asignando...' : 'Aplicar asignacion'}
+              </button>
+            </div>
             <div className="table-wrap">
               <table>
                 <thead>
                   <tr>
                     <th>Pregunta</th>
-                    <th>Correcta</th>
                     <th>Detectada</th>
+                    <th>Correcta</th>
                     <th>Correccion</th>
                     <th>Final</th>
                   </tr>
                 </thead>
                 <tbody>
                   {attemptModal.detail.answers.map((row) => (
-                    <tr key={row.question_number}>
+                    <tr
+                      key={row.question_number}
+                      className={!row.marked_answer ? 'row-unmarked' : undefined}
+                    >
                       <td>{row.question_number}</td>
-                      <td>{row.correct_answer || '-'}</td>
                       <td>{row.marked_answer || '-'}</td>
+                      <td>{row.correct_answer || '-'}</td>
                       <td>
                         <select
                           value={attemptEdits[row.question_number] ?? ''}
@@ -911,6 +1163,134 @@ export default function App() {
               <button type="button" onClick={closeAttemptImage}>Cerrar</button>
             </div>
             <img src={attemptImage} alt="omr" style={{ width: '100%', borderRadius: 8 }} />
+          </div>
+        </div>
+      ) : null}
+
+      {attemptRatios.open && attemptRatios.detail ? (
+        <div className="preview-modal-overlay" onClick={closeAttemptRatios}>
+          <div className="preview-modal ratios-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="preview-modal-header">
+              <h4>Ratios lectura OMR</h4>
+              <button type="button" onClick={closeAttemptRatios}>Cerrar</button>
+            </div>
+            <div className="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Pregunta</th>
+                    <th>A</th>
+                    <th>B</th>
+                    <th>C</th>
+                    <th>D</th>
+                    <th>Top1</th>
+                    <th>Top2</th>
+                    <th>Margin</th>
+                    <th>Marcadas</th>
+                    <th>Ambiguas</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {attemptRatios.detail.question_ratios.map((row) => (
+                    <tr key={row.question_number}>
+                      <td>{row.question_number}</td>
+                      <td>{row.ratios?.A ?? '-'}</td>
+                      <td>{row.ratios?.B ?? '-'}</td>
+                      <td>{row.ratios?.C ?? '-'}</td>
+                      <td>{row.ratios?.D ?? '-'}</td>
+                      <td>
+                        {row.top1_label || '-'} {row.top1_ratio ? `(${row.top1_ratio})` : ''}
+                      </td>
+                      <td>
+                        {row.top2_label || '-'} {row.top2_ratio ? `(${row.top2_ratio})` : ''}
+                      </td>
+                      <td>{row.margin ?? '-'}</td>
+                      <td>{row.marked_options || '-'}</td>
+                      <td>{row.ambiguous_options || '-'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <details className="ratios-details">
+              <summary>Ratios auxiliares</summary>
+              <div className="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      {attemptRatios.detail.auxiliary_ratios[0]
+                        ? Object.keys(attemptRatios.detail.auxiliary_ratios[0]).map((key) => (
+                            <th key={key}>{key}</th>
+                          ))
+                        : null}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {attemptRatios.detail.auxiliary_ratios.map((row, idx) => {
+                      const fillRatio = Number(row.fill_ratio);
+                      const top1Ratio = Number(row.top1_ratio);
+                      const highlightTop =
+                        Number.isFinite(fillRatio) &&
+                        Number.isFinite(top1Ratio) &&
+                        Math.abs(fillRatio - top1Ratio) < 1e-6;
+                      return (
+                        <tr key={idx} className={highlightTop ? 'row-top-ratio' : undefined}>
+                          {Object.values(row).map((value, colIdx) => (
+                            <td key={colIdx}>{value}</td>
+                          ))}
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </details>
+          </div>
+        </div>
+      ) : null}
+
+      {attemptOverlay.open && attemptOverlay.detail ? (
+        <div className="preview-modal-overlay" onClick={closeAttemptOverlay}>
+          <div className="preview-modal overlay-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="preview-modal-header">
+              <h4>Overlay respuestas</h4>
+              <button type="button" onClick={closeAttemptOverlay}>Cerrar</button>
+            </div>
+            {!attemptOverlay.image ? (
+              <p className="helper-text">No hay imagen alineada disponible.</p>
+            ) : (
+              <div className="overlay-container">
+                <img className="overlay-image" src={attemptOverlay.image} alt="omr aligned" />
+                <svg
+                  className="overlay-svg"
+                  viewBox={`0 0 ${attemptOverlay.detail.page_width_px || 1} ${attemptOverlay.detail.page_height_px || 1}`}
+                  preserveAspectRatio="xMidYMid meet"
+                >
+                  {attemptOverlay.detail.questions.flatMap((question) =>
+                    question.options
+                      .filter((option) => option.is_correct || option.is_effective)
+                      .map((option) => {
+                        const size = option.r * 2.6;
+                        const x = option.cx - size / 2;
+                        const y = option.cy - size / 2;
+                        const color = option.is_correct ? '#1b7d3a' : '#b81d1d';
+                        return (
+                          <rect
+                            key={`${question.question_number}-${option.label}-${color}`}
+                            x={x}
+                            y={y}
+                            width={size}
+                            height={size}
+                            fill="none"
+                            stroke={color}
+                            strokeWidth={6}
+                          />
+                        );
+                      })
+                  )}
+                </svg>
+              </div>
+            )}
           </div>
         </div>
       ) : null}

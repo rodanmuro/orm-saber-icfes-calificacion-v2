@@ -156,11 +156,11 @@ export default function App() {
     setOmrLoading(true);
     setOmrResult(null);
     try {
-      const optimized = await ImageManipulator.manipulateAsync(
-        photoUri,
-        [{ resize: { width: 900 } }],
-        { compress: 0.5, format: ImageManipulator.SaveFormat.JPEG }
-      );
+    const optimized = await ImageManipulator.manipulateAsync(
+      photoUri,
+      [{ resize: { width: 900 } }],
+      { compress: 0.6, format: ImageManipulator.SaveFormat.JPEG }
+    );
       const response = await sendPhotoToOcr({
         endpointUrl: omrReadUrl,
         photoUri: optimized.uri,

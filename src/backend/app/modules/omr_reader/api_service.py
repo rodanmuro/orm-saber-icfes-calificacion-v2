@@ -149,6 +149,11 @@ def _run_classic_omr_read_from_image_bytes(*, request: OMRReadRequest) -> dict[s
         metadata=metadata,
         px_per_mm=request.px_per_mm,
     )
+    aligned_path = persist_aligned_image(
+        aligned_image=aligned.aligned_image,
+        debug_base_name=request.debug_base_name,
+        uploads_dir=DEFAULT_UPLOADS_DIR,
+    )
     debug_artifacts: dict[str, np.ndarray] | None = {} if request.save_debug_artifacts else None
     bubbles = classify_bubbles(
         aligned_image=aligned.aligned_image,
@@ -178,6 +183,10 @@ def _run_classic_omr_read_from_image_bytes(*, request: OMRReadRequest) -> dict[s
         "detected_marker_ids": aligned.detected_marker_ids,
         "robust_mode": request.robust_mode,
         "auxiliary_summary": auxiliary.get("summary", {}),
+        "aligned_image_path": str(aligned_path),
+        "px_per_mm": request.px_per_mm,
+        "page_width_mm": metadata.get("page", {}).get("width_mm"),
+        "page_height_mm": metadata.get("page", {}).get("height_mm"),
     }
     if request.save_debug_artifacts:
         debug_paths = persist_debug_artifacts(
@@ -464,6 +473,22 @@ def persist_debug_artifacts(
         cv2.imwrite(str(binary_path), binary_inv)
         output["binary_inv"] = binary_path
     return output
+
+
+def persist_aligned_image(
+    *,
+    aligned_image: np.ndarray,
+    debug_base_name: str | None,
+    uploads_dir: str = DEFAULT_UPLOADS_DIR,
+) -> Path:
+    out_dir = resolve_backend_relative_path(uploads_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    prefix = debug_base_name or f"omr_{stamp}_{uuid4().hex[:8]}"
+    aligned_path = out_dir / f"{prefix}.aligned.jpg"
+    cv2.imwrite(str(aligned_path), aligned_image)
+    return aligned_path
 
 
 def resolve_backend_relative_path(path_value: str) -> Path:

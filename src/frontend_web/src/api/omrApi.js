@@ -39,3 +39,29 @@ export function updateOmrAttemptAnswers(attemptId, answers) {
     body: JSON.stringify({ answers }),
   });
 }
+
+export function getOmrAttemptRatios(attemptId) {
+  return request(`/omr/attempts/${attemptId}/ratios`);
+}
+
+export function getOmrAttemptOverlay(attemptId) {
+  return request(`/omr/attempts/${attemptId}/overlay`);
+}
+
+export function assignOmrAttempt(attemptId, payload) {
+  return requestJson(`/omr/attempts/${attemptId}/assign`, {
+    method: 'PATCH',
+    body: JSON.stringify(payload),
+  });
+}
+
+export function getOmrThresholds() {
+  return request('/omr/thresholds');
+}
+
+export function updateOmrThresholds(payload) {
+  return requestJson('/omr/thresholds', {
+    method: 'PATCH',
+    body: JSON.stringify(payload),
+  });
+}

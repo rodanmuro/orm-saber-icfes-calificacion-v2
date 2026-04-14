@@ -11,8 +11,8 @@ class Settings(BaseSettings):
     database_url: str = "sqlite:///data/omr_app.db"
     omr_reader_backend: str = "classic"
     omr_default_metadata_path: str = "data/output/template_basica_omr_v2_wireframe.json"
-    omr_marked_threshold: float = 0.45
-    omr_unmarked_threshold: float = 0.35
+    omr_marked_threshold: float = 0.32
+    omr_unmarked_threshold: float = 0.3
     gemini_api_key: str | None = None
     gemini_model: str = "gemini-3-flash-preview"
     gemini_timeout_seconds: float = 60.0
