@@ -59,7 +59,7 @@ def _parse_storage_doc(value: Any) -> dict[str, Any]:
 
 def _table_as_paragraph_matrix(
     node: dict[str, Any],
-    column_width: float,
+    cell_content_width: float,
     cell_style: Any,
     header_style: Any,
 ) -> list[list[Any]]:
@@ -71,10 +71,22 @@ def _table_as_paragraph_matrix(
     if not isinstance(rows, list):
         return []
 
-    matrix: list[list[Any]] = []
+    filtered_rows: list[dict[str, Any]] = []
+    max_cols = 0
     for row in rows:
         if not isinstance(row, dict) or row.get("type") != "tableRow":
             continue
+        cells = row.get("content")
+        if not isinstance(cells, list):
+            continue
+        filtered_rows.append(row)
+        max_cols = max(max_cols, len([c for c in cells if isinstance(c, dict)]))
+
+    if not filtered_rows or max_cols <= 0:
+        return []
+
+    matrix: list[list[Any]] = []
+    for row in filtered_rows:
         cells = row.get("content")
         if not isinstance(cells, list):
             continue
@@ -84,7 +96,8 @@ def _table_as_paragraph_matrix(
                 continue
             is_header = cell.get("type") == "tableHeader"
             style = header_style if is_header else cell_style
-            markup = _build_inline_markup(cell, column_width)
+            # El contenido inline de celda debe ajustarse al ancho real de la celda.
+            markup = _build_inline_markup(cell, max(cell_content_width, 20))
             markup = markup.strip()
             while markup.endswith("<br/>"):
                 markup = markup[:-5].strip()
@@ -93,10 +106,6 @@ def _table_as_paragraph_matrix(
             matrix.append(row_data)
 
     if not matrix:
-        return []
-
-    max_cols = max(len(r) for r in matrix)
-    if max_cols <= 0:
         return []
 
     for row in matrix:
@@ -351,12 +360,24 @@ def _render_tiptap_doc(
             header_style = ParagraphStyle(
                 "TableHeader", parent=cell_style, fontName="Helvetica-Bold",
             )
-            matrix = _table_as_paragraph_matrix(node, column_width, cell_style, header_style)
+            rows = node.get("content") or []
+            cols = 0
+            for row in rows if isinstance(rows, list) else []:
+                if not isinstance(row, dict) or row.get("type") != "tableRow":
+                    continue
+                cells = row.get("content") or []
+                cols = max(cols, len([c for c in cells if isinstance(c, dict)]))
+            if cols <= 0:
+                continue
+
+            # Reducimos un poco el ancho total para evitar desbordes en borde derecho del frame.
+            table_total_width = column_width - 3 * mm
+            col_w = table_total_width / cols
+            cell_content_width = col_w - 6  # padding izquierdo/derecho (3+3)
+            matrix = _table_as_paragraph_matrix(node, cell_content_width, cell_style, header_style)
             if not matrix:
                 continue
             try:
-                cols = max(len(r) for r in matrix)
-                col_w = (column_width - 2 * mm) / max(cols, 1)
                 t = Table(matrix, colWidths=[col_w] * cols, repeatRows=1)
                 t.setStyle(TableStyle([
                     ("GRID", (0, 0), (-1, -1), 0.3, colors.black),
@@ -435,7 +456,7 @@ def build_exam_version_pdf(
         rightMargin=12 * mm,
         topMargin=12 * mm,
         bottomMargin=12 * mm,
-        title=f"Cuadernillo {exam.exam_code} {version.version_code}",
+        title=f"Cuadernillo {version.exam_code} {version.version_code}",
     )
     page_width, page_height = LETTER
     gutter = 6 * mm
@@ -465,7 +486,7 @@ def build_exam_version_pdf(
 
     story: list[Any] = [
         Paragraph(f"Cuadernillo: {exam.title}", title_style),
-        Paragraph(f"Codigo de examen: {exam.exam_code}", body_style),
+        Paragraph(f"Codigo de examen: {version.exam_code}", body_style),
         Paragraph(f"Version: {version.version_code}", body_style),
         Spacer(1, 4),
     ]

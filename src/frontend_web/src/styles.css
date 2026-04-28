@@ -335,6 +335,16 @@ button:disabled {
   overflow-x: auto;
 }
 
+.attempt-bulk-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin: 10px 0;
+  color: #385070;
+  font-size: 13px;
+}
+
 .exam-items-pane {
   display: flex;
   flex-direction: column;
@@ -366,6 +376,16 @@ td {
 .col-action {
   white-space: nowrap;
   width: 1%;
+}
+
+.col-select {
+  width: 42px;
+  text-align: center;
+}
+
+.col-select input {
+  width: 16px;
+  height: 16px;
 }
 
 .col-action button + button {

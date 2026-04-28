@@ -275,15 +275,18 @@ def _add_table_node(doc: Document, node: dict[str, Any], column_width_in: float 
     if num_cols == 0:
         return
 
-    col_width_twips = int((column_width_in / num_cols) * 1440)
+    # Reducimos un poco el ancho util para evitar desbordes por bordes/padding de Word.
+    safe_table_width_in = max(column_width_in - 0.12, 1.0)
+    col_width_twips = int((safe_table_width_in / num_cols) * 1440)
 
     table = doc.add_table(rows=len(rows_nodes), cols=num_cols)
     table.style = "Table Grid"
+    table.autofit = False
 
     # Ancho total de tabla
     tbl = table._tbl
     tblW = OxmlElement("w:tblW")
-    tblW.set(qn("w:w"), str(int(column_width_in * 1440)))
+    tblW.set(qn("w:w"), str(int(safe_table_width_in * 1440)))
     tblW.set(qn("w:type"), "dxa")
     tbl.tblPr.append(tblW)
 
@@ -293,6 +296,7 @@ def _add_table_node(doc: Document, node: dict[str, Any], column_width_in: float 
 
         for c_idx in range(num_cols):
             cell = table.cell(r_idx, c_idx)
+            cell.width = Twips(col_width_twips)
             # Fijar ancho de celda
             tc = cell._tc
             tcPr = tc.get_or_add_tcPr()
@@ -498,7 +502,7 @@ def build_exam_version_docx(
     title_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
     meta = doc.add_paragraph()
-    meta.add_run(f"Código de examen: {exam.exam_code}   |   Versión: {version.version_code}").bold = True
+    meta.add_run(f"Código de examen: {version.exam_code}   |   Versión: {version.version_code}").bold = True
     meta.alignment = WD_ALIGN_PARAGRAPH.CENTER
     doc.add_paragraph()
 
@@ -507,7 +511,7 @@ def build_exam_version_docx(
         if item is None:
             continue
 
-        q_heading = doc.add_paragraph()
+        q_heading = _no_spacing(doc.add_paragraph())
         q_run = q_heading.add_run(f"Pregunta {version_row.question_number}")
         q_run.bold = True
         q_run.font.size = Pt(10)

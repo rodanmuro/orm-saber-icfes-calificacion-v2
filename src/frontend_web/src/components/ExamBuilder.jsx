@@ -177,7 +177,6 @@ export default function ExamBuilder({
                     <th>Code</th>
                     <th>Titulo</th>
                     <th>Accion</th>
-                    <th>Exportar</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -190,24 +189,6 @@ export default function ExamBuilder({
                   <button type="button" onClick={() => onSelectExam(exam.id)}>
                     Abrir
                   </button>
-                      </td>
-                      <td className="col-action col-export">
-                        <div className="export-actions">
-                          <button
-                            type="button"
-                            onClick={() => onExportExamPdf(exam)}
-                            disabled={exporting?.examId === exam.id}
-                          >
-                            {exporting?.examId === exam.id && exporting?.format === 'pdf' ? 'Generando...' : 'PDF'}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => onExportExamDocx(exam)}
-                            disabled={exporting?.examId === exam.id}
-                          >
-                            {exporting?.examId === exam.id && exporting?.format === 'docx' ? 'Generando...' : 'DOCX'}
-                          </button>
-                        </div>
                       </td>
                     </tr>
                   ))}
@@ -247,6 +228,7 @@ export default function ExamBuilder({
                     <th>Preguntas barajadas</th>
                     <th>Opciones barajadas</th>
                     <th>Accion</th>
+                    <th>Exportar</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -265,6 +247,24 @@ export default function ExamBuilder({
                         >
                           {loadingAnswerKey ? 'Consultando...' : 'Ver respuestas correctas'}
                         </button>
+                      </td>
+                      <td className="col-action col-export">
+                        <div className="export-actions">
+                          <button
+                            type="button"
+                            onClick={() => onExportExamPdf(selectedExam, version)}
+                            disabled={exporting?.examId === selectedExam?.id}
+                          >
+                            {exporting?.examId === selectedExam?.id && exporting?.format === 'pdf' ? 'Generando...' : 'PDF'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => onExportExamDocx(selectedExam, version)}
+                            disabled={exporting?.examId === selectedExam?.id}
+                          >
+                            {exporting?.examId === selectedExam?.id && exporting?.format === 'docx' ? 'Generando...' : 'DOCX'}
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}

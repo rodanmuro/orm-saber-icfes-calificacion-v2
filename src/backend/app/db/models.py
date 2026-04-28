@@ -150,10 +150,15 @@ class ExamItem(Base):
 
 class ExamVersion(Base):
     __tablename__ = "exam_version"
-    __table_args__ = (UniqueConstraint("exam_id", "version_code", name="uq_exam_version_code"),)
+    __table_args__ = (
+        UniqueConstraint("exam_id", "version_code", name="uq_exam_version_code"),
+        UniqueConstraint("teacher_id", "exam_code", name="uq_exam_version_teacher_code"),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     exam_id: Mapped[int] = mapped_column(ForeignKey("exam.id", ondelete="CASCADE"), index=True)
+    teacher_id: Mapped[int] = mapped_column(Integer, index=True)
+    exam_code: Mapped[str] = mapped_column(String(64), index=True)
     version_code: Mapped[str] = mapped_column(String(64), index=True)
     seed_shuffle: Mapped[int] = mapped_column(Integer)
     shuffle_questions: Mapped[bool] = mapped_column(Boolean, default=True)

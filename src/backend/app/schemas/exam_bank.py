@@ -61,6 +61,8 @@ class ExamVersionRead(BaseModel):
 
     id: int
     exam_id: int
+    teacher_id: int
+    exam_code: str
     version_code: str
     seed_shuffle: int
     shuffle_questions: bool

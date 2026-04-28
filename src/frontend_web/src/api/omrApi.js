@@ -21,6 +21,14 @@ async function requestJson(path, options) {
   return response.json();
 }
 
+async function requestEmpty(path, options) {
+  const response = await fetch(`${API_BASE_URL}${path}`, options);
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error(`HTTP ${response.status}: ${body}`);
+  }
+}
+
 export function listOmrAttempts({ teacherId, limit = 200, offset = 0 } = {}) {
   const query = new URLSearchParams();
   if (teacherId) query.append('teacher_id', teacherId);
@@ -31,6 +39,12 @@ export function listOmrAttempts({ teacherId, limit = 200, offset = 0 } = {}) {
 
 export function getOmrAttempt(attemptId) {
   return request(`/omr/attempts/${attemptId}`);
+}
+
+export function deleteOmrAttempt(attemptId) {
+  return requestEmpty(`/omr/attempts/${attemptId}`, {
+    method: 'DELETE',
+  });
 }
 
 export function updateOmrAttemptAnswers(attemptId, answers) {

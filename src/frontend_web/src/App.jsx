@@ -4,6 +4,7 @@ import { createItem, deleteItem, getItem, listItems, updateItem, API_BASE_URL } 
 import { listStudents } from './api/studentsApi';
 import {
   getOmrAttempt,
+  deleteOmrAttempt,
   listOmrAttempts,
   updateOmrAttemptAnswers,
   getOmrAttemptRatios,
@@ -118,6 +119,9 @@ export default function App() {
   const [attemptFilters, setAttemptFilters] = useState({ query: '', status: '', group: '' });
   const [omrThresholds, setOmrThresholds] = useState({ marked: '0.32', unmarked: '0.30' });
   const [savingThresholds, setSavingThresholds] = useState(false);
+  const [selectedAttemptIds, setSelectedAttemptIds] = useState([]);
+  const [deletingAttemptIds, setDeletingAttemptIds] = useState([]);
+  const [deletingSelectedAttempts, setDeletingSelectedAttempts] = useState(false);
 
   async function refreshItems() {
     setLoading(true);
@@ -172,6 +176,11 @@ export default function App() {
     return () => clearInterval(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
+
+  useEffect(() => {
+    const availableIds = new Set(attempts.map((row) => row.attempt_id));
+    setSelectedAttemptIds((prev) => prev.filter((attemptId) => availableIds.has(attemptId)));
+  }, [attempts]);
 
   async function refreshAttempts() {
     setLoadingAttempts(true);
@@ -251,6 +260,83 @@ export default function App() {
       setAssignDocumentNumber(detail.student?.document_number || '');
     } catch (err) {
       setError(err.message);
+    }
+  }
+
+  function handleToggleAttemptSelection(attemptId, checked) {
+    setSelectedAttemptIds((prev) => {
+      if (checked) {
+        return prev.includes(attemptId) ? prev : [...prev, attemptId];
+      }
+      return prev.filter((id) => id !== attemptId);
+    });
+  }
+
+  function handleToggleAllAttemptSelection(checked) {
+    const visibleIds = filteredAttempts.map((row) => row.attempt_id);
+    setSelectedAttemptIds((prev) => {
+      if (!checked) {
+        return prev.filter((id) => !visibleIds.includes(id));
+      }
+      const next = new Set(prev);
+      visibleIds.forEach((id) => next.add(id));
+      return Array.from(next);
+    });
+  }
+
+  function clearDeletedAttemptsFromUi(attemptIds) {
+    const deleted = new Set(attemptIds);
+    setAttempts((prev) => prev.filter((row) => !deleted.has(row.attempt_id)));
+    setSelectedAttemptIds((prev) => prev.filter((id) => !deleted.has(id)));
+    if (attemptModal.detail && deleted.has(attemptModal.detail.attempt_id)) {
+      closeAttemptModal();
+    }
+    if (attemptRatios.detail && deleted.has(attemptRatios.detail.attempt_id)) {
+      closeAttemptRatios();
+    }
+    if (attemptOverlay.detail && deleted.has(attemptOverlay.detail.attempt_id)) {
+      closeAttemptOverlay();
+    }
+  }
+
+  async function handleDeleteAttempt(row) {
+    const confirmed = window.confirm(`Borrar el intento #${row.attempt_id}? Esta accion quita el registro de examenes calificados.`);
+    if (!confirmed) return;
+    setDeletingAttemptIds((prev) => (prev.includes(row.attempt_id) ? prev : [...prev, row.attempt_id]));
+    setError('');
+    setMessage('');
+    try {
+      await deleteOmrAttempt(row.attempt_id);
+      clearDeletedAttemptsFromUi([row.attempt_id]);
+      setMessage(`Intento #${row.attempt_id} borrado.`);
+      refreshAttempts();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setDeletingAttemptIds((prev) => prev.filter((id) => id !== row.attempt_id));
+    }
+  }
+
+  async function handleDeleteSelectedAttempts() {
+    const ids = selectedAttemptIds.filter((id) => attempts.some((row) => row.attempt_id === id));
+    if (ids.length === 0) return;
+    const confirmed = window.confirm(`Borrar ${ids.length} intento${ids.length === 1 ? '' : 's'} seleccionado${ids.length === 1 ? '' : 's'}?`);
+    if (!confirmed) return;
+    setDeletingSelectedAttempts(true);
+    setDeletingAttemptIds((prev) => Array.from(new Set([...prev, ...ids])));
+    setError('');
+    setMessage('');
+    try {
+      await Promise.all(ids.map((attemptId) => deleteOmrAttempt(attemptId)));
+      clearDeletedAttemptsFromUi(ids);
+      setMessage(`${ids.length} intento${ids.length === 1 ? '' : 's'} borrado${ids.length === 1 ? '' : 's'}.`);
+      refreshAttempts();
+    } catch (err) {
+      setError(err.message);
+      refreshAttempts();
+    } finally {
+      setDeletingSelectedAttempts(false);
+      setDeletingAttemptIds((prev) => prev.filter((id) => !ids.includes(id)));
     }
   }
 
@@ -727,36 +813,31 @@ export default function App() {
     setError('');
     setMessage('');
     try {
-      const versionCode = `V${String(examVersions.length + 1).padStart(3, '0')}`;
       const seed = Math.floor(Date.now() / 1000);
-      await publishExamVersion(examId, {
-        version_code: versionCode,
+      const published = await publishExamVersion(examId, {
         seed_shuffle: seed,
         shuffle_questions: true,
         shuffle_options: true,
       });
       const versions = await listExamVersions(examId);
       setExamVersions(versions);
-      setMessage(`Version ${versionCode} publicada`);
+      setMessage(`Version ${published.version_code} publicada`);
     } catch (err) {
       setError(err.message);
     }
   }
 
-  async function handleExportExamPdf(exam) {
+  async function handleExportExamPdf(exam, version) {
     setError('');
     setMessage('');
     setExporting({ examId: exam.id, format: 'pdf' });
     try {
-      const versions = await listExamVersions(exam.id);
-      if (!versions.length) throw new Error('El examen no tiene versiones publicadas.');
-      const latest = versions[versions.length - 1];
       await exportExamVersionPdf(
         exam.id,
-        latest.id,
-        `cuadernillo_exam_${exam.exam_code}_${latest.version_code}.pdf`
+        version.id,
+        `cuadernillo_exam_${version.exam_code}_${version.version_code}.pdf`
       );
-      setMessage(`PDF descargado para examen #${exam.id} versión ${latest.version_code}.`);
+      setMessage(`PDF descargado para examen #${exam.id} código ${version.exam_code} versión ${version.version_code}.`);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -764,20 +845,17 @@ export default function App() {
     }
   }
 
-  async function handleExportExamDocx(exam) {
+  async function handleExportExamDocx(exam, version) {
     setError('');
     setMessage('');
     setExporting({ examId: exam.id, format: 'docx' });
     try {
-      const versions = await listExamVersions(exam.id);
-      if (!versions.length) throw new Error('El examen no tiene versiones publicadas.');
-      const latest = versions[versions.length - 1];
       await exportExamVersionDocx(
         exam.id,
-        latest.id,
-        `cuadernillo_exam_${exam.exam_code}_${latest.version_code}.docx`
+        version.id,
+        `cuadernillo_exam_${version.exam_code}_${version.version_code}.docx`
       );
-      setMessage(`DOCX descargado para examen #${exam.id} versión ${latest.version_code}.`);
+      setMessage(`DOCX descargado para examen #${exam.id} código ${version.exam_code} versión ${version.version_code}.`);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -1006,6 +1084,13 @@ export default function App() {
               onViewImage={handleViewAttemptImage}
               onViewRatios={handleViewAttemptRatios}
               onViewOverlay={handleViewAttemptOverlay}
+              selectedAttemptIds={selectedAttemptIds}
+              deletingAttemptIds={deletingAttemptIds}
+              deletingSelected={deletingSelectedAttempts}
+              onToggleAttemptSelection={handleToggleAttemptSelection}
+              onToggleAllAttempts={handleToggleAllAttemptSelection}
+              onDelete={handleDeleteAttempt}
+              onDeleteSelected={handleDeleteSelectedAttempts}
             />
           </section>
         ) : null}

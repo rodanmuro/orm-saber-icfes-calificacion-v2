@@ -70,6 +70,8 @@ def _exam_version_to_read(version: ExamVersion) -> ExamVersionRead:
     return ExamVersionRead(
         id=version.id,
         exam_id=version.exam_id,
+        teacher_id=version.teacher_id,
+        exam_code=version.exam_code,
         version_code=version.version_code,
         seed_shuffle=version.seed_shuffle,
         shuffle_questions=version.shuffle_questions,
@@ -236,7 +238,22 @@ def _resolve_version_code(db: Session, exam_id: int, requested: str | None) -> s
     if requested:
         return requested.strip()
     count = db.scalar(select(func.count(ExamVersion.id)).where(ExamVersion.exam_id == exam_id)) or 0
-    return f"V{count + 1:03d}"
+    return str(count + 1)
+
+
+def _resolve_version_exam_code(db: Session, teacher_id: int) -> str:
+    used_exam_codes = set(
+        db.scalars(select(Exam.exam_code).where(Exam.teacher_id == teacher_id)).all()
+    )
+    used_version_codes = set(
+        db.scalars(select(ExamVersion.exam_code).where(ExamVersion.teacher_id == teacher_id)).all()
+    )
+    used_codes = {str(code) for code in used_exam_codes.union(used_version_codes)}
+
+    candidate = 1
+    while str(candidate) in used_codes:
+        candidate += 1
+    return str(candidate)
 
 
 @router.post(
@@ -278,6 +295,8 @@ def publish_version(
 
     version = ExamVersion(
         exam_id=exam_id,
+        teacher_id=exam.teacher_id,
+        exam_code=_resolve_version_exam_code(db=db, teacher_id=exam.teacher_id),
         version_code=version_code,
         seed_shuffle=seed_shuffle,
         shuffle_questions=payload.shuffle_questions,
@@ -305,7 +324,7 @@ def publish_version(
         db.rollback()
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="version_code already exists for this exam",
+            detail="version_code or exam_code already exists",
         ) from None
     db.refresh(version)
 
@@ -376,7 +395,7 @@ def export_exam_version_pdf(exam_id: int, version_id: int, db: Session = Depends
         version_items=version_items,
         items_by_id=items_by_id,
     )
-    filename = f"cuadernillo_exam_{exam.exam_code}_{version.version_code}.pdf"
+    filename = f"cuadernillo_exam_{version.exam_code}_{version.version_code}.pdf"
     headers = {"Content-Disposition": f'attachment; filename="{filename}"'}
     return Response(content=pdf_bytes, media_type="application/pdf", headers=headers)
 
@@ -414,7 +433,7 @@ def export_exam_version_docx(exam_id: int, version_id: int, db: Session = Depend
         version_items=version_items,
         items_by_id=items_by_id,
     )
-    filename = f"cuadernillo_exam_{exam.exam_code}_{version.version_code}.docx"
+    filename = f"cuadernillo_exam_{version.exam_code}_{version.version_code}.docx"
     headers = {"Content-Disposition": f'attachment; filename="{filename}"'}
     return Response(
         content=docx_bytes,

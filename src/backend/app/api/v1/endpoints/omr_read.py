@@ -64,6 +64,15 @@ class ThresholdsPayload(BaseModel):
     unmarked: float
 
 
+def _normalize_exam_code(value: str | None) -> str | None:
+    raw = str(value or "").strip()
+    if not raw:
+        return None
+    if raw.isdigit():
+        return str(int(raw))
+    return raw
+
+
 @router.get("/thresholds")
 def get_omr_thresholds() -> dict[str, float]:
     return {
@@ -304,7 +313,7 @@ async def read_photo_omr(
                             "status": "graded",
                             "teacher_id": exam.teacher_id,
                             "exam_id": exam.id,
-                            "exam_code": exam.exam_code,
+                            "exam_code": version.exam_code,
                             "exam_version_id": version.id,
                             "summary": score_payload["summary"],
                             "details": score_payload["details"],
@@ -317,57 +326,66 @@ async def read_photo_omr(
                             json.dumps(score_payload["summary"], ensure_ascii=False),
                         )
         elif teacher_id is not None and exam_value:
-            exam_code = str(exam_value).strip()
-            with SessionLocal() as db:
-                exam = db.scalar(
-                    select(Exam).where(Exam.teacher_id == teacher_id, Exam.exam_code == exam_code)
-                )
-                if exam is None:
-                    grading_block = {
-                        "status": "resolution_error",
-                        "message": f"exam not found for teacher_id={teacher_id} and exam_code={exam_code}",
-                    }
-                else:
-                    resolved_exam_id = exam.id
-                    latest_version = db.scalar(
-                        select(ExamVersion)
-                        .where(ExamVersion.exam_id == exam.id)
-                        .order_by(ExamVersion.id.desc())
+            exam_code_raw = str(exam_value).strip()
+            exam_code = _normalize_exam_code(exam_code_raw)
+            if not exam_code:
+                grading_block = {
+                    "status": "resolution_error",
+                    "message": "exam_identifier detected but empty after normalization",
+                }
+            else:
+                with SessionLocal() as db:
+                    version = db.scalar(
+                        select(ExamVersion).where(
+                            ExamVersion.teacher_id == teacher_id,
+                            ExamVersion.exam_code == exam_code,
+                        )
                     )
-                    if latest_version is None:
+                    if version is None:
                         grading_block = {
                             "status": "resolution_error",
-                            "message": "exam has no published versions for grading",
+                            "message": (
+                                f"exam version not found for teacher_id={teacher_id} "
+                                f"and exam_code={exam_code} (raw={exam_code_raw})"
+                            ),
                         }
                     else:
-                        resolved_exam_version_id = latest_version.id
-                        version_items = db.scalars(
-                            select(ExamVersionItem)
-                            .where(ExamVersionItem.exam_version_id == latest_version.id)
-                            .order_by(ExamVersionItem.question_number.asc())
-                        ).all()
-                        answer_key = build_answer_key_from_version_items(version_items)
-                        score_payload = grade_omr_questions(
-                            answer_key=answer_key,
-                            omr_questions=result.get("questions", []),
-                        )
-                        resolved_student_id = _resolve_student(db)
-                        grading_block = {
-                            "status": "graded",
-                            "teacher_id": teacher_id,
-                            "exam_id": exam.id,
-                            "exam_code": exam.exam_code,
-                            "exam_version_id": latest_version.id,
-                            "summary": score_payload["summary"],
-                            "details": score_payload["details"],
-                        }
-                        logger.info(
-                            "OMR grading summary | teacher_id=%s exam_id=%s version_id=%s summary=%s",
-                            teacher_id,
-                            exam.id,
-                            latest_version.id,
-                            json.dumps(score_payload["summary"], ensure_ascii=False),
-                        )
+                        exam = db.get(Exam, version.exam_id)
+                        if exam is None:
+                            grading_block = {
+                                "status": "resolution_error",
+                                "message": f"exam not found for version_id={version.id}",
+                            }
+                        else:
+                            resolved_exam_id = exam.id
+                            resolved_exam_version_id = version.id
+                            version_items = db.scalars(
+                                select(ExamVersionItem)
+                                .where(ExamVersionItem.exam_version_id == version.id)
+                                .order_by(ExamVersionItem.question_number.asc())
+                            ).all()
+                            answer_key = build_answer_key_from_version_items(version_items)
+                            score_payload = grade_omr_questions(
+                                answer_key=answer_key,
+                                omr_questions=result.get("questions", []),
+                            )
+                            resolved_student_id = _resolve_student(db)
+                            grading_block = {
+                                "status": "graded",
+                                "teacher_id": teacher_id,
+                                "exam_id": exam.id,
+                                "exam_code": version.exam_code,
+                                "exam_version_id": version.id,
+                                "summary": score_payload["summary"],
+                                "details": score_payload["details"],
+                            }
+                            logger.info(
+                                "OMR grading summary | teacher_id=%s exam_id=%s version_id=%s summary=%s",
+                                teacher_id,
+                                exam.id,
+                                version.id,
+                                json.dumps(score_payload["summary"], ensure_ascii=False),
+                            )
         elif teacher_id is not None and not exam_value and exam_version_id is None:
             grading_block = {
                 "status": "resolution_error",
@@ -510,6 +528,7 @@ def get_omr_attempt(attempt_id: int) -> dict:
             "teacher_id": attempt.teacher_id,
             "exam_id": attempt.exam_id,
             "exam_version_id": attempt.exam_version_id,
+            "exam_code": attempt.exam_version.exam_code if attempt.exam_version else (attempt.exam.exam_code if attempt.exam else None),
             "exam_code_detected": attempt.exam_code_detected,
             "status": attempt.status,
             "summary": {
@@ -551,6 +570,17 @@ def get_omr_attempt(attempt_id: int) -> dict:
                 for row in answers
             ],
         }
+
+
+@router.delete("/attempts/{attempt_id}")
+def delete_omr_attempt(attempt_id: int) -> dict:
+    with SessionLocal() as db:
+        attempt = db.get(OmrAttempt, attempt_id)
+        if attempt is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="attempt not found")
+        db.delete(attempt)
+        db.commit()
+        return {"deleted": True, "attempt_id": attempt_id}
 
 
 @router.patch("/attempts/{attempt_id}/answers")
@@ -629,16 +659,25 @@ def assign_omr_attempt(attempt_id: int, payload: AssignAttemptPayload) -> dict:
             elif payload.exam_code:
                 if teacher_id is None:
                     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="teacher_id required")
-                exam = db.scalar(
-                    select(Exam).where(Exam.teacher_id == teacher_id, Exam.exam_code == payload.exam_code)
+                exam_code = _normalize_exam_code(payload.exam_code)
+                if not exam_code:
+                    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="exam_code invalid")
+                version = db.scalar(
+                    select(ExamVersion).where(
+                        ExamVersion.teacher_id == teacher_id,
+                        ExamVersion.exam_code == exam_code,
+                    )
                 )
-            if exam is None:
+                if version is not None:
+                    exam = db.get(Exam, version.exam_id)
+            if exam is None and version is None:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="exam not found")
-            version = db.scalar(
-                select(ExamVersion)
-                .where(ExamVersion.exam_id == exam.id)
-                .order_by(ExamVersion.id.desc())
-            )
+            if version is None and exam is not None:
+                version = db.scalar(
+                    select(ExamVersion)
+                    .where(ExamVersion.exam_id == exam.id)
+                    .order_by(ExamVersion.id.desc())
+                )
             if version is None:
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="exam has no versions")
 
@@ -732,7 +771,7 @@ def list_omr_attempts(
                     "attempt_id": attempt.id,
                     "teacher_id": attempt.teacher_id,
                     "exam_id": attempt.exam_id,
-                    "exam_code": attempt.exam.exam_code if attempt.exam else None,
+                    "exam_code": attempt.exam_version.exam_code if attempt.exam_version else (attempt.exam.exam_code if attempt.exam else None),
                     "exam_title": attempt.exam.title if attempt.exam else None,
                     "exam_version_id": attempt.exam_version_id,
                     "exam_version_code": attempt.exam_version.version_code if attempt.exam_version else None,
@@ -743,6 +782,10 @@ def list_omr_attempts(
                     "student_group": attempt.student.group_name if attempt.student else None,
                     "status": attempt.status,
                     "score_percent": attempt.score_percent,
+                    "total_questions": attempt.total_questions,
+                    "correct_count": attempt.correct_count,
+                    "incorrect_count": attempt.incorrect_count,
+                    "blank_count": attempt.blank_count,
                     "manual_review_required": attempt.manual_review_required,
                     "uploaded_image_path": attempt.uploaded_image_path,
                     "created_at": attempt.created_at,
