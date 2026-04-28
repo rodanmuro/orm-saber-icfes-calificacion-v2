@@ -31,6 +31,7 @@ import ItemForm, { emptyForm, formToPayload, itemToForm } from './components/Ite
 import ItemList from './components/ItemList';
 import StudentList from './components/StudentList';
 import AttemptList from './components/AttemptList';
+import AnalyticsPanel from './components/AnalyticsPanel';
 import { docHasMeaningfulContent } from './utils/editorDoc';
 
 
@@ -122,6 +123,11 @@ export default function App() {
   const [selectedAttemptIds, setSelectedAttemptIds] = useState([]);
   const [deletingAttemptIds, setDeletingAttemptIds] = useState([]);
   const [deletingSelectedAttempts, setDeletingSelectedAttempts] = useState(false);
+  const [analyticsFilters, setAnalyticsFilters] = useState({ examCode: '', group: '' });
+  const [analyticsLoading, setAnalyticsLoading] = useState(false);
+  const [analyticsSummary, setAnalyticsSummary] = useState({ attemptCount: 0, avgScorePercent: null, questionCount: 0 });
+  const [analyticsQuestionStats, setAnalyticsQuestionStats] = useState([]);
+  const [attemptDetailsCache, setAttemptDetailsCache] = useState({});
 
   async function refreshItems() {
     setLoading(true);
@@ -161,15 +167,17 @@ export default function App() {
   }, [activeTab]);
 
   useEffect(() => {
-    if (activeTab === 'graded') {
+    if (activeTab === 'graded' || activeTab === 'analytics') {
       refreshAttempts();
+    }
+    if (activeTab === 'graded') {
       refreshThresholds();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
 
   useEffect(() => {
-    if (activeTab !== 'graded') return;
+    if (activeTab !== 'graded' && activeTab !== 'analytics') return;
     const timer = setInterval(() => {
       refreshAttempts();
     }, 5000);
@@ -593,6 +601,154 @@ export default function App() {
     return Array.from(values).sort();
   }, [attempts]);
 
+  const analyticsExamCodeOptions = useMemo(() => {
+    const values = new Set();
+    attempts.forEach((row) => {
+      if (row.exam_code) values.add(String(row.exam_code));
+    });
+    return Array.from(values).sort((a, b) => Number(a) - Number(b));
+  }, [attempts]);
+
+  const analyticsGroupOptions = useMemo(() => {
+    const values = new Set();
+    attempts.forEach((row) => {
+      if (row.student_group) values.add(String(row.student_group));
+    });
+    return Array.from(values).sort();
+  }, [attempts]);
+
+  const analyticsBaseAttempts = useMemo(() => {
+    return attempts.filter((row) => {
+      if (analyticsFilters.examCode && String(row.exam_code || '') !== String(analyticsFilters.examCode)) {
+        return false;
+      }
+      if (analyticsFilters.group && String(row.student_group || '') !== String(analyticsFilters.group)) {
+        return false;
+      }
+      return true;
+    });
+  }, [attempts, analyticsFilters]);
+
+  async function refreshAnalytics() {
+    setAnalyticsLoading(true);
+    setError('');
+    try {
+      const ids = analyticsBaseAttempts.map((row) => row.attempt_id);
+      const missingIds = ids.filter((id) => !attemptDetailsCache[id]);
+
+      const fetchedMap = {};
+      if (missingIds.length > 0) {
+        const details = await Promise.all(
+          missingIds.map(async (attemptId) => {
+            try {
+              return await getOmrAttempt(attemptId);
+            } catch {
+              return null;
+            }
+          }),
+        );
+        details.forEach((detail) => {
+          if (detail?.attempt_id) fetchedMap[detail.attempt_id] = detail;
+        });
+        if (Object.keys(fetchedMap).length > 0) {
+          setAttemptDetailsCache((prev) => ({ ...prev, ...fetchedMap }));
+        }
+      }
+
+      const mergedCache = { ...attemptDetailsCache, ...fetchedMap };
+      const detailsToAnalyze = ids.map((id) => mergedCache[id]).filter(Boolean);
+
+      const scored = analyticsBaseAttempts
+        .map((row) => Number(row.score_percent))
+        .filter((value) => Number.isFinite(value));
+      const avgScorePercent = scored.length
+        ? scored.reduce((acc, value) => acc + value, 0) / scored.length
+        : null;
+
+      const perQuestion = new Map();
+      const itemByQuestion = new Map();
+      const markedByQuestion = new Map();
+      detailsToAnalyze.forEach((detail) => {
+        (detail.answers || []).forEach((answer) => {
+          const qn = Number(answer.question_number);
+          if (!Number.isFinite(qn)) return;
+          if (!perQuestion.has(qn)) {
+            perQuestion.set(qn, {
+              questionNumber: qn,
+              itemId: null,
+              correct: 0,
+              incorrect: 0,
+              answered: 0,
+              markedTotal: 0,
+              markedDistribution: { A: 0, B: 0, C: 0, D: 0, blank: 0, ambiguous: 0 },
+            });
+          }
+          const current = perQuestion.get(qn);
+          const itemId = Number(answer.item_id);
+          if (Number.isFinite(itemId) && itemId > 0) {
+            const currentItemMap = itemByQuestion.get(qn) || new Map();
+            currentItemMap.set(itemId, (currentItemMap.get(itemId) || 0) + 1);
+            itemByQuestion.set(qn, currentItemMap);
+          }
+          const marked = String(answer.marked_answer || '').trim().toUpperCase();
+          const answerStatus = String(answer.status || '').toLowerCase();
+          const markedBucket = markedByQuestion.get(qn) || { A: 0, B: 0, C: 0, D: 0, blank: 0, ambiguous: 0 };
+          if (marked === 'A' || marked === 'B' || marked === 'C' || marked === 'D') {
+            markedBucket[marked] += 1;
+          } else if (answerStatus === 'ambiguous' || marked.includes(',')) {
+            markedBucket.ambiguous += 1;
+          } else {
+            markedBucket.blank += 1;
+          }
+          markedByQuestion.set(qn, markedBucket);
+
+          const status = String(answer.effective_status || answer.status || '');
+          if (status === 'correct') {
+            current.correct += 1;
+            current.answered += 1;
+          } else if (status === 'incorrect') {
+            current.incorrect += 1;
+            current.answered += 1;
+          }
+        });
+      });
+
+      const questionRows = Array.from(perQuestion.values()).map((row) => {
+        const itemMap = itemByQuestion.get(row.questionNumber);
+        if (!itemMap || itemMap.size === 0) return row;
+        let selectedItemId = null;
+        let selectedCount = -1;
+        itemMap.forEach((count, itemId) => {
+          if (count > selectedCount) {
+            selectedCount = count;
+            selectedItemId = itemId;
+          }
+        });
+        const markedDistribution = markedByQuestion.get(row.questionNumber) || {
+          A: 0, B: 0, C: 0, D: 0, blank: 0, ambiguous: 0,
+        };
+        const markedTotal = Object.values(markedDistribution).reduce((acc, value) => acc + Number(value || 0), 0);
+        return { ...row, itemId: selectedItemId, markedDistribution, markedTotal };
+      });
+      setAnalyticsSummary({
+        attemptCount: analyticsBaseAttempts.length,
+        avgScorePercent,
+        questionCount: questionRows.length,
+      });
+      setAnalyticsQuestionStats(questionRows);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setAnalyticsLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if (activeTab !== 'analytics') return;
+    refreshAnalytics();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, analyticsBaseAttempts]);
+
   async function handleSelectItem(itemId) {
     setError('');
     setMessage('');
@@ -933,6 +1089,13 @@ export default function App() {
         </button>
         <button
           type="button"
+          className={activeTab === 'analytics' ? 'tab-btn active' : 'tab-btn'}
+          onClick={() => setActiveTab('analytics')}
+        >
+          Analiticas
+        </button>
+        <button
+          type="button"
           className={activeTab === 'students' ? 'tab-btn active' : 'tab-btn'}
           onClick={() => setActiveTab('students')}
         >
@@ -1091,6 +1254,23 @@ export default function App() {
               onToggleAllAttempts={handleToggleAllAttemptSelection}
               onDelete={handleDeleteAttempt}
               onDeleteSelected={handleDeleteSelectedAttempts}
+            />
+          </section>
+        ) : null}
+
+        {activeTab === 'analytics' ? (
+          <section className="single-pane">
+            <AnalyticsPanel
+              attempts={analyticsBaseAttempts}
+              items={items}
+              filters={analyticsFilters}
+              examCodeOptions={analyticsExamCodeOptions}
+              groupOptions={analyticsGroupOptions}
+              loading={analyticsLoading}
+              summary={analyticsSummary}
+              questionStats={analyticsQuestionStats}
+              onFilterChange={setAnalyticsFilters}
+              onRefresh={refreshAnalytics}
             />
           </section>
         ) : null}
