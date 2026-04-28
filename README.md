@@ -91,6 +91,7 @@ Nota: `marked_threshold` y `unmarked_threshold` ya no se controlan desde fronten
 - Backend: `src/backend/README.md`
 - Frontend: `src/frontend/README.md`
 - Arquitectura de pipeline de plantilla: `bitacoras/026_02_26_2026_arquitecura_pipeline_plantilla_v2_deuda_tecnica.md`
+- Backup y restauracion operativa (Drive institucional): ver seccion `Backup operativo (Drive institucional)` en `src/backend/README.md`.
 
 ## Notas de trabajo
 - Umbrales actuales centralizados en backend:

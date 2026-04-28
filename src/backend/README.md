@@ -299,3 +299,154 @@ Parametros opcionales en form-data:
 
 Notas:
 - El backend valida calidad geometrica minima de captura; si la perspectiva es extrema o la hoja ocupa muy poco, devuelve error controlado (HTTP 400).
+
+## Backup operativo (Drive institucional)
+
+### Objetivo
+Respaldar datos criticos que no estan en GitHub, para recuperar operacion si falla el PC local.
+
+### Que se respalda y por que
+Se respalda:
+- `pg_dump -Fc` de `omr_app`:
+  - estado de calificaciones, intentos OMR, examenes, estudiantes, etc.
+- `src/backend/data/input/mobile_uploads/`:
+  - evidencia de lecturas OMR reales (foto original, aligned, ratios, result json).
+- `src/backend/data/input/item_assets/`:
+  - imagenes usadas dentro de enunciados/opciones de items.
+- templates de `src/backend/data/output/`:
+  - `template*.pdf`, `template*.json`, `template_basica_omr_v2_wireframe.pdf`, `template_basica_omr_v2_wireframe.json`.
+
+No se respalda en este corte:
+- codigo fuente (ya esta en GitHub),
+- `src/backend/data/output/debug_preprocess/` (artefacto de depuracion),
+- `src/backend/data/output/aligned/` (no es fuente de verdad de produccion).
+
+### Ubicacion remota
+Drive institucional (rclone):
+- remoto: `gdrive-institucional:`
+- carpeta: `CEVU2026/OMR_BACKUPS/`
+
+### Estructura del archivo comprimido
+El archivo `.tar.gz` se genera con estructura:
+- `omr_backup_<timestamp>/omr_app_<timestamp>.dump`
+- `omr_backup_<timestamp>/data_input_mobile_uploads_today/`
+- `omr_backup_<timestamp>/data_input_item_assets/`
+- `omr_backup_<timestamp>/data_output_templates/`
+- `omr_backup_<timestamp>/README_BACKUP.txt`
+
+### Comandos de backup (manual)
+Ejemplo de corte:
+```bash
+STAMP=$(date +%Y%m%d_%H%M%S)
+BACKUP_ROOT=/tmp/omr_backup_${STAMP}
+mkdir -p "$BACKUP_ROOT/data_input_mobile_uploads_today" \
+         "$BACKUP_ROOT/data_input_item_assets" \
+         "$BACKUP_ROOT/data_output_templates"
+
+# 1) mobile_uploads solo del dia (produccion del dia)
+find src/backend/data/input/mobile_uploads -maxdepth 1 -type f -daystart -mtime 0 -print0 \
+  | xargs -0 -I{} cp -a "{}" "$BACKUP_ROOT/data_input_mobile_uploads_today/"
+
+# 2) item assets
+cp -a src/backend/data/input/item_assets/. "$BACKUP_ROOT/data_input_item_assets/"
+
+# 3) templates output
+find src/backend/data/output -maxdepth 1 -type f \
+  \( -name 'template*.pdf' -o -name 'template*.json' -o -name 'template_basica_omr_v2_wireframe.pdf' -o -name 'template_basica_omr_v2_wireframe.json' \) \
+  -print0 | xargs -0 -I{} cp -a "{}" "$BACKUP_ROOT/data_output_templates/"
+
+# 4) dump postgres
+pg_dump -Fc "postgresql://administrador:12345678@localhost:5432/omr_app" \
+  -f "$BACKUP_ROOT/omr_app_${STAMP}.dump"
+
+# 5) comprimir
+cd /tmp
+tar -czf "omr_backup_${STAMP}.tar.gz" "omr_backup_${STAMP}"
+
+# 6) subir a drive institucional
+rclone mkdir "gdrive-institucional:CEVU2026/OMR_BACKUPS"
+rclone copyto "/tmp/omr_backup_${STAMP}.tar.gz" \
+  "gdrive-institucional:CEVU2026/OMR_BACKUPS/omr_backup_${STAMP}.tar.gz"
+```
+
+### Script automatico de backup (recomendado)
+Existe script listo en:
+- `src/backend/scripts/backup_produccion_hoy.sh`
+
+Uso basico:
+```bash
+cd /ruta/proyecto/orm-saber-icfes-calificacion-v2
+src/backend/scripts/backup_produccion_hoy.sh
+```
+
+Variables utiles:
+```bash
+# cambiar remoto destino
+RCLONE_REMOTE="gdrive-institucional:CEVU2026/OMR_BACKUPS" src/backend/scripts/backup_produccion_hoy.sh
+
+# solo generar archivo local sin subir
+UPLOAD_REMOTE=false src/backend/scripts/backup_produccion_hoy.sh
+
+# usar otra conexion postgres
+DATABASE_URL="postgresql://usuario:clave@host:5432/omr_app" src/backend/scripts/backup_produccion_hoy.sh
+```
+
+### Restauracion despues de clonar el repo
+Supuesto: ya clonaste proyecto y levantaste PostgreSQL local.
+
+1. Descargar backup desde Drive:
+```bash
+rclone copyto \
+  "gdrive-institucional:CEVU2026/OMR_BACKUPS/omr_backup_<timestamp>.tar.gz" \
+  "/tmp/omr_backup_<timestamp>.tar.gz"
+```
+
+2. Descomprimir:
+```bash
+cd /tmp
+tar -xzf omr_backup_<timestamp>.tar.gz
+```
+
+3. Restaurar archivos a rutas del proyecto:
+```bash
+cd /ruta/proyecto/orm-saber-icfes-calificacion-v2
+
+# mobile uploads
+mkdir -p src/backend/data/input/mobile_uploads
+cp -a /tmp/omr_backup_<timestamp>/data_input_mobile_uploads_today/. \
+  src/backend/data/input/mobile_uploads/
+
+# item assets
+mkdir -p src/backend/data/input/item_assets
+cp -a /tmp/omr_backup_<timestamp>/data_input_item_assets/. \
+  src/backend/data/input/item_assets/
+
+# templates output
+mkdir -p src/backend/data/output
+cp -a /tmp/omr_backup_<timestamp>/data_output_templates/. \
+  src/backend/data/output/
+```
+
+4. Restaurar base de datos:
+```bash
+# opcional: recrear base vacia
+dropdb --if-exists omr_app
+createdb -O administrador omr_app
+
+# restore custom format
+pg_restore -d "postgresql://administrador:12345678@localhost:5432/omr_app" \
+  /tmp/omr_backup_<timestamp>/omr_app_<timestamp>.dump
+```
+
+5. Levantar backend:
+```bash
+cd src/backend
+source .venv/bin/activate
+./run-app-postgres.sh
+```
+
+### Verificaciones minimas post-restauracion
+- `GET /api/v1/health` responde OK.
+- Se ven intentos en `GET /api/v1/omr/attempts?teacherId=1`.
+- En frontend web se visualizan items con imagenes (item_assets OK).
+- Exportacion de resultados y overlay funcional sobre intentos restaurados.
