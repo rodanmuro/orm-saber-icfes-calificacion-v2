@@ -8,6 +8,7 @@ from app.api.v1.endpoints.health import router as health_router
 from app.api.v1.endpoints.items import router as items_router
 from app.api.v1.endpoints.omr_read import router as omr_read_router
 from app.api.v1.endpoints.students import router as students_router
+from app.api.v1.endpoints.student_portal import router as student_portal_router
 
 api_router = APIRouter()
 api_router.include_router(ai_assistant_router)
@@ -18,3 +19,4 @@ api_router.include_router(health_router)
 api_router.include_router(items_router)
 api_router.include_router(omr_read_router)
 api_router.include_router(students_router)
+api_router.include_router(student_portal_router)
