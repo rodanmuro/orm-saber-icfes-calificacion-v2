@@ -1,4 +1,30 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8001/api/v1';
+function resolveApiBaseUrl() {
+  const configured = String(import.meta.env.VITE_API_BASE_URL || '').trim();
+  if (configured) {
+    try {
+      const parsed = new URL(configured);
+      if (
+        typeof window !== 'undefined' &&
+        window.location.hostname &&
+        !['localhost', '127.0.0.1'].includes(window.location.hostname) &&
+        ['localhost', '127.0.0.1'].includes(parsed.hostname)
+      ) {
+        parsed.hostname = window.location.hostname;
+      }
+      return parsed.toString().replace(/\/+$/, '');
+    } catch {
+      return configured.replace(/\/+$/, '');
+    }
+  }
+  if (typeof window !== 'undefined') {
+    const protocol = window.location.protocol || 'http:';
+    const host = window.location.hostname || 'localhost';
+    return `${protocol}//${host}:8001/api/v1`;
+  }
+  return 'http://localhost:8001/api/v1';
+}
+
+const API_BASE_URL = resolveApiBaseUrl();
 
 async function requestJson(path, options = {}) {
   const response = await fetch(`${API_BASE_URL}${path}`, {

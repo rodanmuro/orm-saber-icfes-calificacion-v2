@@ -76,6 +76,23 @@ npm install
 npm start
 ```
 
+### Levantar todo `src` con un comando
+Para evitar iniciar cada proyecto por separado:
+
+```bash
+scripts/start_all.sh start
+```
+
+Comandos utiles:
+```bash
+scripts/start_all.sh status
+scripts/start_all.sh logs backend
+scripts/start_all.sh logs frontend_web
+scripts/start_all.sh logs frontend_results
+scripts/start_all.sh logs frontend_expo
+scripts/start_all.sh stop
+```
+
 ## Endpoints principales
 - Health: `GET /api/v1/health`
 - Lectura foto OMR: `POST /api/v1/omr/read-photo`

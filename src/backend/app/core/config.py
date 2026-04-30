@@ -11,6 +11,14 @@ class Settings(BaseSettings):
         "http://localhost:5173,http://127.0.0.1:5173,"
         "http://localhost:5174,http://127.0.0.1:5174"
     )
+    cors_allowed_origin_regex: str = (
+        r"^https?://("
+        r"localhost|127\.0\.0\.1|"
+        r"10\.\d{1,3}\.\d{1,3}\.\d{1,3}|"
+        r"192\.168\.\d{1,3}\.\d{1,3}|"
+        r"172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3}"
+        r")(:\d+)?$"
+    )
     database_url: str = "sqlite:///data/omr_app.db"
     omr_reader_backend: str = "classic"
     omr_default_metadata_path: str = "data/output/template_basica_omr_v2_wireframe.json"

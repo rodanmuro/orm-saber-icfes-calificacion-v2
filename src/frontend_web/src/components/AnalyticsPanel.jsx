@@ -51,6 +51,23 @@ export default function AnalyticsPanel({
     [sortedQuestionRows],
   );
 
+  const rankingRows = useMemo(() => {
+    return [...attempts]
+      .sort((a, b) => {
+        const as = Number(a.score_percent);
+        const bs = Number(b.score_percent);
+        const aValid = Number.isFinite(as);
+        const bValid = Number.isFinite(bs);
+        if (aValid && bValid && bs !== as) return bs - as;
+        if (aValid && !bValid) return -1;
+        if (!aValid && bValid) return 1;
+        const ac = String(a.created_at || '');
+        const bc = String(b.created_at || '');
+        return bc.localeCompare(ac);
+      })
+      .map((row, index) => ({ ...row, rank: index + 1 }));
+  }, [attempts]);
+
   function toggleSort(key) {
     if (sortBy === key) {
       setSortDir((prev) => (prev === 'asc' ? 'desc' : 'asc'));
@@ -131,6 +148,42 @@ export default function AnalyticsPanel({
 
       {hasData ? (
         <>
+          <h4>Ranking de calificaciones</h4>
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Estudiante</th>
+                  <th>Grupo</th>
+                  <th>Examen</th>
+                  <th>Version</th>
+                  <th>Puntaje</th>
+                  <th>Correctas</th>
+                  <th>Incorrectas</th>
+                  <th>No marcadas</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rankingRows.map((row) => (
+                  <tr key={row.attempt_id}>
+                    <td>{row.rank}</td>
+                    <td>{row.student_name || '-'}</td>
+                    <td>{row.student_group || '-'}</td>
+                    <td>{row.exam_title || '-'}</td>
+                    <td>{row.exam_version_code || '-'}</td>
+                    <td>{row.score_percent ?? '-'}</td>
+                    <td>{row.correct_count ?? '-'}</td>
+                    <td>{row.incorrect_count ?? '-'}</td>
+                    <td>{row.blank_count ?? '-'}</td>
+                    <td>{row.status || '-'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
           <h4>Grafica de barras (errores por pregunta)</h4>
           <div className="analytics-bars">
             {chartRows.map((row) => {
