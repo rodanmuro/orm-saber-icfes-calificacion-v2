@@ -8,7 +8,7 @@ set -euo pipefail
 # - templates de data/output
 # - subida opcional con rclone
 
-PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 STAMP="${STAMP:-$(date +%Y%m%d_%H%M%S)}"
 TMP_DIR="${TMP_DIR:-/tmp}"
 BACKUP_ROOT="${TMP_DIR}/omr_backup_${STAMP}"
@@ -35,7 +35,7 @@ mkdir -p "${BACKUP_ROOT}/data_input_mobile_uploads_today" \
 
 echo "[INFO] Copiando mobile_uploads del dia..."
 find "${PROJECT_ROOT}/src/backend/data/input/mobile_uploads" -maxdepth 1 -type f -daystart -mtime 0 -print0 \
-  | xargs -0 -I{} cp -a "{}" "${BACKUP_ROOT}/data_input_mobile_uploads_today/"
+  | xargs -r -0 -I{} cp -a "{}" "${BACKUP_ROOT}/data_input_mobile_uploads_today/"
 
 echo "[INFO] Copiando item_assets..."
 cp -a "${PROJECT_ROOT}/src/backend/data/input/item_assets/." "${BACKUP_ROOT}/data_input_item_assets/"
@@ -43,7 +43,7 @@ cp -a "${PROJECT_ROOT}/src/backend/data/input/item_assets/." "${BACKUP_ROOT}/dat
 echo "[INFO] Copiando templates output..."
 find "${PROJECT_ROOT}/src/backend/data/output" -maxdepth 1 -type f \
   \( -name 'template*.pdf' -o -name 'template*.json' -o -name 'template_basica_omr_v2_wireframe.pdf' -o -name 'template_basica_omr_v2_wireframe.json' \) \
-  -print0 | xargs -0 -I{} cp -a "{}" "${BACKUP_ROOT}/data_output_templates/"
+  -print0 | xargs -r -0 -I{} cp -a "{}" "${BACKUP_ROOT}/data_output_templates/"
 
 echo "[INFO] Generando dump PostgreSQL..."
 pg_dump -Fc "${DATABASE_URL}" -f "${BACKUP_ROOT}/omr_app_${STAMP}.dump"
