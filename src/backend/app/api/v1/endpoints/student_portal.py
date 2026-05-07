@@ -138,7 +138,11 @@ def _render_attempt_pdf(attempt: OmrAttempt, overlay_payload: dict) -> bytes:
     margin = 36
     y = height - margin
 
-    exam_title = attempt.exam.title if attempt.exam else "Examen"
+    exam_title = (
+        attempt.exam.title
+        if attempt.exam
+        else (attempt.anonymous_exam.title if attempt.anonymous_exam else "Examen")
+    )
     version_code = attempt.exam_version.version_code if attempt.exam_version else "-"
     student_name = f"{attempt.student.first_name} {attempt.student.last_name}" if attempt.student else "-"
     student_group = attempt.student.group_name if attempt.student else "-"
@@ -250,8 +254,18 @@ def authenticate_student_portal(payload: StudentPortalAuthPayload) -> dict:
                 {
                     "attempt_id": row.id,
                     "exam_id": row.exam_id,
-                    "exam_title": row.exam.title if row.exam else None,
-                    "exam_code": row.exam_version.exam_code if row.exam_version else (row.exam.exam_code if row.exam else None),
+                    "exam_title": (
+                        row.exam.title if row.exam else (row.anonymous_exam.title if row.anonymous_exam else None)
+                    ),
+                    "exam_code": (
+                        row.exam_version.exam_code
+                        if row.exam_version
+                        else (
+                            row.anonymous_exam.exam_code
+                            if row.anonymous_exam
+                            else (row.exam.exam_code if row.exam else None)
+                        )
+                    ),
                     "version_code": row.exam_version.version_code if row.exam_version else None,
                     "status": row.status,
                     "score_percent": row.score_percent,

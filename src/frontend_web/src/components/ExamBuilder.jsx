@@ -32,6 +32,8 @@ export default function ExamBuilder({
   onExportExamPdf,
   onExportExamDocx,
   onViewVersionAnswerKey,
+  onGetVersionDetail,
+  onReorderVersion,
   answerKeyModal,
   onCloseAnswerKeyModal,
   exporting,
@@ -41,6 +43,15 @@ export default function ExamBuilder({
   const [form, setForm] = useState(emptyExamForm(exams[0]?.teacher_id || 1));
   const [previewModalItem, setPreviewModalItem] = useState(null);
   const [previewModalContext, setPreviewModalContext] = useState(null);
+  const [reorderModal, setReorderModal] = useState({
+    open: false,
+    exam: null,
+    version: null,
+    rows: [],
+    loading: false,
+    saving: false,
+    dragId: null,
+  });
 
   useEffect(() => {
     if (!Number.isFinite(form.teacher_id) || form.teacher_id <= 0) return;
@@ -124,6 +135,94 @@ export default function ExamBuilder({
     setPreviewModalItem(nextItem);
   }
 
+  function exportAnswerKeyCsv() {
+    if (!answerKeyModal?.rows?.length) return;
+    const escapeCsv = (value) => {
+      const text = String(value ?? '');
+      if (/[",\n]/.test(text)) {
+        return `"${text.replace(/"/g, '""')}"`;
+      }
+      return text;
+    };
+
+    const header = ['Pregunta', 'Respuesta Correcta', 'Item ID'];
+    const lines = [
+      header.join(','),
+      ...answerKeyModal.rows.map((row) => [
+        row.question_number,
+        row.correct_answer,
+        row.item_id,
+      ].map(escapeCsv).join(',')),
+    ];
+    const csv = `${lines.join('\n')}\n`;
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const examCode = answerKeyModal.version?.exam_code || answerKeyModal.exam?.exam_code || answerKeyModal.exam?.id || 'exam';
+    const versionCode = answerKeyModal.version?.version_code || 'base';
+    a.href = url;
+    a.download = `clave_respuestas_exam_${examCode}_v${versionCode}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  }
+
+  async function openReorderModal(version) {
+    if (!selectedExam || !onGetVersionDetail) return;
+    setReorderModal((prev) => ({ ...prev, open: true, exam: selectedExam, version, rows: [], loading: true, saving: false, dragId: null }));
+    try {
+      const detail = await onGetVersionDetail(selectedExam.id, version.id);
+      const statementByItemId = new Map((selectedExam.items || []).map((row) => [row.item_id, row.item_statement]));
+      const rows = (detail.items || []).map((row) => ({
+        versionItemId: row.id,
+        itemId: row.item_id,
+        questionNumber: row.question_number,
+        statement: statementByItemId.get(row.item_id) || '',
+      }));
+      setReorderModal((prev) => ({ ...prev, rows, loading: false }));
+    } catch (err) {
+      setReorderModal((prev) => ({ ...prev, open: false, loading: false }));
+      throw err;
+    }
+  }
+
+  function closeReorderModal() {
+    setReorderModal({ open: false, exam: null, version: null, rows: [], loading: false, saving: false, dragId: null });
+  }
+
+  function onDragStartRow(id) {
+    setReorderModal((prev) => ({ ...prev, dragId: id }));
+  }
+
+  function onDropRow(targetId) {
+    setReorderModal((prev) => {
+      if (!prev.dragId || prev.dragId === targetId) return prev;
+      const rows = [...prev.rows];
+      const from = rows.findIndex((r) => r.versionItemId === prev.dragId);
+      const to = rows.findIndex((r) => r.versionItemId === targetId);
+      if (from < 0 || to < 0) return { ...prev, dragId: null };
+      const [moved] = rows.splice(from, 1);
+      rows.splice(to, 0, moved);
+      return { ...prev, rows, dragId: null };
+    });
+  }
+
+  async function saveReorderModal() {
+    if (!reorderModal.exam || !reorderModal.version || !onReorderVersion) return;
+    setReorderModal((prev) => ({ ...prev, saving: true }));
+    try {
+      await onReorderVersion(
+        reorderModal.exam,
+        reorderModal.version,
+        reorderModal.rows.map((r) => r.versionItemId),
+      );
+      closeReorderModal();
+    } finally {
+      setReorderModal((prev) => ({ ...prev, saving: false }));
+    }
+  }
+
   return (
     <section className="card">
       <h3>Armado de examen</h3>
@@ -200,7 +299,7 @@ export default function ExamBuilder({
         <>
           <hr />
           <h4>
-            Examen seleccionado: #{selectedExam.id} - {selectedExam.exam_code}
+            Examen seleccionado: #{selectedExam.id} - Código base {selectedExam.exam_code}
           </h4>
           <p className="helper-text">
             Docente del examen: {selectedExam.teacher_id}. Solo se listan items de este docente para asociar.
@@ -223,7 +322,8 @@ export default function ExamBuilder({
                 <thead>
                   <tr>
                     <th>ID</th>
-                    <th>Code</th>
+                    <th>Código OMR</th>
+                    <th>Versión</th>
                     <th>Seed</th>
                     <th>Preguntas barajadas</th>
                     <th>Opciones barajadas</th>
@@ -235,6 +335,7 @@ export default function ExamBuilder({
                   {versions.map((version) => (
                     <tr key={version.id}>
                       <td>{version.id}</td>
+                      <td>{version.exam_code}</td>
                       <td>{version.version_code}</td>
                       <td>{version.seed_shuffle}</td>
                       <td>{version.shuffle_questions ? 'Si' : 'No'}</td>
@@ -246,6 +347,13 @@ export default function ExamBuilder({
                           disabled={loadingAnswerKey}
                         >
                           {loadingAnswerKey ? 'Consultando...' : 'Ver respuestas correctas'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => openReorderModal(version)}
+                          disabled={reorderModal.loading || reorderModal.saving}
+                        >
+                          Reordenar preguntas
                         </button>
                       </td>
                       <td className="col-action col-export">
@@ -489,6 +597,95 @@ export default function ExamBuilder({
         </div>
       ) : null}
 
+      {reorderModal.open ? (
+        <div className="preview-modal-overlay" onClick={closeReorderModal}>
+          <div className="preview-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="preview-modal-header">
+              <h4>Reordenar versión (drag & drop)</h4>
+              <button type="button" onClick={closeReorderModal}>Cerrar</button>
+            </div>
+            <p className="helper-text">
+              Examen #{reorderModal.exam?.id} | Código OMR {reorderModal.version?.exam_code} | Versión {reorderModal.version?.version_code}
+            </p>
+            <p className="helper-text">
+              Arrastra cada fila para cambiar el orden. Al guardar se actualizan número de pregunta y clave OMR.
+            </p>
+            {reorderModal.loading ? <p>Cargando preguntas...</p> : null}
+            {!reorderModal.loading ? (
+              <div className="table-wrap" style={{ maxHeight: 420 }}>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Nuevo #</th>
+                      <th>Item</th>
+                      <th>Enunciado</th>
+                      <th>Estandar</th>
+                      <th>Desempeño</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {reorderModal.rows.map((row, idx) => (
+                      <tr
+                        key={row.versionItemId}
+                        draggable
+                        onDragStart={() => onDragStartRow(row.versionItemId)}
+                        onDragOver={(e) => e.preventDefault()}
+                        onDrop={() => onDropRow(row.versionItemId)}
+                        style={{ cursor: 'grab' }}
+                      >
+                        <td>{idx + 1}</td>
+                        <td>{row.itemId}</td>
+                        <td>
+                          {(() => {
+                            const item = itemsById.get(row.itemId);
+                            const full = item
+                              ? statementPreview(item.statement)
+                              : statementPreview(row.statement || '');
+                            const cell = buildCellText(full, 90);
+                            return (
+                              <span className="cell-truncate" title={cell.full}>
+                                {cell.short}
+                              </span>
+                            );
+                          })()}
+                        </td>
+                        <td>
+                          {(() => {
+                            const item = itemsById.get(row.itemId);
+                            const cell = buildCellText(item?.curriculum?.standard_name || '-', 42);
+                            return (
+                              <span className="cell-truncate" title={cell.full}>
+                                {cell.short}
+                              </span>
+                            );
+                          })()}
+                        </td>
+                        <td>
+                          {(() => {
+                            const item = itemsById.get(row.itemId);
+                            const cell = buildCellText(item?.curriculum?.competency_name || '-', 42);
+                            return (
+                              <span className="cell-truncate" title={cell.full}>
+                                {cell.short}
+                              </span>
+                            );
+                          })()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : null}
+            <div className="actions">
+              <button type="button" onClick={saveReorderModal} disabled={reorderModal.loading || reorderModal.saving}>
+                {reorderModal.saving ? 'Guardando...' : 'Guardar orden'}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       {answerKeyModal?.open ? (
         <div className="preview-modal-overlay" onClick={onCloseAnswerKeyModal}>
           <div className="preview-modal answer-key-modal" onClick={(e) => e.stopPropagation()}>
@@ -496,7 +693,10 @@ export default function ExamBuilder({
               <h4>
                 Clave de respuestas - Examen #{answerKeyModal.exam?.id} ({answerKeyModal.exam?.exam_code})
               </h4>
-              <button type="button" onClick={onCloseAnswerKeyModal}>Cerrar</button>
+              <div className="preview-modal-actions">
+                <button type="button" onClick={exportAnswerKeyCsv}>Exportar a CSV</button>
+                <button type="button" onClick={onCloseAnswerKeyModal}>Cerrar</button>
+              </div>
             </div>
             <p className="helper-text">
               Version: {answerKeyModal.version?.version_code} | Seed: {answerKeyModal.version?.seed_shuffle}

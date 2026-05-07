@@ -48,6 +48,7 @@ class ExamVersionPublishRequest(BaseModel):
 
 
 class ExamVersionItemRead(BaseModel):
+    id: int
     question_number: int
     source_exam_item_id: int
     item_id: int
@@ -73,3 +74,7 @@ class ExamVersionRead(BaseModel):
 
 class ExamVersionDetailRead(ExamVersionRead):
     items: list[ExamVersionItemRead]
+
+
+class ExamVersionReorderRequest(BaseModel):
+    ordered_version_item_ids: list[int] = Field(min_length=1)

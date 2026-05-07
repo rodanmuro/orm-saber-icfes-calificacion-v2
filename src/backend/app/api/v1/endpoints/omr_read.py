@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import select
 
 from app.core.config import settings
-from app.db.models import Exam, ExamItem, ExamVersion, ExamVersionItem, OmrAttempt, OmrAttemptAnswer, Student
+from app.db.models import AnonymousExam, Exam, ExamItem, ExamVersion, ExamVersionItem, OmrAttempt, OmrAttemptAnswer, Student
 from app.db.session import SessionLocal
 from app.modules.omr_reader.api_service import (
     DEFAULT_METADATA_PATH,
@@ -51,6 +51,7 @@ class ManualAnswerPayload(BaseModel):
 
 class AssignAttemptPayload(BaseModel):
     exam_id: int | None = None
+    anonymous_exam_id: int | None = None
     exam_code: str | None = None
     exam_version_id: int | None = None
     teacher_id: int | None = None
@@ -71,6 +72,22 @@ def _normalize_exam_code(value: str | None) -> str | None:
     if raw.isdigit():
         return str(int(raw))
     return raw
+
+
+def _build_answer_key_from_anonymous_exam(answer_key_json: dict[str, str]) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for key, correct in sorted(
+        ((int(k), str(v).strip().upper()) for k, v in answer_key_json.items()),
+        key=lambda pair: pair[0],
+    ):
+        rows.append(
+            {
+                "question_number": key,
+                "item_id": None,
+                "correct_answer": correct,
+            }
+        )
+    return rows
 
 
 @router.get("/thresholds")
@@ -256,6 +273,7 @@ async def read_photo_omr(
         resolved_exam_id: int | None = None
         resolved_exam_version_id: int | None = None
         resolved_student_id: int | None = None
+        resolved_anonymous_exam_id: int | None = None
 
         def _resolve_student(db) -> int | None:
             doc_type = str(doc_value or "CC").strip()
@@ -341,15 +359,7 @@ async def read_photo_omr(
                             ExamVersion.exam_code == exam_code,
                         )
                     )
-                    if version is None:
-                        grading_block = {
-                            "status": "resolution_error",
-                            "message": (
-                                f"exam version not found for teacher_id={teacher_id} "
-                                f"and exam_code={exam_code} (raw={exam_code_raw})"
-                            ),
-                        }
-                    else:
+                    if version is not None:
                         exam = db.get(Exam, version.exam_id)
                         if exam is None:
                             grading_block = {
@@ -386,6 +396,46 @@ async def read_photo_omr(
                                 version.id,
                                 json.dumps(score_payload["summary"], ensure_ascii=False),
                             )
+                    else:
+                        anonymous_exam = db.scalar(
+                            select(AnonymousExam).where(
+                                AnonymousExam.teacher_id == teacher_id,
+                                AnonymousExam.exam_code == exam_code,
+                                AnonymousExam.is_active.is_(True),
+                            )
+                        )
+                        if anonymous_exam is None:
+                            grading_block = {
+                                "status": "resolution_error",
+                                "message": (
+                                    f"exam not found for teacher_id={teacher_id} "
+                                    f"and exam_code={exam_code} (raw={exam_code_raw})"
+                                ),
+                            }
+                        else:
+                            resolved_anonymous_exam_id = anonymous_exam.id
+                            answer_key = _build_answer_key_from_anonymous_exam(anonymous_exam.answer_key_json)
+                            score_payload = grade_omr_questions(
+                                answer_key=answer_key,
+                                omr_questions=result.get("questions", []),
+                            )
+                            resolved_student_id = _resolve_student(db)
+                            grading_block = {
+                                "status": "graded",
+                                "teacher_id": teacher_id,
+                                "exam_id": None,
+                                "exam_code": anonymous_exam.exam_code,
+                                "exam_version_id": None,
+                                "anonymous_exam_id": anonymous_exam.id,
+                                "summary": score_payload["summary"],
+                                "details": score_payload["details"],
+                            }
+                            logger.info(
+                                "OMR grading summary | teacher_id=%s anonymous_exam_id=%s summary=%s",
+                                teacher_id,
+                                anonymous_exam.id,
+                                json.dumps(score_payload["summary"], ensure_ascii=False),
+                            )
         elif teacher_id is not None and not exam_value and exam_version_id is None:
             grading_block = {
                 "status": "resolution_error",
@@ -408,6 +458,7 @@ async def read_photo_omr(
                 teacher_id=teacher_id,
                 exam_id=resolved_exam_id,
                 exam_version_id=resolved_exam_version_id,
+                anonymous_exam_id=resolved_anonymous_exam_id,
                 student_id=resolved_student_id,
                 exam_code_detected=str(exam_value).strip() if exam_value else None,
                 grading_block=grading_block,
@@ -528,7 +579,16 @@ def get_omr_attempt(attempt_id: int) -> dict:
             "teacher_id": attempt.teacher_id,
             "exam_id": attempt.exam_id,
             "exam_version_id": attempt.exam_version_id,
-            "exam_code": attempt.exam_version.exam_code if attempt.exam_version else (attempt.exam.exam_code if attempt.exam else None),
+            "anonymous_exam_id": attempt.anonymous_exam_id,
+            "exam_code": (
+                attempt.exam_version.exam_code
+                if attempt.exam_version
+                else (
+                    attempt.anonymous_exam.exam_code
+                    if attempt.anonymous_exam
+                    else (attempt.exam.exam_code if attempt.exam else None)
+                )
+            ),
             "exam_code_detected": attempt.exam_code_detected,
             "status": attempt.status,
             "summary": {
@@ -644,7 +704,23 @@ def assign_omr_attempt(attempt_id: int, payload: AssignAttemptPayload) -> dict:
 
         exam = None
         version = None
-        if payload.exam_version_id is not None:
+        anonymous_exam = None
+
+        if payload.exam_version_id is not None and payload.anonymous_exam_id is not None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="cannot provide exam_version_id and anonymous_exam_id together",
+            )
+
+        if payload.anonymous_exam_id is not None:
+            anonymous_exam = db.get(AnonymousExam, payload.anonymous_exam_id)
+            if anonymous_exam is None:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="anonymous_exam not found")
+            if not anonymous_exam.is_active:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="anonymous_exam is inactive")
+            if teacher_id is not None and anonymous_exam.teacher_id != teacher_id:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="teacher_id mismatch")
+        elif payload.exam_version_id is not None:
             version = db.get(ExamVersion, payload.exam_version_id)
             if version is None:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="exam_version not found")
@@ -670,16 +746,27 @@ def assign_omr_attempt(attempt_id: int, payload: AssignAttemptPayload) -> dict:
                 )
                 if version is not None:
                     exam = db.get(Exam, version.exam_id)
+                else:
+                    anonymous_exam = db.scalar(
+                        select(AnonymousExam).where(
+                            AnonymousExam.teacher_id == teacher_id,
+                            AnonymousExam.exam_code == exam_code,
+                            AnonymousExam.is_active.is_(True),
+                        )
+                    )
             if exam is None and version is None:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="exam not found")
+                if anonymous_exam is None:
+                    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="exam not found")
             if version is None and exam is not None:
                 version = db.scalar(
                     select(ExamVersion)
                     .where(ExamVersion.exam_id == exam.id)
                     .order_by(ExamVersion.id.desc())
                 )
-            if version is None:
+            if version is None and anonymous_exam is None:
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="exam has no versions")
+        if anonymous_exam is None and version is None:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="exam reference required")
 
         student_id = attempt.student_id
         if payload.student_id is not None:
@@ -713,19 +800,23 @@ def assign_omr_attempt(attempt_id: int, payload: AssignAttemptPayload) -> dict:
                 }
             )
 
-        version_items = db.scalars(
-            select(ExamVersionItem)
-            .where(ExamVersionItem.exam_version_id == version.id)
-            .order_by(ExamVersionItem.question_number.asc())
-        ).all()
-        answer_key = build_answer_key_from_version_items(version_items)
+        if anonymous_exam is not None:
+            answer_key = _build_answer_key_from_anonymous_exam(anonymous_exam.answer_key_json)
+        else:
+            version_items = db.scalars(
+                select(ExamVersionItem)
+                .where(ExamVersionItem.exam_version_id == version.id)
+                .order_by(ExamVersionItem.question_number.asc())
+            ).all()
+            answer_key = build_answer_key_from_version_items(version_items)
         score_payload = grade_omr_questions(
             answer_key=answer_key,
             omr_questions=omr_questions,
         )
 
-        attempt.exam_id = exam.id
-        attempt.exam_version_id = version.id
+        attempt.exam_id = exam.id if exam is not None else None
+        attempt.exam_version_id = version.id if version is not None else None
+        attempt.anonymous_exam_id = anonymous_exam.id if anonymous_exam is not None else None
         attempt.student_id = student_id
         attempt.status = "needs_review" if score_payload["summary"]["ambiguous"] > 0 else "graded"
         attempt.score_percent = score_payload["summary"]["score_percent"]
@@ -771,10 +862,23 @@ def list_omr_attempts(
                     "attempt_id": attempt.id,
                     "teacher_id": attempt.teacher_id,
                     "exam_id": attempt.exam_id,
-                    "exam_code": attempt.exam_version.exam_code if attempt.exam_version else (attempt.exam.exam_code if attempt.exam else None),
-                    "exam_title": attempt.exam.title if attempt.exam else None,
+                    "exam_code": (
+                        attempt.exam_version.exam_code
+                        if attempt.exam_version
+                        else (
+                            attempt.anonymous_exam.exam_code
+                            if attempt.anonymous_exam
+                            else (attempt.exam.exam_code if attempt.exam else None)
+                        )
+                    ),
+                    "exam_title": (
+                        attempt.exam.title
+                        if attempt.exam
+                        else (attempt.anonymous_exam.title if attempt.anonymous_exam else None)
+                    ),
                     "exam_version_id": attempt.exam_version_id,
                     "exam_version_code": attempt.exam_version.version_code if attempt.exam_version else None,
+                    "anonymous_exam_id": attempt.anonymous_exam_id,
                     "student_id": attempt.student_id,
                     "student_name": (
                         f"{attempt.student.first_name} {attempt.student.last_name}" if attempt.student else None

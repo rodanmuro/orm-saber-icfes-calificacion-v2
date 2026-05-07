@@ -24,6 +24,7 @@ class Teacher(Base):
 
     items: Mapped[list[Item]] = relationship(back_populates="teacher")
     exams: Mapped[list[Exam]] = relationship(back_populates="teacher")
+    anonymous_exams: Mapped[list[AnonymousExam]] = relationship(back_populates="teacher")
     omr_attempts: Mapped[list[OmrAttempt]] = relationship(back_populates="teacher")
 
 
@@ -198,6 +199,27 @@ class ExamVersionItem(Base):
     exam_version: Mapped[ExamVersion] = relationship(back_populates="version_items")
 
 
+class AnonymousExam(Base):
+    __tablename__ = "anonymous_exam"
+    __table_args__ = (UniqueConstraint("teacher_id", "exam_code", name="uq_anonymous_exam_teacher_code"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    teacher_id: Mapped[int] = mapped_column(ForeignKey("teacher.id", ondelete="RESTRICT"), index=True)
+    exam_code: Mapped[str] = mapped_column(String(64), index=True)
+    title: Mapped[str] = mapped_column(String(255))
+    question_count: Mapped[int] = mapped_column(Integer)
+    answer_key_json: Mapped[dict[str, str]] = mapped_column(JSON)
+    source_pdf_path: Mapped[str | None] = mapped_column(Text, nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+    teacher: Mapped[Teacher] = relationship(back_populates="anonymous_exams")
+    omr_attempts: Mapped[list[OmrAttempt]] = relationship(back_populates="anonymous_exam")
+
+
 class OmrAttempt(Base):
     __tablename__ = "omr_attempt"
 
@@ -210,6 +232,9 @@ class OmrAttempt(Base):
     )
     exam_version_id: Mapped[int | None] = mapped_column(
         ForeignKey("exam_version.id", ondelete="SET NULL"), nullable=True, index=True
+    )
+    anonymous_exam_id: Mapped[int | None] = mapped_column(
+        ForeignKey("anonymous_exam.id", ondelete="SET NULL"), nullable=True, index=True
     )
     student_id: Mapped[int | None] = mapped_column(
         ForeignKey("student.id", ondelete="SET NULL"), nullable=True, index=True
@@ -232,6 +257,7 @@ class OmrAttempt(Base):
     teacher: Mapped[Teacher | None] = relationship(back_populates="omr_attempts")
     exam: Mapped[Exam | None] = relationship(back_populates="omr_attempts")
     exam_version: Mapped[ExamVersion | None] = relationship()
+    anonymous_exam: Mapped[AnonymousExam | None] = relationship(back_populates="omr_attempts")
     student: Mapped[Student | None] = relationship()
     answers: Mapped[list[OmrAttemptAnswer]] = relationship(
         back_populates="attempt",

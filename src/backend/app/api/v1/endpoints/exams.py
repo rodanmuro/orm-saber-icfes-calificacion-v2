@@ -23,6 +23,7 @@ from app.schemas.exam_bank import (
     ExamVersionItemRead,
     ExamVersionPublishRequest,
     ExamVersionRead,
+    ExamVersionReorderRequest,
 )
 
 router = APIRouter(prefix="/exams", tags=["exams"])
@@ -89,6 +90,7 @@ def _exam_version_to_detail(
         **_exam_version_to_read(version).model_dump(),
         items=[
             ExamVersionItemRead(
+                id=row.id,
                 question_number=row.question_number,
                 source_exam_item_id=row.source_exam_item_id,
                 item_id=row.item_id,
@@ -360,6 +362,71 @@ def get_exam_version(exam_id: int, version_id: int, db: Session = Depends(get_db
         .order_by(ExamVersionItem.question_number.asc())
     ).all()
     return _exam_version_to_detail(version=version, version_items=version_items)
+
+
+@router.patch("/{exam_id}/versions/{version_id}/reorder", response_model=ExamVersionDetailRead)
+def reorder_exam_version(
+    exam_id: int,
+    version_id: int,
+    payload: ExamVersionReorderRequest,
+    db: Session = Depends(get_db),
+) -> ExamVersionDetailRead:
+    version = db.get(ExamVersion, version_id)
+    if version is None or version.exam_id != exam_id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="exam version not found")
+
+    version_items = db.scalars(
+        select(ExamVersionItem)
+        .where(ExamVersionItem.exam_version_id == version_id)
+        .order_by(ExamVersionItem.question_number.asc())
+    ).all()
+    if not version_items:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="cannot reorder an empty exam version",
+        )
+
+    current_ids = [row.id for row in version_items]
+    requested_ids = payload.ordered_version_item_ids
+    if len(requested_ids) != len(current_ids) or set(requested_ids) != set(current_ids):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="ordered_version_item_ids must contain exactly the same version item ids",
+        )
+
+    by_id = {row.id: row for row in version_items}
+    reordered_rows = [by_id[row_id] for row_id in requested_ids]
+
+    # Two-phase renumbering to avoid transient unique collisions on
+    # (exam_version_id, question_number) while swapping positions.
+    offset = len(reordered_rows) + 1000
+    for row in reordered_rows:
+        row.question_number = row.question_number + offset
+    db.flush()
+
+    answer_key: dict[str, str] = {}
+    for idx, row in enumerate(reordered_rows, start=1):
+        row.question_number = idx
+        answer_key[str(idx)] = row.correct_answer_mapped
+
+    version.answer_key_json = answer_key
+    db.add(version)
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="could not reorder exam version due to concurrent/conflicting update",
+        ) from exc
+    db.refresh(version)
+
+    refreshed = db.scalars(
+        select(ExamVersionItem)
+        .where(ExamVersionItem.exam_version_id == version_id)
+        .order_by(ExamVersionItem.question_number.asc())
+    ).all()
+    return _exam_version_to_detail(version=version, version_items=refreshed)
 
 
 @router.get("/{exam_id}/versions/{version_id}/export/pdf")

@@ -81,6 +81,13 @@ export function getExamVersion(examId, versionId) {
   return request(`/exams/${examId}/versions/${versionId}`);
 }
 
+export function reorderExamVersion(examId, versionId, orderedVersionItemIds) {
+  return request(`/exams/${examId}/versions/${versionId}/reorder`, {
+    method: 'PATCH',
+    body: JSON.stringify({ ordered_version_item_ids: orderedVersionItemIds }),
+  });
+}
+
 export async function exportExamVersionPdf(examId, versionId, filenameFallback) {
   const { blob } = await requestBlob(`/exams/${examId}/versions/${versionId}/export/pdf`);
   downloadBlob(blob, filenameFallback || `exam_${examId}_version_${versionId}.pdf`);

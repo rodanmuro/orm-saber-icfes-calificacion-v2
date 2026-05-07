@@ -22,10 +22,13 @@ import {
   listExamVersions,
   exportExamVersionPdf,
   exportExamVersionDocx,
+  reorderExamVersion,
   publishExamVersion,
   removeItemFromExam,
 } from './api/examsApi';
+import { createAnonymousExam, listAnonymousExams } from './api/anonymousExamsApi';
 import ExamBuilder from './components/ExamBuilder';
+import AnonymousExamBuilder from './components/AnonymousExamBuilder';
 import FiltersBar from './components/FiltersBar';
 import ItemForm, { emptyForm, formToPayload, itemToForm } from './components/ItemForm';
 import ItemList from './components/ItemList';
@@ -86,6 +89,8 @@ export default function App() {
   const [exams, setExams] = useState([]);
   const [selectedExam, setSelectedExam] = useState(null);
   const [examVersions, setExamVersions] = useState([]);
+  const [anonymousExams, setAnonymousExams] = useState([]);
+  const [loadingAnonymousExams, setLoadingAnonymousExams] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [exporting, setExporting] = useState({ examId: null, format: null });
@@ -172,6 +177,13 @@ export default function App() {
     }
     if (activeTab === 'graded') {
       refreshThresholds();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (activeTab === 'anonymous') {
+      refreshAnonymousExams(1);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
@@ -916,16 +928,46 @@ export default function App() {
     }
   }
 
+  async function refreshAnonymousExams(teacherId) {
+    setLoadingAnonymousExams(true);
+    setError('');
+    try {
+      const data = await listAnonymousExams(teacherId);
+      setAnonymousExams(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoadingAnonymousExams(false);
+    }
+  }
+
   async function handleCreateExam(formData) {
     setError('');
     setMessage('');
+    const title = String(formData.title || '').trim();
+    if (!title) {
+      setError('El titulo del examen es obligatorio.');
+      return;
+    }
     const payload = {
       teacher_id: Number(formData.teacher_id),
-      title: formData.title,
+      title,
       description: formData.description || null,
     };
     const created = await createExam(payload);
     setMessage(`Examen #${created.id} creado`);
+  }
+
+  async function handleCreateAnonymousExam(payload) {
+    setError('');
+    setMessage('');
+    const title = String(payload.title || '').trim();
+    if (!title) {
+      setError('El titulo del examen anónimo es obligatorio.');
+      return;
+    }
+    const created = await createAnonymousExam({ ...payload, title });
+    setMessage(`Examen anónimo #${created.id} creado (code ${created.exam_code})`);
   }
 
   async function handleSelectExam(examId) {
@@ -1046,6 +1088,19 @@ export default function App() {
     }
   }
 
+  async function handleGetVersionDetail(examId, versionId) {
+    return getExamVersion(examId, versionId);
+  }
+
+  async function handleReorderVersion(exam, version, orderedVersionItemIds) {
+    setError('');
+    setMessage('');
+    await reorderExamVersion(exam.id, version.id, orderedVersionItemIds);
+    const refreshed = await listExamVersions(exam.id);
+    setExamVersions(refreshed);
+    setMessage(`Version ${version.version_code} reordenada y clave OMR actualizada.`);
+  }
+
   function handleCloseAnswerKeyModal() {
     setAnswerKeyModal({
       open: false,
@@ -1079,6 +1134,13 @@ export default function App() {
           onClick={() => setActiveTab('exam')}
         >
           Armado de examen
+        </button>
+        <button
+          type="button"
+          className={activeTab === 'anonymous' ? 'tab-btn active' : 'tab-btn'}
+          onClick={() => setActiveTab('anonymous')}
+        >
+          Examen anonimo
         </button>
         <button
           type="button"
@@ -1169,12 +1231,25 @@ export default function App() {
             onExportExamPdf={handleExportExamPdf}
             onExportExamDocx={handleExportExamDocx}
             onViewVersionAnswerKey={handleViewVersionAnswerKey}
+            onGetVersionDetail={handleGetVersionDetail}
+            onReorderVersion={handleReorderVersion}
             answerKeyModal={answerKeyModal}
             onCloseAnswerKeyModal={handleCloseAnswerKeyModal}
             exporting={exporting}
             loadingAnswerKey={loadingAnswerKey}
             loading={loadingExams}
           />
+        ) : null}
+
+        {activeTab === 'anonymous' ? (
+          <section className="single-pane">
+            <AnonymousExamBuilder
+              exams={anonymousExams}
+              loading={loadingAnonymousExams}
+              onRefresh={refreshAnonymousExams}
+              onCreate={handleCreateAnonymousExam}
+            />
+          </section>
         ) : null}
 
         {activeTab === 'students' ? (
