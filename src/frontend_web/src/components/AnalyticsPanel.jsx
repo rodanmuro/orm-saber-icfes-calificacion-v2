@@ -68,6 +68,48 @@ export default function AnalyticsPanel({
       .map((row, index) => ({ ...row, rank: index + 1 }));
   }, [attempts]);
 
+  function exportRankingCsv() {
+    const headers = [
+      'Rank',
+      'Estudiante',
+      'Grupo',
+      'Examen',
+      'Version',
+      'Puntaje',
+      'Correctas',
+      'Incorrectas',
+      'No marcadas',
+      'Estado',
+    ];
+    const escape = (value) => {
+      const text = String(value ?? '');
+      if (/[",\n]/.test(text)) return `"${text.replace(/"/g, '""')}"`;
+      return text;
+    };
+    const rows = rankingRows.map((row) => [
+      row.rank,
+      row.student_name || '-',
+      row.student_group || '-',
+      row.exam_title || '-',
+      row.exam_version_code || '-',
+      row.score_percent ?? '-',
+      row.correct_count ?? '-',
+      row.incorrect_count ?? '-',
+      row.blank_count ?? '-',
+      row.status || '-',
+    ]);
+    const csv = `${[headers, ...rows].map((line) => line.map(escape).join(',')).join('\n')}\n`;
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'ranking_calificaciones.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
   function toggleSort(key) {
     if (sortBy === key) {
       setSortDir((prev) => (prev === 'asc' ? 'desc' : 'asc'));
@@ -148,7 +190,12 @@ export default function AnalyticsPanel({
 
       {hasData ? (
         <>
-          <h4>Ranking de calificaciones</h4>
+          <div className="row between center">
+            <h4>Ranking de calificaciones</h4>
+            <button type="button" onClick={exportRankingCsv} disabled={!rankingRows.length}>
+              Exportar CSV
+            </button>
+          </div>
           <div className="table-wrap">
             <table>
               <thead>

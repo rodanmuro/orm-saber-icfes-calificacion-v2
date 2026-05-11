@@ -28,7 +28,10 @@ CONTENT_WIDTH_IN = PAGE_WIDTH_IN - 2 * MARGIN_IN
 COLUMN_WIDTH_IN = (CONTENT_WIDTH_IN - GUTTER_IN) / 2  # ~3.6"
 
 # Altura inline para ecuaciones y valores numéricos (puntos)
-INLINE_IMG_HEIGHT_PT = 11.0
+INLINE_IMG_HEIGHT_PT = 18.0
+
+# Tamaño de fuente para renderizar LaTeX a imagen (matplotlib)
+LATEX_FONT_PT = 16.0
 
 BACKEND_DIR = Path(__file__).resolve().parents[3]
 ASSETS_DIR = BACKEND_DIR / "data" / "input" / "item_assets"
@@ -88,7 +91,7 @@ def _render_latex_to_png(latex: str) -> Path | None:
     try:
         fig = plt.figure(figsize=(0.01, 0.01))
         fig.patch.set_alpha(0)
-        text = fig.text(0, 0, f"${clean}$", fontsize=10)
+        text = fig.text(0, 0, f"${clean}$", fontsize=LATEX_FONT_PT)
         fig.canvas.draw()
         bbox = text.get_window_extent(renderer=fig.canvas.get_renderer()).expanded(1.08, 1.25)
         dpi = 160
