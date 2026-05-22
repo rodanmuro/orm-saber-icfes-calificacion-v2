@@ -37,6 +37,13 @@ export function listOmrAttempts({ teacherId, limit = 200, offset = 0 } = {}) {
   return request(`/omr/attempts?${query.toString()}`);
 }
 
+export function listOmrStudentAnswerReport({ teacherId, q } = {}) {
+  const query = new URLSearchParams();
+  if (teacherId) query.append('teacher_id', teacherId);
+  if (q?.trim()) query.append('q', q.trim());
+  return request(`/omr/student-answer-report?${query.toString()}`);
+}
+
 export function getOmrAttempt(attemptId) {
   return request(`/omr/attempts/${attemptId}`);
 }

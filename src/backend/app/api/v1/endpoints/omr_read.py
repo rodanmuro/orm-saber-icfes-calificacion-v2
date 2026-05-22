@@ -9,9 +9,10 @@ import csv
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile, Query, status
 from pydantic import BaseModel, Field
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 
 from app.core.config import settings
-from app.db.models import AnonymousExam, Exam, ExamItem, ExamVersion, ExamVersionItem, OmrAttempt, OmrAttemptAnswer, Student
+from app.db.models import AnonymousExam, Exam, ExamItem, ExamVersion, ExamVersionItem, Item, OmrAttempt, OmrAttemptAnswer, Student
 from app.db.session import SessionLocal
 from app.modules.omr_reader.api_service import (
     DEFAULT_METADATA_PATH,
@@ -88,6 +89,22 @@ def _build_answer_key_from_anonymous_exam(answer_key_json: dict[str, str]) -> li
             }
         )
     return rows
+
+
+def _effective_answer(row: OmrAttemptAnswer) -> tuple[str | None, str]:
+    if row.manual_override:
+        manual_answer = str(row.manual_answer or "").strip().upper()
+        if manual_answer == "":
+            return None, "blank"
+        if manual_answer == row.correct_answer:
+            return manual_answer, "correct"
+        return manual_answer, "incorrect"
+    status_value = str(row.status or "blank")
+    if status_value in {"correct", "incorrect", "blank", "ambiguous"}:
+        return row.marked_answer, status_value
+    if status_value == "detected":
+        return row.marked_answer, "incorrect"
+    return row.marked_answer, "blank"
 
 
 @router.get("/thresholds")
@@ -559,20 +576,6 @@ def get_omr_attempt(attempt_id: int) -> dict:
             .where(OmrAttemptAnswer.attempt_id == attempt_id)
             .order_by(OmrAttemptAnswer.question_number.asc())
         ).all()
-        def _effective_answer(row: OmrAttemptAnswer) -> tuple[str | None, str]:
-            if row.manual_override:
-                manual_answer = str(row.manual_answer or "").strip().upper()
-                if manual_answer == "":
-                    return None, "blank"
-                if manual_answer == row.correct_answer:
-                    return manual_answer, "correct"
-                return manual_answer, "incorrect"
-            status = str(row.status or "blank")
-            if status in {"correct", "incorrect", "blank", "ambiguous"}:
-                return row.marked_answer, status
-            if status == "detected":
-                return row.marked_answer, "incorrect"
-            return row.marked_answer, "blank"
 
         return {
             "attempt_id": attempt.id,
@@ -630,6 +633,116 @@ def get_omr_attempt(attempt_id: int) -> dict:
                 for row in answers
             ],
         }
+
+
+@router.get("/student-answer-report")
+def get_student_answer_report(
+    teacher_id: int | None = Query(default=None, gt=0),
+    q: str = Query(..., min_length=1),
+) -> list[dict]:
+    query = q.strip().lower()
+    if not query:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="q is required")
+
+    with SessionLocal() as db:
+        statement = (
+            select(OmrAttempt)
+            .where(OmrAttempt.student_id.is_not(None))
+            .options(selectinload(OmrAttempt.student))
+            .order_by(OmrAttempt.created_at.desc(), OmrAttempt.id.desc())
+        )
+        if teacher_id is not None:
+            statement = statement.where(OmrAttempt.teacher_id == teacher_id)
+        attempts = db.scalars(statement).all()
+
+        matched_attempts = []
+        for attempt in attempts:
+            student = attempt.student
+            if student is None:
+                continue
+            haystack = " ".join(
+                part
+                for part in [
+                    student.first_name,
+                    student.last_name,
+                    student.document_number,
+                    student.group_name,
+                ]
+                if part
+            ).lower()
+            if query in haystack:
+                matched_attempts.append(attempt)
+
+        attempt_ids = [attempt.id for attempt in matched_attempts]
+        if not attempt_ids:
+            return []
+
+        answers = db.scalars(
+            select(OmrAttemptAnswer)
+            .where(OmrAttemptAnswer.attempt_id.in_(attempt_ids))
+            .order_by(OmrAttemptAnswer.attempt_id.desc(), OmrAttemptAnswer.question_number.asc())
+        ).all()
+        answers_by_attempt: dict[int, list[OmrAttemptAnswer]] = {}
+        item_ids: set[int] = set()
+        for row in answers:
+            answers_by_attempt.setdefault(row.attempt_id, []).append(row)
+            if row.item_id:
+                item_ids.add(int(row.item_id))
+
+        items_by_id: dict[int, Item] = {}
+        if item_ids:
+            items = db.scalars(
+                select(Item)
+                .where(Item.id.in_(item_ids))
+                .options(selectinload(Item.standard), selectinload(Item.competency))
+            ).all()
+            items_by_id = {item.id: item for item in items}
+
+        rows: list[dict] = []
+        for attempt in matched_attempts:
+            student = attempt.student
+            if student is None:
+                continue
+            exam_code = (
+                attempt.exam_version.exam_code
+                if attempt.exam_version
+                else (
+                    attempt.anonymous_exam.exam_code
+                    if attempt.anonymous_exam
+                    else (attempt.exam.exam_code if attempt.exam else None)
+                )
+            )
+            exam_title = (
+                attempt.exam.title
+                if attempt.exam
+                else (attempt.anonymous_exam.title if attempt.anonymous_exam else None)
+            )
+            version_code = attempt.exam_version.version_code if attempt.exam_version else None
+            for answer in answers_by_attempt.get(attempt.id, []):
+                item = items_by_id.get(int(answer.item_id)) if answer.item_id else None
+                effective_answer, effective_status = _effective_answer(answer)
+                rows.append(
+                    {
+                        "attempt_id": attempt.id,
+                        "student_id": student.id,
+                        "student_name": f"{student.first_name} {student.last_name}".strip(),
+                        "student_document_number": student.document_number,
+                        "student_group": student.group_name,
+                        "exam_code": exam_code,
+                        "exam_title": exam_title,
+                        "exam_version_code": version_code,
+                        "created_at": attempt.created_at,
+                        "question_number": answer.question_number,
+                        "item_id": answer.item_id,
+                        "standard_name": item.standard.name if item and item.standard else None,
+                        "competency_name": item.competency.name if item and item.competency else None,
+                        "marked_answer": answer.marked_answer,
+                        "correct_answer": answer.correct_answer,
+                        "effective_answer": effective_answer,
+                        "effective_status": effective_status,
+                    }
+                )
+        return rows
 
 
 @router.delete("/attempts/{attempt_id}")

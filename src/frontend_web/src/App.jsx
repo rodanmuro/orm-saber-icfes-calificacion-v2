@@ -6,6 +6,7 @@ import {
   getOmrAttempt,
   deleteOmrAttempt,
   listOmrAttempts,
+  listOmrStudentAnswerReport,
   updateOmrAttemptAnswers,
   getOmrAttemptRatios,
   getOmrAttemptOverlay,
@@ -35,6 +36,7 @@ import ItemList from './components/ItemList';
 import StudentList from './components/StudentList';
 import AttemptList from './components/AttemptList';
 import AnalyticsPanel from './components/AnalyticsPanel';
+import StudentAnswerReportPanel from './components/StudentAnswerReportPanel';
 import { docHasMeaningfulContent } from './utils/editorDoc';
 
 
@@ -133,6 +135,9 @@ export default function App() {
   const [analyticsSummary, setAnalyticsSummary] = useState({ attemptCount: 0, avgScorePercent: null, questionCount: 0 });
   const [analyticsQuestionStats, setAnalyticsQuestionStats] = useState([]);
   const [attemptDetailsCache, setAttemptDetailsCache] = useState({});
+  const [studentAnswerReportQuery, setStudentAnswerReportQuery] = useState('');
+  const [studentAnswerReportRows, setStudentAnswerReportRows] = useState([]);
+  const [studentAnswerReportLoading, setStudentAnswerReportLoading] = useState(false);
 
   async function refreshItems() {
     setLoading(true);
@@ -165,7 +170,7 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (activeTab === 'students') {
+    if (activeTab === 'students' || activeTab === 'student-report') {
       refreshStudents();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -757,6 +762,28 @@ export default function App() {
     }
   }
 
+  async function searchStudentAnswerReport() {
+    const rawQuery = studentAnswerReportQuery.trim();
+    const matchedStudent = students.find(
+      (student) => formatStudentOption(student).toLowerCase() === rawQuery.toLowerCase(),
+    );
+    const query = matchedStudent?.document_number || rawQuery;
+    if (!query) {
+      setStudentAnswerReportRows([]);
+      return;
+    }
+    setStudentAnswerReportLoading(true);
+    setError('');
+    try {
+      const data = await listOmrStudentAnswerReport({ teacherId: 1, q: query });
+      setStudentAnswerReportRows(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setStudentAnswerReportLoading(false);
+    }
+  }
+
   useEffect(() => {
     if (activeTab !== 'analytics') return;
     refreshAnalytics();
@@ -1165,6 +1192,13 @@ export default function App() {
         >
           Estudiantes
         </button>
+        <button
+          type="button"
+          className={activeTab === 'student-report' ? 'tab-btn active' : 'tab-btn'}
+          onClick={() => setActiveTab('student-report')}
+        >
+          Informe estudiante
+        </button>
       </aside>
 
       <main className="dashboard-main">
@@ -1304,6 +1338,20 @@ export default function App() {
               </button>
             </section>
             <StudentList students={students} filters={studentFilters} sortKey={studentSortKey} />
+          </section>
+        ) : null}
+
+        {activeTab === 'student-report' ? (
+          <section className="single-pane">
+            <StudentAnswerReportPanel
+              rows={studentAnswerReportRows}
+              items={items}
+              students={students}
+              loading={studentAnswerReportLoading}
+              searchQuery={studentAnswerReportQuery}
+              onSearchQueryChange={setStudentAnswerReportQuery}
+              onSearch={searchStudentAnswerReport}
+            />
           </section>
         ) : null}
 
