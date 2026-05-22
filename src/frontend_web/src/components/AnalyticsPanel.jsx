@@ -9,6 +9,7 @@ function formatDecimal(value, digits = 2) {
 
 export default function AnalyticsPanel({
   attempts,
+  allAttempts,
   items,
   filters,
   examCodeOptions,
@@ -21,6 +22,8 @@ export default function AnalyticsPanel({
 }) {
   const [sortBy, setSortBy] = useState('questionNumber');
   const [sortDir, setSortDir] = useState('asc');
+  const [questionFilters, setQuestionFilters] = useState({ questionNumber: '', itemId: '' });
+  const [studentReportQuery, setStudentReportQuery] = useState('');
   const [previewRow, setPreviewRow] = useState(null);
   const [markedModalRow, setMarkedModalRow] = useState(null);
 
@@ -31,8 +34,30 @@ export default function AnalyticsPanel({
     return map;
   }, [items]);
 
+  const filteredQuestionRows = useMemo(() => {
+    const questionQuery = questionFilters.questionNumber.trim();
+    const itemQuery = questionFilters.itemId.trim();
+    const questionNumbers = questionQuery
+      .split(',')
+      .map((value) => value.trim())
+      .filter(Boolean);
+    const itemIds = itemQuery
+      .split(',')
+      .map((value) => value.trim())
+      .filter(Boolean);
+    return questionStats.filter((row) => {
+      if (questionNumbers.length > 0 && !questionNumbers.includes(String(row.questionNumber ?? ''))) {
+        return false;
+      }
+      if (itemIds.length > 0 && !itemIds.includes(String(row.itemId ?? ''))) {
+        return false;
+      }
+      return true;
+    });
+  }, [questionStats, questionFilters]);
+
   const sortedQuestionRows = useMemo(() => {
-    const rows = [...questionStats];
+    const rows = [...filteredQuestionRows];
     rows.sort((a, b) => {
       const av = a?.[sortBy];
       const bv = b?.[sortBy];
@@ -44,7 +69,7 @@ export default function AnalyticsPanel({
       return sortDir === 'asc' ? as.localeCompare(bs) : bs.localeCompare(as);
     });
     return rows;
-  }, [questionStats, sortBy, sortDir]);
+  }, [filteredQuestionRows, sortBy, sortDir]);
 
   const chartRows = useMemo(
     () => [...sortedQuestionRows].sort((a, b) => b.incorrect - a.incorrect).slice(0, 12),
@@ -67,6 +92,31 @@ export default function AnalyticsPanel({
       })
       .map((row, index) => ({ ...row, rank: index + 1 }));
   }, [attempts]);
+
+  const studentReportRows = useMemo(() => {
+    const query = studentReportQuery.trim().toLowerCase();
+    if (!query) return [];
+    return [...allAttempts]
+      .filter((row) => {
+        const haystack = [
+          row.student_name,
+          row.student_document_number,
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+        return haystack.includes(query);
+      })
+      .sort((a, b) => {
+        const as = String(a.student_name || '');
+        const bs = String(b.student_name || '');
+        const byStudent = as.localeCompare(bs);
+        if (byStudent !== 0) return byStudent;
+        const ac = String(a.created_at || '');
+        const bc = String(b.created_at || '');
+        return bc.localeCompare(ac);
+      });
+  }, [allAttempts, studentReportQuery]);
 
   function exportRankingCsv() {
     const headers = [
@@ -134,6 +184,12 @@ export default function AnalyticsPanel({
   }
 
   const previewItem = previewRow?.itemId ? itemsById.get(previewRow.itemId) : null;
+  const selectedExamCodes = Array.isArray(filters.examCode) ? filters.examCode : [];
+  const selectedGroups = Array.isArray(filters.group) ? filters.group : [];
+
+  function getMultiSelectValues(event) {
+    return Array.from(event.target.selectedOptions, (option) => option.value);
+  }
 
   return (
     <section className="card">
@@ -142,32 +198,45 @@ export default function AnalyticsPanel({
         <label>
           Codigo examen
           <select
-            value={filters.examCode}
-            onChange={(event) => onFilterChange({ ...filters, examCode: event.target.value })}
+            multiple
+            size={Math.min(Math.max(examCodeOptions.length, 2), 6)}
+            value={selectedExamCodes}
+            onChange={(event) => onFilterChange({ ...filters, examCode: getMultiSelectValues(event) })}
           >
-            <option value="">Todos</option>
             {examCodeOptions.map((code) => (
               <option key={code} value={code}>{code}</option>
             ))}
           </select>
+          <small className="helper-text">Ctrl o Cmd + clic para seleccionar varios.</small>
         </label>
         <label>
           Grupo
           <select
-            value={filters.group}
-            onChange={(event) => onFilterChange({ ...filters, group: event.target.value })}
+            multiple
+            size={Math.min(Math.max(groupOptions.length, 2), 6)}
+            value={selectedGroups}
+            onChange={(event) => onFilterChange({ ...filters, group: getMultiSelectValues(event) })}
           >
-            <option value="">Todos</option>
             {groupOptions.map((group) => (
               <option key={group} value={group}>{group}</option>
             ))}
           </select>
+          <small className="helper-text">Ctrl o Cmd + clic para seleccionar varios.</small>
         </label>
         <label>
           <span>&nbsp;</span>
-          <button type="button" onClick={onRefresh} disabled={loading}>
-            {loading ? 'Calculando...' : 'Recalcular'}
-          </button>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <button
+              type="button"
+              onClick={() => onFilterChange({ ...filters, examCode: [], group: [] })}
+              disabled={!selectedExamCodes.length && !selectedGroups.length}
+            >
+              Limpiar filtros
+            </button>
+            <button type="button" onClick={onRefresh} disabled={loading}>
+              {loading ? 'Calculando...' : 'Recalcular'}
+            </button>
+          </div>
         </label>
       </div>
 
@@ -185,6 +254,79 @@ export default function AnalyticsPanel({
           <strong>{summary.questionCount}</strong>
         </div>
       </div>
+
+      <div className="row between center">
+        <h4>Informe por estudiante</h4>
+        <span className="helper-text">{studentReportRows.length} resultado{studentReportRows.length === 1 ? '' : 's'}</span>
+      </div>
+      <div className="filters-grid">
+        <label>
+          Buscar estudiante
+          <input
+            type="text"
+            placeholder="Nombre o numero de documento"
+            value={studentReportQuery}
+            onChange={(event) => setStudentReportQuery(event.target.value)}
+          />
+        </label>
+        <label>
+          <span>&nbsp;</span>
+          <button
+            type="button"
+            onClick={() => setStudentReportQuery('')}
+            disabled={!studentReportQuery}
+          >
+            Limpiar busqueda
+          </button>
+        </label>
+      </div>
+
+      {!studentReportQuery ? (
+        <p className="helper-text">Escribe un nombre o numero de documento para ver los examenes presentados por ese estudiante.</p>
+      ) : null}
+
+      {studentReportQuery && studentReportRows.length ? (
+        <div className="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Estudiante</th>
+                <th>Documento</th>
+                <th>Grupo</th>
+                <th>Codigo OMR</th>
+                <th>Examen</th>
+                <th>Version</th>
+                <th>Puntaje</th>
+                <th>Correctas</th>
+                <th>Incorrectas</th>
+                <th>No marcadas</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              {studentReportRows.map((row) => (
+                <tr key={`student-report-${row.attempt_id}`}>
+                  <td>{row.student_name || '-'}</td>
+                  <td>{row.student_document_number || '-'}</td>
+                  <td>{row.student_group || '-'}</td>
+                  <td>{row.exam_code || '-'}</td>
+                  <td>{row.exam_title || '-'}</td>
+                  <td>{row.exam_version_code || '-'}</td>
+                  <td>{row.score_percent ?? '-'}</td>
+                  <td>{row.correct_count ?? '-'}</td>
+                  <td>{row.incorrect_count ?? '-'}</td>
+                  <td>{row.blank_count ?? '-'}</td>
+                  <td>{row.status || '-'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : null}
+
+      {studentReportQuery && !studentReportRows.length ? (
+        <p>No se encontraron resultados para ese estudiante con los filtros actuales.</p>
+      ) : null}
 
       {!hasData ? <p>No hay intentos para analizar con los filtros actuales.</p> : null}
 
@@ -248,7 +390,42 @@ export default function AnalyticsPanel({
             })}
           </div>
 
-          <h4>Resultados por pregunta</h4>
+          <div className="row between center">
+            <h4>Resultados por pregunta</h4>
+            <button
+              type="button"
+              onClick={() => setQuestionFilters({ questionNumber: '', itemId: '' })}
+              disabled={!questionFilters.questionNumber && !questionFilters.itemId}
+            >
+              Limpiar filtros
+            </button>
+          </div>
+        <div className="filters-grid">
+          <label>
+            Numero de pregunta
+            <input
+              type="text"
+              inputMode="numeric"
+              placeholder="Ej: 12, 15, 18"
+              value={questionFilters.questionNumber}
+              onChange={(event) =>
+                setQuestionFilters((prev) => ({ ...prev, questionNumber: event.target.value }))
+              }
+            />
+          </label>
+          <label>
+            ID item
+            <input
+              type="text"
+              inputMode="numeric"
+              placeholder="Ej: 345, 410, 512"
+              value={questionFilters.itemId}
+              onChange={(event) =>
+                setQuestionFilters((prev) => ({ ...prev, itemId: event.target.value }))
+              }
+            />
+          </label>
+        </div>
         <div className="table-wrap">
           <table>
             <thead>

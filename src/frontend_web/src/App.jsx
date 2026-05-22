@@ -128,7 +128,7 @@ export default function App() {
   const [selectedAttemptIds, setSelectedAttemptIds] = useState([]);
   const [deletingAttemptIds, setDeletingAttemptIds] = useState([]);
   const [deletingSelectedAttempts, setDeletingSelectedAttempts] = useState(false);
-  const [analyticsFilters, setAnalyticsFilters] = useState({ examCode: '', group: '' });
+  const [analyticsFilters, setAnalyticsFilters] = useState({ examCode: [], group: [] });
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
   const [analyticsSummary, setAnalyticsSummary] = useState({ attemptCount: 0, avgScorePercent: null, questionCount: 0 });
   const [analyticsQuestionStats, setAnalyticsQuestionStats] = useState([]);
@@ -631,10 +631,12 @@ export default function App() {
 
   const analyticsBaseAttempts = useMemo(() => {
     return attempts.filter((row) => {
-      if (analyticsFilters.examCode && String(row.exam_code || '') !== String(analyticsFilters.examCode)) {
+      const selectedExamCodes = Array.isArray(analyticsFilters.examCode) ? analyticsFilters.examCode : [];
+      const selectedGroups = Array.isArray(analyticsFilters.group) ? analyticsFilters.group : [];
+      if (selectedExamCodes.length > 0 && !selectedExamCodes.includes(String(row.exam_code || ''))) {
         return false;
       }
-      if (analyticsFilters.group && String(row.student_group || '') !== String(analyticsFilters.group)) {
+      if (selectedGroups.length > 0 && !selectedGroups.includes(String(row.student_group || ''))) {
         return false;
       }
       return true;
@@ -1337,6 +1339,7 @@ export default function App() {
           <section className="single-pane">
             <AnalyticsPanel
               attempts={analyticsBaseAttempts}
+              allAttempts={attempts}
               items={items}
               filters={analyticsFilters}
               examCodeOptions={analyticsExamCodeOptions}

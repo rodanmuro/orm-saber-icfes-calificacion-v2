@@ -883,6 +883,8 @@ def list_omr_attempts(
                     "student_name": (
                         f"{attempt.student.first_name} {attempt.student.last_name}" if attempt.student else None
                     ),
+                    "student_document_number": attempt.student.document_number if attempt.student else None,
+                    "student_document_type": attempt.student.document_type if attempt.student else None,
                     "student_group": attempt.student.group_name if attempt.student else None,
                     "status": attempt.status,
                     "score_percent": attempt.score_percent,
