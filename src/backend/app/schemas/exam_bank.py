@@ -27,12 +27,18 @@ class ExamRead(BaseModel):
 class ExamItemBindRequest(BaseModel):
     item_id: int = Field(gt=0)
     order_position: int | None = Field(default=None, gt=0)
+    group_key: str | None = Field(default=None, max_length=64)
+
+
+class ExamItemUpdateRequest(BaseModel):
+    group_key: str | None = Field(default=None, max_length=64)
 
 
 class ExamItemRead(BaseModel):
     exam_id: int
     item_id: int
     order_position: int
+    group_key: str | None
     item_statement: str
 
 

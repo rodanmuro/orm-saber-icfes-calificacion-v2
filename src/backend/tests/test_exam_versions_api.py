@@ -234,3 +234,100 @@ def test_reorder_exam_version_updates_question_numbers_and_answer_key(tmp_path: 
     finally:
         client.close()
         app.dependency_overrides.clear()
+
+
+def test_publish_exam_version_keeps_grouped_exam_items_together(tmp_path: Path) -> None:
+    db_path = tmp_path / "exam_versions_grouped_api.db"
+    engine = create_engine(f"sqlite:///{db_path}", connect_args={"check_same_thread": False})
+    testing_session_local = sessionmaker(bind=engine, autocommit=False, autoflush=False)
+    Base.metadata.create_all(bind=engine)
+
+    def override_get_db():
+        db = testing_session_local()
+        try:
+            yield db
+        finally:
+            db.close()
+
+    app.dependency_overrides[get_db] = override_get_db
+
+    with testing_session_local() as db:
+        teacher = Teacher(
+            external_uuid="teacher-version-003",
+            email="teacher.version3@example.com",
+            first_name="Version3",
+            last_name="Teacher",
+        )
+        db.add(teacher)
+        db.commit()
+        db.refresh(teacher)
+        teacher_id = teacher.id
+
+    client = TestClient(app)
+    try:
+        item_ids: list[int] = []
+        for idx, correct_answer in enumerate(["A", "B", "C", "D"], start=1):
+            response = client.post(
+                "/api/v1/items",
+                json={
+                    "teacher_id": teacher_id,
+                    "statement": f"Pregunta {idx}",
+                    "options": {"A": "1", "B": "2", "C": "3", "D": "4"},
+                    "correct_answer": correct_answer,
+                },
+            )
+            assert response.status_code == 201
+            item_ids.append(response.json()["id"])
+
+        exam_response = client.post(
+            "/api/v1/exams",
+            json={
+                "teacher_id": teacher_id,
+                "exam_code": "3000",
+                "title": "Demo Grouped",
+                "description": "Exam de prueba grouped",
+            },
+        )
+        assert exam_response.status_code == 201
+        exam_id = exam_response.json()["id"]
+
+        for item_id in item_ids:
+            bind_response = client.post(
+                f"/api/v1/exams/{exam_id}/items",
+                json={"item_id": item_id},
+            )
+            assert bind_response.status_code == 200
+
+        patch_one = client.patch(
+            f"/api/v1/exams/{exam_id}/items/{item_ids[1]}",
+            json={"group_key": "bloque-a"},
+        )
+        assert patch_one.status_code == 200
+        patch_two = client.patch(
+            f"/api/v1/exams/{exam_id}/items/{item_ids[2]}",
+            json={"group_key": "bloque-a"},
+        )
+        assert patch_two.status_code == 200
+        exam_detail = patch_two.json()
+        grouped_rows = [row for row in exam_detail["items"] if row["item_id"] in {item_ids[1], item_ids[2]}]
+        assert {row["group_key"] for row in grouped_rows} == {"bloque-a"}
+
+        publish_response = client.post(
+            f"/api/v1/exams/{exam_id}/versions/publish",
+            json={
+                "version_code": "G1",
+                "seed_shuffle": 7,
+                "shuffle_questions": True,
+                "shuffle_options": False,
+            },
+        )
+        assert publish_response.status_code == 201
+        published = publish_response.json()
+        ordered_item_ids = [row["item_id"] for row in published["items"]]
+        grouped_positions = [ordered_item_ids.index(item_ids[1]), ordered_item_ids.index(item_ids[2])]
+
+        assert grouped_positions[1] - grouped_positions[0] == 1
+        assert grouped_positions == sorted(grouped_positions)
+    finally:
+        client.close()
+        app.dependency_overrides.clear()

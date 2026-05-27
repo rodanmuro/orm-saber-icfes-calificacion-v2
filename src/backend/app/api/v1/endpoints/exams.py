@@ -18,6 +18,7 @@ from app.schemas.exam_bank import (
     ExamDetailRead,
     ExamItemBindRequest,
     ExamItemRead,
+    ExamItemUpdateRequest,
     ExamRead,
     ExamVersionDetailRead,
     ExamVersionItemRead,
@@ -60,11 +61,17 @@ def _exam_to_detail(exam: Exam, exam_items: list[ExamItem]) -> ExamDetailRead:
                 exam_id=row.exam_id,
                 item_id=row.item_id,
                 order_position=row.order_position,
+                group_key=row.group_key,
                 item_statement=row.item.statement,
             )
             for row in exam_items
         ],
     )
+
+
+def _normalize_group_key(value: str | None) -> str | None:
+    normalized = str(value or "").strip()
+    return normalized or None
 
 
 def _exam_version_to_read(version: ExamVersion) -> ExamVersionRead:
@@ -206,6 +213,7 @@ def bind_item_to_exam(
         exam_id=exam_id,
         item_id=payload.item_id,
         order_position=order_position,
+        group_key=_normalize_group_key(payload.group_key),
     )
     db.add(row)
     try:
@@ -217,6 +225,28 @@ def bind_item_to_exam(
             detail="item already bound or order_position already used in this exam",
         ) from None
 
+    return get_exam(exam_id=exam_id, db=db)
+
+
+@router.patch("/{exam_id}/items/{item_id}", response_model=ExamDetailRead)
+def update_exam_item(
+    exam_id: int,
+    item_id: int,
+    payload: ExamItemUpdateRequest,
+    db: Session = Depends(get_db),
+) -> ExamDetailRead:
+    exam = db.get(Exam, exam_id)
+    if exam is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="exam not found")
+
+    row = db.scalar(
+        select(ExamItem).where(ExamItem.exam_id == exam_id, ExamItem.item_id == item_id)
+    )
+    if row is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="exam-item not found")
+
+    row.group_key = _normalize_group_key(payload.group_key)
+    db.commit()
     return get_exam(exam_id=exam_id, db=db)
 
 

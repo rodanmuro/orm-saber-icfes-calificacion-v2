@@ -33,6 +33,37 @@ def _build_option_map(rng: random.Random, shuffle_options: bool) -> dict[str, st
     return {original: mapped for original, mapped in zip(CHOICES, shuffled)}
 
 
+def _normalize_group_key(value: str | None) -> str | None:
+    normalized = str(value or "").strip()
+    return normalized or None
+
+
+def _build_question_blocks(exam_items: list[ExamItem]) -> list[list[ExamItem]]:
+    ordered_items = sorted(exam_items, key=lambda row: row.order_position)
+    grouped_rows: dict[str, list[ExamItem]] = {}
+
+    for row in ordered_items:
+        group_key = _normalize_group_key(getattr(row, "group_key", None))
+        if group_key is None:
+            continue
+        if group_key not in grouped_rows:
+            grouped_rows[group_key] = []
+        grouped_rows[group_key].append(row)
+
+    blocks: list[list[ExamItem]] = []
+    used_group_keys: set[str] = set()
+    for row in ordered_items:
+        group_key = _normalize_group_key(getattr(row, "group_key", None))
+        if group_key is None:
+            blocks.append([row])
+            continue
+        if group_key in used_group_keys:
+            continue
+        blocks.append(grouped_rows[group_key])
+        used_group_keys.add(group_key)
+    return blocks
+
+
 def publish_exam_version(
     exam_items: list[ExamItem],
     seed_shuffle: int,
@@ -43,9 +74,11 @@ def publish_exam_version(
         raise ValueError("exam must contain at least one item")
 
     rng = random.Random(seed_shuffle)
-    ordered_items = sorted(exam_items, key=lambda row: row.order_position)
+    ordered_blocks = _build_question_blocks(exam_items)
     if shuffle_questions:
-        rng.shuffle(ordered_items)
+        rng.shuffle(ordered_blocks)
+
+    ordered_items = [row for block in ordered_blocks for row in block]
 
     rows: list[PublishedVersionRow] = []
     answer_key: dict[str, str] = {}

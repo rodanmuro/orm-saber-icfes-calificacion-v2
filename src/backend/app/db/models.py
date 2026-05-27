@@ -143,6 +143,7 @@ class ExamItem(Base):
     exam_id: Mapped[int] = mapped_column(ForeignKey("exam.id", ondelete="CASCADE"), index=True)
     item_id: Mapped[int] = mapped_column(ForeignKey("item.id", ondelete="RESTRICT"), index=True)
     order_position: Mapped[int] = mapped_column(index=True)
+    group_key: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     exam: Mapped[Exam] = relationship(back_populates="exam_items")
