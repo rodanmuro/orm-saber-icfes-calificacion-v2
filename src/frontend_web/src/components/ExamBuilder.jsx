@@ -18,6 +18,13 @@ function statementPreview(value) {
   return text;
 }
 
+function splitCsvValues(value) {
+  return String(value || '')
+    .split(',')
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+}
+
 function getGroupVisual(groupKey) {
   const normalized = String(groupKey || '').trim();
   if (!normalized) {
@@ -68,6 +75,7 @@ export default function ExamBuilder({
   onRemoveItem,
   onUpdateExamItem,
   onPublishVersion,
+  onDeleteVersion,
   onExportExamPdf,
   onExportExamDocx,
   onViewVersionAnswerKey,
@@ -83,7 +91,10 @@ export default function ExamBuilder({
   const [previewModalItem, setPreviewModalItem] = useState(null);
   const [previewModalContext, setPreviewModalContext] = useState(null);
   const [availableStandardFilter, setAvailableStandardFilter] = useState('');
+  const [availableItemIdFilter, setAvailableItemIdFilter] = useState('');
   const [assignedStandardFilter, setAssignedStandardFilter] = useState('');
+  const [assignedItemIdFilter, setAssignedItemIdFilter] = useState('');
+  const [assignedGroupFilter, setAssignedGroupFilter] = useState('');
   const [groupDrafts, setGroupDrafts] = useState({});
   const [savingGroupItemId, setSavingGroupItemId] = useState(null);
   const [reorderModal, setReorderModal] = useState({
@@ -129,11 +140,17 @@ export default function ExamBuilder({
 
   const filteredAvailableItems = useMemo(() => {
     const query = availableStandardFilter.trim().toLowerCase();
-    if (!query) return itemsNotAdded;
-    return itemsNotAdded.filter((item) =>
-      String(item.curriculum?.standard_name || '').toLowerCase().includes(query),
-    );
-  }, [availableStandardFilter, itemsNotAdded]);
+    const selectedItemIds = new Set(splitCsvValues(availableItemIdFilter));
+    return itemsNotAdded.filter((item) => {
+      if (query && !String(item.curriculum?.standard_name || '').toLowerCase().includes(query)) {
+        return false;
+      }
+      if (selectedItemIds.size > 0 && !selectedItemIds.has(String(item.id))) {
+        return false;
+      }
+      return true;
+    });
+  }, [availableItemIdFilter, availableStandardFilter, itemsNotAdded]);
 
   const assignedStandardOptions = useMemo(() => {
     if (!selectedExam) return [];
@@ -166,11 +183,21 @@ export default function ExamBuilder({
   const filteredAssignedItems = useMemo(() => {
     if (!selectedExam) return [];
     const query = assignedStandardFilter.trim().toLowerCase();
-    if (!query) return selectedExam.items;
-    return selectedExam.items.filter(
-      (row) => String(itemsById.get(row.item_id)?.curriculum?.standard_name || '').toLowerCase().includes(query),
-    );
-  }, [assignedStandardFilter, itemsById, selectedExam]);
+    const selectedItemIds = new Set(splitCsvValues(assignedItemIdFilter));
+    const selectedGroups = new Set(splitCsvValues(assignedGroupFilter).map((value) => String(value)));
+    return selectedExam.items.filter((row) => {
+      if (query && !String(itemsById.get(row.item_id)?.curriculum?.standard_name || '').toLowerCase().includes(query)) {
+        return false;
+      }
+      if (selectedItemIds.size > 0 && !selectedItemIds.has(String(row.item_id))) {
+        return false;
+      }
+      if (selectedGroups.size > 0 && !selectedGroups.has(String(row.group_key || ''))) {
+        return false;
+      }
+      return true;
+    });
+  }, [assignedGroupFilter, assignedItemIdFilter, assignedStandardFilter, itemsById, selectedExam]);
 
   const availableItemIds = useMemo(() => filteredAvailableItems.map((item) => item.id), [filteredAvailableItems]);
   const assignedItemIds = useMemo(
@@ -206,7 +233,10 @@ export default function ExamBuilder({
   useEffect(() => {
     if (!selectedExam) {
       setAvailableStandardFilter('');
+      setAvailableItemIdFilter('');
       setAssignedStandardFilter('');
+      setAssignedItemIdFilter('');
+      setAssignedGroupFilter('');
     }
   }, [selectedExam]);
 
@@ -481,6 +511,13 @@ export default function ExamBuilder({
                         >
                           Reordenar preguntas
                         </button>
+                        <button
+                          type="button"
+                          className="btn-danger"
+                          onClick={() => onDeleteVersion(selectedExam, version)}
+                        >
+                          Borrar
+                        </button>
                       </td>
                       <td className="col-action col-export">
                         <div className="export-actions">
@@ -511,21 +548,32 @@ export default function ExamBuilder({
             <div className="exam-items-pane">
               <div className="row between center">
                 <h5>Items disponibles ({filteredAvailableItems.length})</h5>
-                <label>
-                  <span>Filtrar por estandar</span>
-                  <input
-                    type="text"
-                    list="available-standards-list"
-                    value={availableStandardFilter}
-                    onChange={(event) => setAvailableStandardFilter(event.target.value)}
-                    placeholder="Escribe un estandar"
-                  />
-                  <datalist id="available-standards-list">
-                    {availableStandardOptions.map((option) => (
-                      <option key={option} value={option}>{option}</option>
-                    ))}
-                  </datalist>
-                </label>
+                <div style={{ display: 'grid', gap: '8px', minWidth: '280px' }}>
+                  <label>
+                    <span>Filtrar por estandar</span>
+                    <input
+                      type="text"
+                      list="available-standards-list"
+                      value={availableStandardFilter}
+                      onChange={(event) => setAvailableStandardFilter(event.target.value)}
+                      placeholder="Escribe un estandar"
+                    />
+                    <datalist id="available-standards-list">
+                      {availableStandardOptions.map((option) => (
+                        <option key={option} value={option}>{option}</option>
+                      ))}
+                    </datalist>
+                  </label>
+                  <label>
+                    <span>Filtrar por ID item</span>
+                    <input
+                      type="text"
+                      value={availableItemIdFilter}
+                      onChange={(event) => setAvailableItemIdFilter(event.target.value)}
+                      placeholder="Ej: 120,121,112"
+                    />
+                  </label>
+                </div>
               </div>
               <div className="table-wrap">
                 <table>
@@ -593,21 +641,42 @@ export default function ExamBuilder({
             <div className="exam-items-pane">
               <div className="row between center">
                 <h5>Items asociados (orden inicial) ({filteredAssignedItems.length})</h5>
-                <label>
-                  <span>Filtrar por estandar</span>
-                  <input
-                    type="text"
-                    list="assigned-standards-list"
-                    value={assignedStandardFilter}
-                    onChange={(event) => setAssignedStandardFilter(event.target.value)}
-                    placeholder="Escribe un estandar"
-                  />
-                  <datalist id="assigned-standards-list">
-                    {assignedStandardOptions.map((option) => (
-                      <option key={option} value={option}>{option}</option>
-                    ))}
-                  </datalist>
-                </label>
+                <div style={{ display: 'grid', gap: '8px', minWidth: '280px' }}>
+                  <label>
+                    <span>Filtrar por estandar</span>
+                    <input
+                      type="text"
+                      list="assigned-standards-list"
+                      value={assignedStandardFilter}
+                      onChange={(event) => setAssignedStandardFilter(event.target.value)}
+                      placeholder="Escribe un estandar"
+                    />
+                    <datalist id="assigned-standards-list">
+                      {assignedStandardOptions.map((option) => (
+                        <option key={option} value={option}>{option}</option>
+                      ))}
+                    </datalist>
+                  </label>
+                  <label>
+                    <span>Filtrar por ID item</span>
+                    <input
+                      type="text"
+                      value={assignedItemIdFilter}
+                      onChange={(event) => setAssignedItemIdFilter(event.target.value)}
+                      placeholder="Ej: 120,121,112"
+                    />
+                  </label>
+                  <label>
+                    <span>Filtrar por bloque</span>
+                    <input
+                      type="text"
+                      list="assigned-group-keys-list"
+                      value={assignedGroupFilter}
+                      onChange={(event) => setAssignedGroupFilter(event.target.value)}
+                      placeholder="Ej: 1,2,3"
+                    />
+                  </label>
+                </div>
               </div>
               <p className="helper-text">
                 Si varios items comparten el mismo bloque, quedaran consecutivos al publicar una version barajada.

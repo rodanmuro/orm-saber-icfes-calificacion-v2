@@ -27,6 +27,7 @@ import {
   publishExamVersion,
   removeItemFromExam,
   updateExamItem,
+  deleteExamVersion,
 } from './api/examsApi';
 import { createAnonymousExam, listAnonymousExams } from './api/anonymousExamsApi';
 import ExamBuilder from './components/ExamBuilder';
@@ -1069,6 +1070,23 @@ export default function App() {
     }
   }
 
+  async function handleDeleteExamVersion(exam, version) {
+    const ok = window.confirm(
+      `¿Borrar versión ${version.version_code} (Código OMR ${version.exam_code})? Esta acción no se puede deshacer.`
+    );
+    if (!ok) return;
+    setError('');
+    setMessage('');
+    try {
+      await deleteExamVersion(exam.id, version.id);
+      const versions = await listExamVersions(exam.id);
+      setExamVersions(versions);
+      setMessage(`Version ${version.version_code} eliminada`);
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
   async function handleExportExamPdf(exam, version) {
     setError('');
     setMessage('');
@@ -1280,6 +1298,7 @@ export default function App() {
             onRemoveItem={handleRemoveItemFromExam}
             onUpdateExamItem={handleUpdateExamItem}
             onPublishVersion={handlePublishExamVersion}
+            onDeleteVersion={handleDeleteExamVersion}
             onExportExamPdf={handleExportExamPdf}
             onExportExamDocx={handleExportExamDocx}
             onViewVersionAnswerKey={handleViewVersionAnswerKey}

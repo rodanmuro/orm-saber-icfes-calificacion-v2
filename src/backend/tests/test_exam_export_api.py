@@ -6,7 +6,9 @@ para ítems con texto plano y con ecuaciones inline (mathInline).
 from __future__ import annotations
 
 import json
+from io import BytesIO
 from pathlib import Path
+from zipfile import ZipFile
 
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
@@ -38,6 +40,32 @@ def _tiptap_math_inline(before: str, latex: str, after: str) -> str:
                 {"type": "text", "text": before},
                 {"type": "mathInline", "attrs": {"latex": latex}},
                 {"type": "text", "text": after},
+            ],
+        }],
+    })
+
+
+def _tiptap_simple_table() -> str:
+    """Doc Tiptap con una tabla simple para validar el layout DOCX."""
+    return json.dumps({
+        "type": "doc",
+        "content": [{
+            "type": "table",
+            "content": [
+                {
+                    "type": "tableRow",
+                    "content": [
+                        {"type": "tableHeader", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Columna 1"}]}]},
+                        {"type": "tableHeader", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Columna 2"}]}]},
+                    ],
+                },
+                {
+                    "type": "tableRow",
+                    "content": [
+                        {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Texto largo de prueba para envolver dentro de la columna."}]}]},
+                        {"type": "tableCell", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "Otro texto largo para validar ajuste automatico."}]}]},
+                    ],
+                },
             ],
         }],
     })
@@ -182,6 +210,78 @@ def test_export_docx_texto_plano(tmp_path: Path) -> None:
         assert DOCX_MIME in r.headers["content-type"]
         assert r.content.startswith(b"PK"), "No es un DOCX/ZIP válido"
         assert len(r.content) > 1_000
+    finally:
+        client.close()
+        app.dependency_overrides.clear()
+
+
+def test_export_docx_agrega_linea_separacion_entre_columnas(tmp_path: Path) -> None:
+    client, teacher_id = _setup(tmp_path)
+    try:
+        exam_id, version_id = _publish_version(client, teacher_id, [
+            {
+                "statement": "Pregunta para validar la separacion entre columnas.",
+                "options": {"A": "Uno", "B": "Dos", "C": "Tres", "D": "Cuatro"},
+                "correct_answer": "A",
+            },
+        ])
+        r = client.get(f"/api/v1/exams/{exam_id}/versions/{version_id}/export/docx")
+        assert r.status_code == 200
+
+        with ZipFile(BytesIO(r.content)) as docx_zip:
+            document_xml = docx_zip.read("word/document.xml").decode("utf-8")
+
+        assert 'w:cols' in document_xml
+        assert 'w:sep="1"' in document_xml
+    finally:
+        client.close()
+        app.dependency_overrides.clear()
+
+
+def test_export_docx_agrega_lineas_superior_e_inferior_por_pregunta(tmp_path: Path) -> None:
+    client, teacher_id = _setup(tmp_path)
+    try:
+        exam_id, version_id = _publish_version(client, teacher_id, [
+            {
+                "statement": "Pregunta para validar lineas delimitadoras.",
+                "options": {"A": "Uno", "B": "Dos", "C": "Tres", "D": "Cuatro"},
+                "correct_answer": "A",
+            },
+        ])
+        r = client.get(f"/api/v1/exams/{exam_id}/versions/{version_id}/export/docx")
+        assert r.status_code == 200
+
+        with ZipFile(BytesIO(r.content)) as docx_zip:
+            document_xml = docx_zip.read("word/document.xml").decode("utf-8")
+
+        assert "<w:top " in document_xml
+        assert "<w:bottom " in document_xml
+    finally:
+        client.close()
+        app.dependency_overrides.clear()
+
+
+def test_export_docx_tablas_usan_autofit_y_ancho_relativo(tmp_path: Path) -> None:
+    client, teacher_id = _setup(tmp_path)
+    try:
+        exam_id, version_id = _publish_version(client, teacher_id, [
+            {
+                "statement": _tiptap_simple_table(),
+                "options": {"A": "Uno", "B": "Dos", "C": "Tres", "D": "Cuatro"},
+                "correct_answer": "A",
+            },
+        ])
+        r = client.get(f"/api/v1/exams/{exam_id}/versions/{version_id}/export/docx")
+        assert r.status_code == 200
+
+        with ZipFile(BytesIO(r.content)) as docx_zip:
+            document_xml = docx_zip.read("word/document.xml").decode("utf-8")
+
+        assert 'w:tblLayout w:type="autofit"' in document_xml
+        assert 'w:tblW w:w="5000" w:type="pct"' in document_xml
+        assert 'w:tcW w:w="' in document_xml
+        assert 'w:type="pct"' in document_xml
+        assert 'w:gridCol w:w="5400"' not in document_xml
     finally:
         client.close()
         app.dependency_overrides.clear()

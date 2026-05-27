@@ -95,6 +95,12 @@ export function reorderExamVersion(examId, versionId, orderedVersionItemIds) {
   });
 }
 
+export function deleteExamVersion(examId, versionId) {
+  return request(`/exams/${examId}/versions/${versionId}`, {
+    method: 'DELETE',
+  });
+}
+
 export async function exportExamVersionPdf(examId, versionId, filenameFallback) {
   const { blob } = await requestBlob(`/exams/${examId}/versions/${versionId}/export/pdf`);
   downloadBlob(blob, filenameFallback || `exam_${examId}_version_${versionId}.pdf`);

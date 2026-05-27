@@ -7,7 +7,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from app.db.base import Base
-from app.db.models import Teacher
+from app.db.models import OmrAttempt, Teacher
 from app.db.session import get_db
 from app.main import app
 
@@ -328,6 +328,178 @@ def test_publish_exam_version_keeps_grouped_exam_items_together(tmp_path: Path) 
 
         assert grouped_positions[1] - grouped_positions[0] == 1
         assert grouped_positions == sorted(grouped_positions)
+    finally:
+        client.close()
+        app.dependency_overrides.clear()
+
+
+def test_delete_exam_version_without_linked_attempts(tmp_path: Path) -> None:
+    db_path = tmp_path / "exam_versions_delete_api.db"
+    engine = create_engine(f"sqlite:///{db_path}", connect_args={"check_same_thread": False})
+    testing_session_local = sessionmaker(bind=engine, autocommit=False, autoflush=False)
+    Base.metadata.create_all(bind=engine)
+
+    def override_get_db():
+      db = testing_session_local()
+      try:
+          yield db
+      finally:
+          db.close()
+
+    app.dependency_overrides[get_db] = override_get_db
+
+    with testing_session_local() as db:
+        teacher = Teacher(
+            external_uuid="teacher-version-004",
+            email="teacher.version4@example.com",
+            first_name="Version4",
+            last_name="Teacher",
+        )
+        db.add(teacher)
+        db.commit()
+        db.refresh(teacher)
+        teacher_id = teacher.id
+
+    client = TestClient(app)
+    try:
+        item_response = client.post(
+            "/api/v1/items",
+            json={
+                "teacher_id": teacher_id,
+                "statement": "Pregunta delete",
+                "options": {"A": "1", "B": "2", "C": "3", "D": "4"},
+                "correct_answer": "A",
+            },
+        )
+        assert item_response.status_code == 201
+        item_id = item_response.json()["id"]
+
+        exam_response = client.post(
+            "/api/v1/exams",
+            json={
+                "teacher_id": teacher_id,
+                "exam_code": "4001",
+                "title": "Demo Delete",
+                "description": "Exam delete",
+            },
+        )
+        assert exam_response.status_code == 201
+        exam_id = exam_response.json()["id"]
+
+        bind_response = client.post(f"/api/v1/exams/{exam_id}/items", json={"item_id": item_id})
+        assert bind_response.status_code == 200
+
+        publish_response = client.post(
+            f"/api/v1/exams/{exam_id}/versions/publish",
+            json={
+                "version_code": "1",
+                "seed_shuffle": 11,
+                "shuffle_questions": True,
+                "shuffle_options": True,
+            },
+        )
+        assert publish_response.status_code == 201
+        version_id = publish_response.json()["id"]
+
+        delete_response = client.delete(f"/api/v1/exams/{exam_id}/versions/{version_id}")
+        assert delete_response.status_code == 200
+        assert delete_response.json() == {"deleted": True, "version_id": version_id}
+
+        versions_response = client.get(f"/api/v1/exams/{exam_id}/versions")
+        assert versions_response.status_code == 200
+        assert versions_response.json() == []
+    finally:
+        client.close()
+        app.dependency_overrides.clear()
+
+
+def test_delete_exam_version_fails_with_linked_omr_attempts(tmp_path: Path) -> None:
+    db_path = tmp_path / "exam_versions_delete_blocked_api.db"
+    engine = create_engine(f"sqlite:///{db_path}", connect_args={"check_same_thread": False})
+    testing_session_local = sessionmaker(bind=engine, autocommit=False, autoflush=False)
+    Base.metadata.create_all(bind=engine)
+
+    def override_get_db():
+        db = testing_session_local()
+        try:
+            yield db
+        finally:
+            db.close()
+
+    app.dependency_overrides[get_db] = override_get_db
+
+    with testing_session_local() as db:
+        teacher = Teacher(
+            external_uuid="teacher-version-005",
+            email="teacher.version5@example.com",
+            first_name="Version5",
+            last_name="Teacher",
+        )
+        db.add(teacher)
+        db.commit()
+        db.refresh(teacher)
+        teacher_id = teacher.id
+
+    client = TestClient(app)
+    try:
+        item_response = client.post(
+            "/api/v1/items",
+            json={
+                "teacher_id": teacher_id,
+                "statement": "Pregunta delete blocked",
+                "options": {"A": "1", "B": "2", "C": "3", "D": "4"},
+                "correct_answer": "A",
+            },
+        )
+        assert item_response.status_code == 201
+        item_id = item_response.json()["id"]
+
+        exam_response = client.post(
+            "/api/v1/exams",
+            json={
+                "teacher_id": teacher_id,
+                "exam_code": "4002",
+                "title": "Demo Delete Blocked",
+                "description": "Exam delete blocked",
+            },
+        )
+        assert exam_response.status_code == 201
+        exam_id = exam_response.json()["id"]
+
+        bind_response = client.post(f"/api/v1/exams/{exam_id}/items", json={"item_id": item_id})
+        assert bind_response.status_code == 200
+
+        publish_response = client.post(
+            f"/api/v1/exams/{exam_id}/versions/publish",
+            json={
+                "version_code": "1",
+                "seed_shuffle": 12,
+                "shuffle_questions": True,
+                "shuffle_options": True,
+            },
+        )
+        assert publish_response.status_code == 201
+        version_id = publish_response.json()["id"]
+
+        with testing_session_local() as db:
+            attempt = OmrAttempt(
+                teacher_id=teacher_id,
+                exam_id=exam_id,
+                exam_version_id=version_id,
+                status="graded",
+                total_questions=1,
+                correct_count=1,
+                incorrect_count=0,
+                blank_count=0,
+                ambiguous_count=0,
+                manual_review_required=False,
+            )
+            db.add(attempt)
+            db.commit()
+
+        delete_response = client.delete(f"/api/v1/exams/{exam_id}/versions/{version_id}")
+        assert delete_response.status_code == 409
+        assert delete_response.json()["detail"] == "cannot delete exam version with linked omr attempts"
     finally:
         client.close()
         app.dependency_overrides.clear()

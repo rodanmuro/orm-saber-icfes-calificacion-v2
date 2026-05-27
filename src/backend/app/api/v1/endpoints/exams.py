@@ -7,7 +7,7 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.db.models import Exam, ExamItem, ExamVersion, ExamVersionItem, Item, Teacher
+from app.db.models import Exam, ExamItem, ExamVersion, ExamVersionItem, Item, OmrAttempt, Teacher
 from app.db.session import get_db
 from app.modules.exam_version.service import publish_exam_version
 from app.modules.exam_export.pdf_service import build_exam_version_pdf
@@ -392,6 +392,28 @@ def get_exam_version(exam_id: int, version_id: int, db: Session = Depends(get_db
         .order_by(ExamVersionItem.question_number.asc())
     ).all()
     return _exam_version_to_detail(version=version, version_items=version_items)
+
+
+@router.delete("/{exam_id}/versions/{version_id}")
+def delete_exam_version(exam_id: int, version_id: int, db: Session = Depends(get_db)) -> dict[str, int | bool]:
+    version = db.get(ExamVersion, version_id)
+    if version is None or version.exam_id != exam_id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="exam version not found")
+
+    linked_attempt_id = db.scalar(
+        select(OmrAttempt.id)
+        .where(OmrAttempt.exam_version_id == version_id)
+        .limit(1)
+    )
+    if linked_attempt_id is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="cannot delete exam version with linked omr attempts",
+        )
+
+    db.delete(version)
+    db.commit()
+    return {"deleted": True, "version_id": version_id}
 
 
 @router.patch("/{exam_id}/versions/{version_id}/reorder", response_model=ExamVersionDetailRead)

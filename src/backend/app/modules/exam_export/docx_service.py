@@ -234,7 +234,42 @@ def _set_page_size_letter(doc: Document) -> None:
     cols = OxmlElement("w:cols")
     cols.set(qn("w:num"), "2")
     cols.set(qn("w:space"), str(int(0.3 * 1440)))
+    cols.set(qn("w:sep"), "1")
     sectPr.append(cols)
+
+
+def _set_paragraph_border(p: Any, border_kind: str, *, color: str = "B8C0CC", size: int = 6) -> None:
+    """Agrega un borde simple a un párrafo Word."""
+    pPr = p._p.get_or_add_pPr()
+    pBdr = pPr.find(qn("w:pBdr"))
+    if pBdr is None:
+        pBdr = OxmlElement("w:pBdr")
+        pPr.append(pBdr)
+
+    existing = pBdr.find(qn(f"w:{border_kind}"))
+    if existing is not None:
+        pBdr.remove(existing)
+
+    border = OxmlElement(f"w:{border_kind}")
+    border.set(qn("w:val"), "single")
+    border.set(qn("w:sz"), str(size))
+    border.set(qn("w:space"), "1")
+    border.set(qn("w:color"), color)
+    pBdr.append(border)
+
+
+def _add_question_separator(
+    doc: Document,
+    *,
+    border_kind: str,
+    space_before_pt: float = 0,
+    space_after_pt: float = 0,
+) -> None:
+    """Inserta un párrafo vacío usado como separador visual de cada pregunta."""
+    p = _no_spacing(doc.add_paragraph())
+    p.paragraph_format.space_before = Pt(space_before_pt)
+    p.paragraph_format.space_after = Pt(space_after_pt)
+    _set_paragraph_border(p, border_kind)
 
 
 def _fill_cell_content(p: Any, cell_node: dict[str, Any], is_header: bool, cell_height_pt: float = 9.0) -> None:
@@ -278,20 +313,33 @@ def _add_table_node(doc: Document, node: dict[str, Any], column_width_in: float 
     if num_cols == 0:
         return
 
-    # Reducimos un poco el ancho util para evitar desbordes por bordes/padding de Word.
     safe_table_width_in = max(column_width_in - 0.12, 1.0)
-    col_width_twips = int((safe_table_width_in / num_cols) * 1440)
+    col_width_twips = max(int((safe_table_width_in / num_cols) * 1440), 1)
+    col_width_pct = max(int(5000 / num_cols), 1)
 
     table = doc.add_table(rows=len(rows_nodes), cols=num_cols)
     table.style = "Table Grid"
-    table.autofit = False
+    table.autofit = True
 
-    # Ancho total de tabla
+    # Ancho total relativo al contenedor (la columna Word), para que Google Docs
+    # y Word puedan envolver el texto sin fijar un ancho absoluto que desborde.
     tbl = table._tbl
+    tblPr = tbl.tblPr
+    for existing in tblPr.findall(qn("w:tblLayout")):
+        tblPr.remove(existing)
+    tblLayout = OxmlElement("w:tblLayout")
+    tblLayout.set(qn("w:type"), "autofit")
+    tblPr.append(tblLayout)
+
     tblW = OxmlElement("w:tblW")
-    tblW.set(qn("w:w"), str(int(safe_table_width_in * 1440)))
-    tblW.set(qn("w:type"), "dxa")
-    tbl.tblPr.append(tblW)
+    tblW.set(qn("w:w"), "5000")
+    tblW.set(qn("w:type"), "pct")
+    tblPr.append(tblW)
+
+    tblGrid = tbl.tblGrid
+    if tblGrid is not None:
+        for grid_col in tblGrid.findall(qn("w:gridCol")):
+            grid_col.set(qn("w:w"), str(col_width_twips))
 
     for r_idx, row_node in enumerate(rows_nodes):
         cells_nodes = [c for c in (row_node.get("content") or []) if isinstance(c, dict)]
@@ -299,13 +347,13 @@ def _add_table_node(doc: Document, node: dict[str, Any], column_width_in: float 
 
         for c_idx in range(num_cols):
             cell = table.cell(r_idx, c_idx)
-            cell.width = Twips(col_width_twips)
-            # Fijar ancho de celda
             tc = cell._tc
             tcPr = tc.get_or_add_tcPr()
+            for existing in tcPr.findall(qn("w:tcW")):
+                tcPr.remove(existing)
             tcW = OxmlElement("w:tcW")
-            tcW.set(qn("w:w"), str(col_width_twips))
-            tcW.set(qn("w:type"), "dxa")
+            tcW.set(qn("w:w"), str(col_width_pct))
+            tcW.set(qn("w:type"), "pct")
             tcPr.append(tcW)
 
             # Limpiar contenido previo y rellenar
@@ -515,6 +563,7 @@ def build_exam_version_docx(
             continue
 
         q_heading = _no_spacing(doc.add_paragraph())
+        _set_paragraph_border(q_heading, "top")
         q_run = q_heading.add_run(f"Pregunta {version_row.question_number}")
         q_run.bold = True
         q_run.font.size = Pt(10)
@@ -530,7 +579,7 @@ def build_exam_version_docx(
                 prefix=f"{label}. ",
             )
 
-        _no_spacing(doc.add_paragraph())
+        _add_question_separator(doc, border_kind="bottom")
 
     buffer = BytesIO()
     doc.save(buffer)
