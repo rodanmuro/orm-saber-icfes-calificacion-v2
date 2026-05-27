@@ -125,7 +125,7 @@ export default function AttemptList({
               </th>
               <th>ID intento</th>
               <th>Examen</th>
-              <th>Version</th>
+              <th>Codigo OMR</th>
               <th>Nombre examen</th>
               <th>Estudiante</th>
               <th>Grupo</th>
@@ -155,7 +155,7 @@ export default function AttemptList({
                 </td>
                 <td>{row.attempt_id}</td>
                 <td>{row.exam_id || '-'}</td>
-                <td>{row.exam_version_code || '-'}</td>
+                <td>{row.exam_code || '-'}</td>
                 <td>{row.exam_title || '-'}</td>
                 <td>{row.student_name || '-'}</td>
                 <td>{row.student_group || '-'}</td>

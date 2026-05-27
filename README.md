@@ -1,4 +1,4 @@
-# OMR Saber ICFES Calificacion v2
+# omr-saber-icfes-calificaciones
 
 Proyecto para generar plantillas OMR con ArUco, capturar fotos desde celular y leer respuestas marcadas en backend.
 

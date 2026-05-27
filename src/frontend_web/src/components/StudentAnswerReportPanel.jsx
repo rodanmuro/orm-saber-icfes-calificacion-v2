@@ -16,6 +16,89 @@ function splitCsvValues(value) {
     .filter(Boolean);
 }
 
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+
+function exportStudentReportToExcel({ studentSummary, rows }) {
+  const filenameBase = studentSummary?.student_document_number
+    ? `informe_estudiante_${studentSummary.student_document_number}`
+    : 'informe_estudiante';
+  const tableRows = rows
+    .map(
+      (row) => `
+        <tr>
+          <td>${escapeHtml(formatDateTime(row.created_at))}</td>
+          <td>${escapeHtml(row.exam_code || '-')}</td>
+          <td>${escapeHtml(row.exam_title || '-')}</td>
+          <td>${escapeHtml(row.exam_version_code || '-')}</td>
+          <td>${escapeHtml(row.question_number ?? '-')}</td>
+          <td>${escapeHtml(row.item_id ?? '-')}</td>
+          <td>${escapeHtml(row.standard_name || '-')}</td>
+          <td>${escapeHtml(row.competency_name || '-')}</td>
+          <td>${escapeHtml(row.effective_answer || row.marked_answer || '-')}</td>
+          <td>${escapeHtml(row.correct_answer || '-')}</td>
+          <td>${escapeHtml(row.effective_status || '-')}</td>
+        </tr>`,
+    )
+    .join('');
+
+  const html = `
+    <html>
+      <head>
+        <meta charset="utf-8" />
+      </head>
+      <body>
+        <table border="1">
+          <tr><th colspan="2">Informe estudiante</th></tr>
+          <tr><td><strong>Estudiante</strong></td><td>${escapeHtml(studentSummary?.student_name || '-')}</td></tr>
+          <tr><td><strong>Documento</strong></td><td style="mso-number-format:'\\@';">${escapeHtml(studentSummary?.student_document_number || '-')}</td></tr>
+          <tr><td><strong>Grupo</strong></td><td>${escapeHtml(studentSummary?.student_group || '-')}</td></tr>
+          <tr><td><strong>Total respuestas</strong></td><td>${escapeHtml(rows.length)}</td></tr>
+        </table>
+        <br />
+        <table border="1">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Codigo OMR</th>
+              <th>Examen</th>
+              <th>Version</th>
+              <th>Pregunta</th>
+              <th>ID item</th>
+              <th>Estandar</th>
+              <th>Competencia</th>
+              <th>Marcada</th>
+              <th>Correcta</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${tableRows}
+          </tbody>
+        </table>
+      </body>
+    </html>
+  `;
+
+  const blob = new Blob([`\ufeff${html}`], {
+    type: 'application/vnd.ms-excel;charset=utf-8;',
+  });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = `${filenameBase}.xls`;
+  document.body.appendChild(anchor);
+  anchor.click();
+  document.body.removeChild(anchor);
+  URL.revokeObjectURL(url);
+}
+
 export default function StudentAnswerReportPanel({
   rows,
   items,
@@ -255,13 +338,22 @@ export default function StudentAnswerReportPanel({
 
       <div className="row between center">
         <p className="helper-text">Usa filtros para detectar patrones por estandar, competencia o tipo de error.</p>
-        <button
-          type="button"
-          onClick={clearFilters}
-          disabled={Object.values(tableFilters).every((value) => !value)}
-        >
-          Limpiar filtros
-        </button>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <button
+            type="button"
+            onClick={() => exportStudentReportToExcel({ studentSummary, rows: sortedRows })}
+            disabled={!sortedRows.length}
+          >
+            Exportar a Excel
+          </button>
+          <button
+            type="button"
+            onClick={clearFilters}
+            disabled={Object.values(tableFilters).every((value) => !value)}
+          >
+            Limpiar filtros
+          </button>
+        </div>
       </div>
 
       {!searchQuery.trim() ? (

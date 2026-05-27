@@ -375,7 +375,7 @@ Existe script listo en:
 
 Uso basico:
 ```bash
-cd /ruta/proyecto/orm-saber-icfes-calificacion-v2
+cd /ruta/proyecto/omr-saber-icfes-calificaciones
 src/backend/scripts/backup_produccion_hoy.sh
 ```
 
@@ -409,7 +409,7 @@ tar -xzf omr_backup_<timestamp>.tar.gz
 
 3. Restaurar archivos a rutas del proyecto:
 ```bash
-cd /ruta/proyecto/orm-saber-icfes-calificacion-v2
+cd /ruta/proyecto/omr-saber-icfes-calificaciones
 
 # mobile uploads
 mkdir -p src/backend/data/input/mobile_uploads
