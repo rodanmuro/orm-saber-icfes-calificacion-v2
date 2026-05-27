@@ -67,8 +67,8 @@ def test_publish_exam_version_without_option_shuffle() -> None:
 def test_publish_exam_version_keeps_grouped_questions_consecutive() -> None:
     exam_items = [
         _FakeExamItem(row_id=1, order_position=1, item_id=101, correct_answer="A"),
-        _FakeExamItem(row_id=2, order_position=2, item_id=102, correct_answer="B", group_key="lectura-1"),
-        _FakeExamItem(row_id=3, order_position=3, item_id=103, correct_answer="C", group_key="lectura-1"),
+        _FakeExamItem(row_id=2, order_position=2, item_id=102, correct_answer="B", group_key="1"),
+        _FakeExamItem(row_id=3, order_position=3, item_id=103, correct_answer="C", group_key="1"),
         _FakeExamItem(row_id=4, order_position=4, item_id=104, correct_answer="D"),
     ]
 

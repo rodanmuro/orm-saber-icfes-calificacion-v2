@@ -26,6 +26,7 @@ import {
   reorderExamVersion,
   publishExamVersion,
   removeItemFromExam,
+  updateExamItem,
 } from './api/examsApi';
 import { createAnonymousExam, listAnonymousExams } from './api/anonymousExamsApi';
 import ExamBuilder from './components/ExamBuilder';
@@ -1036,6 +1037,20 @@ export default function App() {
     }
   }
 
+  async function handleUpdateExamItem(examId, itemId, payload) {
+    setError('');
+    setMessage('');
+    try {
+      const detail = await updateExamItem(examId, itemId, payload);
+      setSelectedExam(detail);
+      setMessage(`Configuracion de bloque actualizada para item #${itemId}`);
+      return detail;
+    } catch (err) {
+      setError(err.message);
+      throw err;
+    }
+  }
+
   async function handlePublishExamVersion(examId) {
     setError('');
     setMessage('');
@@ -1263,6 +1278,7 @@ export default function App() {
             onSelectExam={handleSelectExam}
             onAddItem={handleAddItemToExam}
             onRemoveItem={handleRemoveItemFromExam}
+            onUpdateExamItem={handleUpdateExamItem}
             onPublishVersion={handlePublishExamVersion}
             onExportExamPdf={handleExportExamPdf}
             onExportExamDocx={handleExportExamDocx}

@@ -18,6 +18,44 @@ function statementPreview(value) {
   return text;
 }
 
+function getGroupVisual(groupKey) {
+  const normalized = String(groupKey || '').trim();
+  if (!normalized) {
+    return {
+      label: 'Sin bloque',
+      rowStyle: undefined,
+      badgeStyle: undefined,
+    };
+  }
+
+  const numeric = Number(normalized);
+  const hue = Number.isFinite(numeric) ? (numeric * 47) % 360 : 210;
+  const accent = `hsl(${hue} 65% 42%)`;
+  const soft = `hsl(${hue} 75% 94%)`;
+  const border = `hsl(${hue} 55% 78%)`;
+
+  return {
+    label: `Bloque ${normalized}`,
+    rowStyle: {
+      background: soft,
+      boxShadow: `inset 4px 0 0 ${accent}`,
+    },
+    badgeStyle: {
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      minWidth: '44px',
+      padding: '3px 8px',
+      borderRadius: '999px',
+      border: `1px solid ${border}`,
+      background: soft,
+      color: accent,
+      fontWeight: 700,
+      fontSize: '12px',
+    },
+  };
+}
+
 export default function ExamBuilder({
   items,
   exams,
@@ -28,6 +66,7 @@ export default function ExamBuilder({
   onSelectExam,
   onAddItem,
   onRemoveItem,
+  onUpdateExamItem,
   onPublishVersion,
   onExportExamPdf,
   onExportExamDocx,
@@ -43,6 +82,10 @@ export default function ExamBuilder({
   const [form, setForm] = useState(emptyExamForm(exams[0]?.teacher_id || 1));
   const [previewModalItem, setPreviewModalItem] = useState(null);
   const [previewModalContext, setPreviewModalContext] = useState(null);
+  const [availableStandardFilter, setAvailableStandardFilter] = useState('');
+  const [assignedStandardFilter, setAssignedStandardFilter] = useState('');
+  const [groupDrafts, setGroupDrafts] = useState({});
+  const [savingGroupItemId, setSavingGroupItemId] = useState(null);
   const [reorderModal, setReorderModal] = useState({
     open: false,
     exam: null,
@@ -69,16 +112,70 @@ export default function ExamBuilder({
     );
   }, [items, selectedExam]);
 
+  const availableStandardOptions = useMemo(() => {
+    const values = new Set();
+    itemsNotAdded.forEach((item) => {
+      const standardName = item.curriculum?.standard_name;
+      if (standardName) values.add(String(standardName));
+    });
+    return Array.from(values).sort();
+  }, [itemsNotAdded]);
+
   const itemsById = useMemo(() => {
     const map = new Map();
     items.forEach((item) => map.set(item.id, item));
     return map;
   }, [items]);
 
-  const availableItemIds = useMemo(() => itemsNotAdded.map((item) => item.id), [itemsNotAdded]);
+  const filteredAvailableItems = useMemo(() => {
+    const query = availableStandardFilter.trim().toLowerCase();
+    if (!query) return itemsNotAdded;
+    return itemsNotAdded.filter((item) =>
+      String(item.curriculum?.standard_name || '').toLowerCase().includes(query),
+    );
+  }, [availableStandardFilter, itemsNotAdded]);
+
+  const assignedStandardOptions = useMemo(() => {
+    if (!selectedExam) return [];
+    const values = new Set();
+    selectedExam.items.forEach((row) => {
+      const standardName = itemsById.get(row.item_id)?.curriculum?.standard_name;
+      if (standardName) values.add(String(standardName));
+    });
+    return Array.from(values).sort();
+  }, [itemsById, selectedExam]);
+
+  const assignedRowsByItemId = useMemo(() => {
+    const map = new Map();
+    (selectedExam?.items || []).forEach((row) => {
+      map.set(row.item_id, row);
+    });
+    return map;
+  }, [selectedExam]);
+
+  const assignedGroupOptions = useMemo(() => {
+    if (!selectedExam) return [];
+    const values = new Set();
+    selectedExam.items.forEach((row) => {
+      const groupKey = String(row.group_key || '').trim();
+      if (groupKey) values.add(groupKey);
+    });
+    return Array.from(values).sort();
+  }, [selectedExam]);
+
+  const filteredAssignedItems = useMemo(() => {
+    if (!selectedExam) return [];
+    const query = assignedStandardFilter.trim().toLowerCase();
+    if (!query) return selectedExam.items;
+    return selectedExam.items.filter(
+      (row) => String(itemsById.get(row.item_id)?.curriculum?.standard_name || '').toLowerCase().includes(query),
+    );
+  }, [assignedStandardFilter, itemsById, selectedExam]);
+
+  const availableItemIds = useMemo(() => filteredAvailableItems.map((item) => item.id), [filteredAvailableItems]);
   const assignedItemIds = useMemo(
-    () => (selectedExam ? selectedExam.items.map((row) => row.item_id) : []),
-    [selectedExam],
+    () => filteredAssignedItems.map((row) => row.item_id),
+    [filteredAssignedItems],
   );
 
   const buildCellText = (value, maxLen = 70) => {
@@ -93,6 +190,35 @@ export default function ExamBuilder({
       setPreviewModalContext(null);
     }
   }, [selectedExam]);
+
+  useEffect(() => {
+    if (!selectedExam) {
+      setGroupDrafts({});
+      return;
+    }
+    const nextDrafts = {};
+    selectedExam.items.forEach((row) => {
+      nextDrafts[row.item_id] = row.group_key || '';
+    });
+    setGroupDrafts(nextDrafts);
+  }, [selectedExam]);
+
+  useEffect(() => {
+    if (!selectedExam) {
+      setAvailableStandardFilter('');
+      setAssignedStandardFilter('');
+    }
+  }, [selectedExam]);
+
+  async function saveGroupKey(itemId) {
+    if (!selectedExam || !onUpdateExamItem) return;
+    setSavingGroupItemId(itemId);
+    try {
+      await onUpdateExamItem(selectedExam.id, itemId, { group_key: groupDrafts[itemId] || null });
+    } finally {
+      setSavingGroupItemId(null);
+    }
+  }
 
   function openPreviewByItem(item, context) {
     if (!item) return;
@@ -383,7 +509,24 @@ export default function ExamBuilder({
 
           <div className="grid grid-2">
             <div className="exam-items-pane">
-              <h5>Items disponibles ({itemsNotAdded.length})</h5>
+              <div className="row between center">
+                <h5>Items disponibles ({filteredAvailableItems.length})</h5>
+                <label>
+                  <span>Filtrar por estandar</span>
+                  <input
+                    type="text"
+                    list="available-standards-list"
+                    value={availableStandardFilter}
+                    onChange={(event) => setAvailableStandardFilter(event.target.value)}
+                    placeholder="Escribe un estandar"
+                  />
+                  <datalist id="available-standards-list">
+                    {availableStandardOptions.map((option) => (
+                      <option key={option} value={option}>{option}</option>
+                    ))}
+                  </datalist>
+                </label>
+              </div>
               <div className="table-wrap">
                 <table>
                   <thead>
@@ -396,7 +539,7 @@ export default function ExamBuilder({
                     </tr>
                   </thead>
                   <tbody>
-                    {itemsNotAdded.map((item) => (
+                    {filteredAvailableItems.map((item) => (
                       <tr key={item.id}>
                         <td>{item.id}</td>
                         <td>
@@ -448,13 +591,35 @@ export default function ExamBuilder({
             </div>
 
             <div className="exam-items-pane">
-              <h5>Items asociados (orden inicial) ({selectedExam.items.length})</h5>
+              <div className="row between center">
+                <h5>Items asociados (orden inicial) ({filteredAssignedItems.length})</h5>
+                <label>
+                  <span>Filtrar por estandar</span>
+                  <input
+                    type="text"
+                    list="assigned-standards-list"
+                    value={assignedStandardFilter}
+                    onChange={(event) => setAssignedStandardFilter(event.target.value)}
+                    placeholder="Escribe un estandar"
+                  />
+                  <datalist id="assigned-standards-list">
+                    {assignedStandardOptions.map((option) => (
+                      <option key={option} value={option}>{option}</option>
+                    ))}
+                  </datalist>
+                </label>
+              </div>
+              <p className="helper-text">
+                Si varios items comparten el mismo bloque, quedaran consecutivos al publicar una version barajada.
+                El bloque puede moverse de posicion, pero sus preguntas se mantienen seguidas.
+              </p>
               <div className="table-wrap">
                 <table>
                   <thead>
                     <tr>
                       <th>Orden</th>
                       <th>Item ID</th>
+                      <th>Bloque</th>
                       <th>Enunciado</th>
                       <th>Estandar</th>
                       <th>Desempeño</th>
@@ -462,10 +627,56 @@ export default function ExamBuilder({
                     </tr>
                   </thead>
                   <tbody>
-                    {selectedExam.items.map((row) => (
-                      <tr key={`${row.exam_id}-${row.item_id}`}>
+                    {filteredAssignedItems.map((row) => (
+                      <tr
+                        key={`${row.exam_id}-${row.item_id}`}
+                        style={row.group_key ? getGroupVisual(row.group_key).rowStyle : undefined}
+                      >
                         <td>{row.order_position}</td>
                         <td>{row.item_id}</td>
+                        <td>
+                          <div style={{ display: 'flex', gap: '6px', minWidth: '180px' }}>
+                            <input
+                              type="text"
+                              inputMode="numeric"
+                              pattern="[0-9]*"
+                              list="assigned-group-keys-list"
+                              value={groupDrafts[row.item_id] ?? ''}
+                              onChange={(event) =>
+                                setGroupDrafts((prev) => ({ ...prev, [row.item_id]: event.target.value }))
+                              }
+                              onKeyDown={(event) => {
+                                if (event.key === 'Enter') {
+                                  event.preventDefault();
+                                  saveGroupKey(row.item_id);
+                                }
+                              }}
+                              placeholder="Ej: 1"
+                            />
+                            <datalist id="assigned-group-keys-list">
+                              {assignedGroupOptions.map((option) => (
+                                <option key={option} value={option}>{option}</option>
+                              ))}
+                            </datalist>
+                            <button
+                              type="button"
+                              onClick={() => saveGroupKey(row.item_id)}
+                              disabled={
+                                savingGroupItemId === row.item_id ||
+                                String(groupDrafts[row.item_id] ?? '').trim() === String(row.group_key || '').trim()
+                              }
+                            >
+                              {savingGroupItemId === row.item_id ? '...' : 'Guardar'}
+                            </button>
+                          </div>
+                          <small className="helper-text">
+                            {row.group_key ? (
+                              <span style={getGroupVisual(row.group_key).badgeStyle}>
+                                {getGroupVisual(row.group_key).label}
+                              </span>
+                            ) : 'Sin bloque numerico'}
+                          </small>
+                        </td>
                         <td>
                           {(() => {
                             const cell = buildCellText(statementPreview(row.item_statement), 90);
@@ -618,23 +829,31 @@ export default function ExamBuilder({
                     <tr>
                       <th>Nuevo #</th>
                       <th>Item</th>
+                      <th>Bloque</th>
                       <th>Enunciado</th>
                       <th>Estandar</th>
                       <th>Desempeño</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {reorderModal.rows.map((row, idx) => (
+                    {reorderModal.rows.map((row, idx) => {
+                      const assignedRow = assignedRowsByItemId.get(row.itemId);
+                      const groupKey = assignedRow?.group_key || null;
+                      const visual = getGroupVisual(groupKey);
+                      return (
                       <tr
                         key={row.versionItemId}
                         draggable
                         onDragStart={() => onDragStartRow(row.versionItemId)}
                         onDragOver={(e) => e.preventDefault()}
                         onDrop={() => onDropRow(row.versionItemId)}
-                        style={{ cursor: 'grab' }}
+                        style={{ cursor: 'grab', ...(visual.rowStyle || {}) }}
                       >
                         <td>{idx + 1}</td>
                         <td>{row.itemId}</td>
+                        <td>
+                          {groupKey ? <span style={visual.badgeStyle}>{visual.label}</span> : '-'}
+                        </td>
                         <td>
                           {(() => {
                             const item = itemsById.get(row.itemId);
@@ -672,7 +891,8 @@ export default function ExamBuilder({
                           })()}
                         </td>
                       </tr>
-                    ))}
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -708,16 +928,28 @@ export default function ExamBuilder({
                     <th>Pregunta</th>
                     <th>Respuesta correcta</th>
                     <th>Item ID</th>
+                    <th>Bloque</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {answerKeyModal.rows.map((row) => (
-                    <tr key={`${row.question_number}-${row.item_id}`}>
+                  {answerKeyModal.rows.map((row) => {
+                    const assignedRow = assignedRowsByItemId.get(row.item_id);
+                    const groupKey = assignedRow?.group_key || null;
+                    const visual = getGroupVisual(groupKey);
+                    return (
+                    <tr
+                      key={`${row.question_number}-${row.item_id}`}
+                      style={groupKey ? visual.rowStyle : undefined}
+                    >
                       <td>{row.question_number}</td>
                       <td>{row.correct_answer}</td>
                       <td>{row.item_id}</td>
+                      <td>
+                        {groupKey ? <span style={visual.badgeStyle}>{visual.label}</span> : '-'}
+                      </td>
                     </tr>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

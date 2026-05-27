@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -62,18 +63,18 @@ def test_group_key_persists_and_publish_keeps_items_consecutive(tmp_path: Path) 
         detail = update_exam_item(
             exam_id=exam.id,
             item_id=items[1].id,
-            payload=ExamItemUpdateRequest(group_key="bloque-a"),
+            payload=ExamItemUpdateRequest(group_key="001"),
             db=db,
         )
         detail = update_exam_item(
             exam_id=exam.id,
             item_id=items[2].id,
-            payload=ExamItemUpdateRequest(group_key="bloque-a"),
+            payload=ExamItemUpdateRequest(group_key="1"),
             db=db,
         )
 
         grouped_rows = [row for row in detail.items if row.item_id in {items[1].id, items[2].id}]
-        assert {row.group_key for row in grouped_rows} == {"bloque-a"}
+        assert {row.group_key for row in grouped_rows} == {"1"}
 
         published = publish_version(
             exam_id=exam.id,
@@ -91,3 +92,13 @@ def test_group_key_persists_and_publish_keeps_items_consecutive(tmp_path: Path) 
 
         assert grouped_positions[1] - grouped_positions[0] == 1
         assert grouped_positions == sorted(grouped_positions)
+
+
+def test_group_key_requires_positive_integer() -> None:
+    with pytest.raises(ValueError):
+        ExamItemUpdateRequest(group_key="bloque-a")
+
+    with pytest.raises(ValueError):
+        ExamItemUpdateRequest(group_key="0")
+
+    assert ExamItemUpdateRequest(group_key="001").group_key == "1"

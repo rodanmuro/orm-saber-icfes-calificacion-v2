@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class ExamCreate(BaseModel):
@@ -29,9 +29,35 @@ class ExamItemBindRequest(BaseModel):
     order_position: int | None = Field(default=None, gt=0)
     group_key: str | None = Field(default=None, max_length=64)
 
+    @field_validator("group_key")
+    @classmethod
+    def validate_group_key(cls, value: str | None) -> str | None:
+        normalized = str(value or "").strip()
+        if not normalized:
+            return None
+        if not normalized.isdigit():
+            raise ValueError("group_key must be a positive integer")
+        parsed = int(normalized)
+        if parsed <= 0:
+            raise ValueError("group_key must be a positive integer")
+        return str(parsed)
+
 
 class ExamItemUpdateRequest(BaseModel):
     group_key: str | None = Field(default=None, max_length=64)
+
+    @field_validator("group_key")
+    @classmethod
+    def validate_group_key(cls, value: str | None) -> str | None:
+        normalized = str(value or "").strip()
+        if not normalized:
+            return None
+        if not normalized.isdigit():
+            raise ValueError("group_key must be a positive integer")
+        parsed = int(normalized)
+        if parsed <= 0:
+            raise ValueError("group_key must be a positive integer")
+        return str(parsed)
 
 
 class ExamItemRead(BaseModel):

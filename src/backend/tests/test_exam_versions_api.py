@@ -300,17 +300,17 @@ def test_publish_exam_version_keeps_grouped_exam_items_together(tmp_path: Path) 
 
         patch_one = client.patch(
             f"/api/v1/exams/{exam_id}/items/{item_ids[1]}",
-            json={"group_key": "bloque-a"},
+            json={"group_key": "001"},
         )
         assert patch_one.status_code == 200
         patch_two = client.patch(
             f"/api/v1/exams/{exam_id}/items/{item_ids[2]}",
-            json={"group_key": "bloque-a"},
+            json={"group_key": "1"},
         )
         assert patch_two.status_code == 200
         exam_detail = patch_two.json()
         grouped_rows = [row for row in exam_detail["items"] if row["item_id"] in {item_ids[1], item_ids[2]}]
-        assert {row["group_key"] for row in grouped_rows} == {"bloque-a"}
+        assert {row["group_key"] for row in grouped_rows} == {"1"}
 
         publish_response = client.post(
             f"/api/v1/exams/{exam_id}/versions/publish",

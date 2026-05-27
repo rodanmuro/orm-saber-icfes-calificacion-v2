@@ -66,6 +66,13 @@ export function removeItemFromExam(examId, itemId) {
   });
 }
 
+export function updateExamItem(examId, itemId, payload) {
+  return request(`/exams/${examId}/items/${itemId}`, {
+    method: 'PATCH',
+    body: JSON.stringify(payload),
+  });
+}
+
 export function publishExamVersion(examId, payload) {
   return request(`/exams/${examId}/versions/publish`, {
     method: 'POST',
